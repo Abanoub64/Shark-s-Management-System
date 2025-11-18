@@ -1,4 +1,18 @@
+﻿using Serilog;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug() 
+    .WriteTo.Console()     // Logging للـ Console
+    .WriteTo.File("logs/log-.txt",     // مسار ملفات اللوج
+        rollingInterval: RollingInterval.Day,  // ملف جديد كل يوم
+        retainedFileCountLimit: 10,     // يحتفظ بـ آخر 10 ملفات
+        shared: true,
+        buffered: true)
+    .CreateLogger();    
 var builder = WebApplication.CreateBuilder(args);
+
+///Logging Middleware
+builder.Host.UseSerilog();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
