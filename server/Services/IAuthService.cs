@@ -6,5 +6,6 @@ namespace backend.Services
     {
         Task<AuthResponseDto> RegisterAsync(RegisterDto model);
         Task<AuthResponseDto> LoginAsync(LoginDto model);
+        Task<AuthResponseDto> RefreshTokenAsync(TokenRequestDto model);
     }
 }
