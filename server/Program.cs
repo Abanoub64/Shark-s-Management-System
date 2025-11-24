@@ -1,8 +1,26 @@
+using backend.Data;
+using backend.Repositories;
+using backend.Services;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+
+// Configure DbContext (SQL Server). Connection string comes from appsettings.json or uses a sensible default.
+var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")
+                        ?? "Server=(localdb)\\mssqllocaldb;Database=BarberShopDb;Trusted_Connection=True;MultipleActiveResultSets=true";
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(defaultConnection));
+
+// Dependency injection
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 var app = builder.Build();
 
@@ -13,6 +31,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthorization();
+
+app.MapControllers();
 
 var summaries = new[]
 {
