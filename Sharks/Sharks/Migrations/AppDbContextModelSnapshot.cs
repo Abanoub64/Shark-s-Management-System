@@ -171,13 +171,12 @@ namespace Sharks.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BranchId")
+                    b.Property<int?>("BranchId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
@@ -335,13 +334,9 @@ namespace Sharks.Migrations
 
             modelBuilder.Entity("BarberBooking.API.Models.Service", b =>
                 {
-                    b.HasOne("BarberBooking.API.Models.Branch", "Branch")
+                    b.HasOne("BarberBooking.API.Models.Branch", null)
                         .WithMany("Services")
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Branch");
+                        .HasForeignKey("BranchId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

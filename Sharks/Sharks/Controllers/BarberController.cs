@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BarberBooking.API.Controllers;
 
-[Authorize]
+
 [ApiController]
 [Route("api/[controller]")]
 public class BarberController : ControllerBase
