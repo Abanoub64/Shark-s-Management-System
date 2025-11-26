@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Sharks.Services;
 using System.Text;
 
 namespace Sharks
@@ -21,6 +22,7 @@ namespace Sharks
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddScoped<PayPalService>();
 
             // DbContext
             builder.Services.AddDbContext<AppDbContext>(options =>
