@@ -53,7 +53,7 @@ public class BookingService : IBookingService
         if (b == null) return null;
         return new BookingDto { Id = b.Id, BranchId = b.BranchId, ServiceId = b.ServiceId, BarberId = b.BarberId, StartAt = b.StartAt, EndAt = b.EndAt, CustomerId = b.CustomerId, PaymentOrderId = b.PaymentOrderId, PaymentCapturedId = b.PaymentCapturedId, Status = b.Status };
     }
-
+    
     public async Task<BookingDto?> UpdateAsync(int id, UpdateBookingDto dto)
     {
         var b = await _db.Bookings.FindAsync(id);
