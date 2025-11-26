@@ -11,6 +11,10 @@ public class BookingDto
     public DateTime StartAt { get; set; }
     public DateTime EndAt { get; set; }
     public string CustomerId { get; set; } = string.Empty;
+    public string? PaymentOrderId { get; set; }
+    public string? PaymentCapturedId { get; set; }
+    public string Status { get; set; } = "Pending";
+
 }
 
 public class CreateBookingDto

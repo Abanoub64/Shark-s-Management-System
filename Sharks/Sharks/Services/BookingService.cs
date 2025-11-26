@@ -44,14 +44,14 @@ public class BookingService : IBookingService
 
     public async Task<List<BookingDto>> GetAllAsync()
     {
-        return await _db.Bookings.Select(b => new BookingDto { Id = b.Id, BranchId = b.BranchId, ServiceId = b.ServiceId, BarberId = b.BarberId, StartAt = b.StartAt, EndAt = b.EndAt, CustomerId = b.CustomerId }).ToListAsync();
+        return await _db.Bookings.Select(b => new BookingDto { Id = b.Id, BranchId = b.BranchId, ServiceId = b.ServiceId, BarberId = b.BarberId, StartAt = b.StartAt, EndAt = b.EndAt, CustomerId = b.CustomerId, PaymentOrderId=b.PaymentOrderId , PaymentCapturedId =b.PaymentCapturedId,Status=b.Status}).ToListAsync();
     }
 
     public async Task<BookingDto?> GetByIdAsync(int id)
     {
         var b = await _db.Bookings.FindAsync(id);
         if (b == null) return null;
-        return new BookingDto { Id = b.Id, BranchId = b.BranchId, ServiceId = b.ServiceId, BarberId = b.BarberId, StartAt = b.StartAt, EndAt = b.EndAt, CustomerId = b.CustomerId };
+        return new BookingDto { Id = b.Id, BranchId = b.BranchId, ServiceId = b.ServiceId, BarberId = b.BarberId, StartAt = b.StartAt, EndAt = b.EndAt, CustomerId = b.CustomerId, PaymentOrderId = b.PaymentOrderId, PaymentCapturedId = b.PaymentCapturedId, Status = b.Status };
     }
 
     public async Task<BookingDto?> UpdateAsync(int id, UpdateBookingDto dto)

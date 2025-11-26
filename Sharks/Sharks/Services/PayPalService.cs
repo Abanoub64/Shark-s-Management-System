@@ -42,7 +42,8 @@ namespace Sharks.Services
                     CancelUrl = "http://localhost:5261/api/paypal/cancel",
                     BrandName = "Sharks",
                     LandingPage = "LOGIN",
-                    UserAction = "PAY_NOW"
+                    UserAction = "PAY_NOW",
+                    ShippingPreference = "NO_SHIPPING"
                 }
             };
 
@@ -53,6 +54,7 @@ namespace Sharks.Services
             var response = await _client.Execute(request);
             return response.Result<Order>();
         }
+
 
         public async Task<Order> CaptureOrder(string orderId)
         {
