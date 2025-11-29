@@ -1,10 +1,12 @@
 using backend.Data;
 using backend.Models;
+using BarberBooking.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Sharks.Services;
 using System;
 using System.Text;
 
@@ -73,6 +75,11 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+builder.Services.AddScoped<IBranchService, BranchService>();
+builder.Services.AddScoped<IBarberService, BarberService>();
+builder.Services.AddScoped<IServiceService, ServiceService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<PayPalService>();
 
 var app = builder.Build();
 
