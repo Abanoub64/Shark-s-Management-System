@@ -1,6 +1,7 @@
 using System;
 
-namespace BarberBooking.API.Models;
+namespace backend.Models;
+
 
 public class Booking
 {

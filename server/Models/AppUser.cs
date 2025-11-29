@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace BarberBooking.API.Models
+namespace backend.Models
 {
     public class AppUser : IdentityUser
     {

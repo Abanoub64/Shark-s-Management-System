@@ -1,4 +1,4 @@
-using BarberBooking.API.Models;
+using backend.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
