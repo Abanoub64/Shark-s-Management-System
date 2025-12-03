@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BarberBooking.API.Controllers;
 
-
 [ApiController]
 [Route("api/[controller]")]
 public class BarberController : ControllerBase
@@ -24,7 +23,16 @@ public class BarberController : ControllerBase
         return r == null ? NotFound() : Ok(r);
     }
 
+    [HttpGet("by-branch/{branchId}")]
+    public async Task<IActionResult> GetByBranch(int branchId)
+    {
+        var allBarbers = await _barberService.GetAllAsync();
+        var branchBarbers = allBarbers.Where(b => b.BranchId == branchId).ToList();
+        return Ok(branchBarbers);
+    }
+
     [HttpPost]
+    [Authorize(Roles = "Admin,BranchManager")]
     public async Task<IActionResult> Create(CreateBarberDto dto)
     {
         var c = await _barberService.CreateAsync(dto);
@@ -32,6 +40,7 @@ public class BarberController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin,BranchManager")]
     public async Task<IActionResult> Update(int id, UpdateBarberDto dto)
     {
         var r = await _barberService.UpdateAsync(id, dto);
@@ -39,6 +48,7 @@ public class BarberController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin,BranchManager")]
     public async Task<IActionResult> Delete(int id)
         => await _barberService.DeleteAsync(id) ? Ok(new { message = "Deleted" }) : NotFound();
 }

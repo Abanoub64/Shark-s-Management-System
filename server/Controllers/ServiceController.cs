@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BarberBooking.API.Controllers;
 
-
 [ApiController]
 [Route("api/[controller]")]
 public class ServiceController : ControllerBase
@@ -24,6 +23,7 @@ public class ServiceController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(CreateServiceDto dto)
     {
         var c = await _serviceService.CreateAsync(dto);
@@ -31,6 +31,7 @@ public class ServiceController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(int id, UpdateServiceDto dto)
     {
         var r = await _serviceService.UpdateAsync(id, dto);
@@ -38,6 +39,7 @@ public class ServiceController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
         => await _serviceService.DeleteAsync(id) ? Ok(new { message = "Deleted" }) : NotFound();
 }

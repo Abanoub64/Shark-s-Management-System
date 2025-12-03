@@ -2,31 +2,32 @@ using backend.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace backend.Models;
-
-public class AppDbContext : IdentityDbContext<AppUser>
+namespace backend.Models
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-
-    public DbSet<Branch> Branches => Set<Branch>();
-    public DbSet<Barber> Barbers => Set<Barber>();
-    public DbSet<Service> Services => Set<Service>();
-    public DbSet<Booking> Bookings => Set<Booking>();
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
-        base.OnModelCreating(modelBuilder);
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        modelBuilder.Entity<Branch>(b =>
-        {
-            b.HasKey(x => x.Id);
-            b.Property(x => x.Name).IsRequired().HasMaxLength(200);
-        });
+        public DbSet<Branch> Branches => Set<Branch>();
+        public DbSet<Barber> Barbers => Set<Barber>();
+        public DbSet<Service> Services => Set<Service>();
+        public DbSet<Booking> Bookings => Set<Booking>();
 
-        modelBuilder.Entity<Service>(s =>
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            s.HasKey(x => x.Id);
-            s.Property(x => x.Name).IsRequired().HasMaxLength(200);
-        });
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Branch>(b =>
+            {
+                b.HasKey(x => x.Id);
+                b.Property(x => x.Name).IsRequired().HasMaxLength(200);
+            });
+
+            modelBuilder.Entity<Service>(s =>
+            {
+                s.HasKey(x => x.Id);
+                s.Property(x => x.Name).IsRequired().HasMaxLength(200);
+            });
+        }
     }
 }

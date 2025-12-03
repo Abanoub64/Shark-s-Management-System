@@ -32,7 +32,8 @@ namespace backend.Services
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Email,
                 FirstName = model.FirstName,
-                LastName = model.LastName
+                LastName = model.LastName,
+                PhoneNumber = model.PhoneNumber
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -88,6 +89,10 @@ namespace backend.Services
 
             if (email == null) email = principal.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            if (string.IsNullOrEmpty(email))
+            {
+                return new AuthResponseDto { Message = "Invalid token: Email claim not found" };
+            }
             var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null || user.RefreshToken != model.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
@@ -112,8 +117,6 @@ namespace backend.Services
                 Message = "Success"
             };
         }
-
-        // --- Helper Methods ---
 
         private string GenerateJwtToken(ApplicationUser user, IList<string> roles)
         {

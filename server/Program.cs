@@ -1,4 +1,4 @@
-using backend.Data;
+﻿using backend.Data;
 using backend.Models;
 using BarberBooking.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,6 +12,20 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.WithOrigins("http://localhost:4200") 
+                                .AllowAnyHeader()
+                                .AllowAnyMethod()
+                                .AllowCredentials();
+                      });
+});
+
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -24,7 +38,6 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 builder.Services.AddScoped<backend.Services.IAuthService, backend.Services.AuthService>();
 
 var jwtSettings = builder.Configuration.GetSection("JWT");
-
 var secretKey = jwtSettings["Secret"] ?? "FallbackSecretKeyForDevelopmentOnly12345";
 
 builder.Services.AddAuthentication(options =>
@@ -75,6 +88,8 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
+// تسجيل الـ Services بتاعتك (زي ما هي)
 builder.Services.AddScoped<IBranchService, BranchService>();
 builder.Services.AddScoped<IBarberService, BarberService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
@@ -90,6 +105,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthentication();
 app.UseAuthorization();
