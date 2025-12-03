@@ -3,6 +3,7 @@ using BarberBooking.API.DTOs;
 using BarberBooking.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BarberBooking.API.Controllers;
 
