@@ -1,3 +1,9 @@
 import { Routes } from '@angular/router';
 
-export const routes: Routes = [];
+import { HairstyleRecommenderComponent } from './hairstyle-recommender/hairstyle-recommender.component';
+
+export const routes: Routes = [
+    { path: '', component: HairstyleRecommenderComponent }
+];
+
+

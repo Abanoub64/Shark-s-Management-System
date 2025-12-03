@@ -1,0 +1,61 @@
+<div class="container">
+  <header class="header">
+    <h1>AI Hairstyle Recommender</h1>
+    <p>Upload your photo and discover your next look with professional barber insights.</p>
+  </header>
+
+  <div class="main-content">
+    <!-- Left Panel: Upload & Preview -->
+    <div class="panel upload-panel">
+      <div class="drop-zone" [class.dragging]="isDragging" (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+
+        <div *ngIf="!previewUrl()" class="upload-placeholder">
+          <div class="icon">📸</div>
+          <h3>Upload Photo</h3>
+          <p>Drag & drop or click to browse</p>
+          <input type="file" (change)="onFileSelected($event)" accept="image/*" class="file-input">
+        </div>
+
+        <div *ngIf="previewUrl()" class="preview-container">
+          <img [src]="previewUrl()" alt="Original" class="preview-image">
+          <button class="change-photo-btn" (click)="fileInput.click()">Change Photo</button>
+          <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*" class="hidden">
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel: Controls & Result -->
+    <div class="panel controls-panel">
+      <div class="style-selector">
+        <h3>Select Hairstyle</h3>
+        <div class="grid-options">
+          <button *ngFor="let type of hairTypes" class="style-option" [class.active]="selectedHairType() === type.id"
+            (click)="selectHairType(type.id)">
+            {{ type.label }}
+          </button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="generate-btn" [disabled]="!previewUrl() || isLoading()" (click)="generateHairstyle()">
+          <span *ngIf="!isLoading()">Generate New Look</span>
+          <span *ngIf="isLoading()">Processing...</span>
+        </button>
+        <div *ngIf="error()" class="error-message">{{ error() }}</div>
+      </div>
+
+      <div *ngIf="generatedImageUrl()" class="result-section">
+        <h3>Your New Look</h3>
+        <div class="result-image-container">
+          <img [src]="generatedImageUrl()" alt="Generated Hairstyle" class="result-image">
+        </div>
+
+        <div class="barber-recommendation">
+          <h4>✂️ Barber's Note</h4>
+          <p>{{ currentRecommendation }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
