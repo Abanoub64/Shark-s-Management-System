@@ -14,7 +14,6 @@ public class BookingDto
     public string? PaymentOrderId { get; set; }
     public string? PaymentCapturedId { get; set; }
     public string Status { get; set; } = "Pending";
-
 }
 
 public class CreateBookingDto
@@ -31,4 +30,10 @@ public class UpdateBookingDto
 {
     public DateTime StartAt { get; set; }
     public DateTime EndAt { get; set; }
+}
+
+public class BookingSlotDto
+{
+    public DateTime Time { get; set; }
+    public bool IsAvailable { get; set; }
 }
