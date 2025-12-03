@@ -6,4 +6,5 @@ public class Barber
     public string FullName { get; set; } = string.Empty;
     public int BranchId { get; set; }
     public Branch? Branch { get; set; }
+    public List<BarberSchedule> Schedules { get; set; } = new();
 }

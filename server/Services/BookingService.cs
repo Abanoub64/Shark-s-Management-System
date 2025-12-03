@@ -1,3 +1,4 @@
+﻿using backend.DTOs;
 using backend.Models;
 
 using BarberBooking.API.DTOs;
@@ -72,4 +73,55 @@ public class BookingService : IBookingService
         await _db.SaveChangesAsync();
         return new BookingDto { Id = b.Id, BranchId = b.BranchId, ServiceId = b.ServiceId, BarberId = b.BarberId, StartAt = b.StartAt, EndAt = b.EndAt, CustomerId = b.CustomerId };
     }
+    public async Task<List<AvailableSlotDto>> GetAvailableSlots(int branchId, int barberId, DateTime date)
+    {
+        // 1) هات الشيفت
+        var schedule = await _db.BarberSchedules
+            .FirstOrDefaultAsync(s =>
+                s.BranchId == branchId &&
+                s.BarberId == barberId &&
+                s.DayOfWeek == (int)date.DayOfWeek
+            );
+
+        if (schedule == null)
+            return new List<AvailableSlotDto>(); // مفيش شيفت
+
+        // 2) المواعيد المحجوزة
+        var bookedTimes = await _db.Bookings
+            .Where(b =>
+                b.BarberId == barberId &&
+                b.StartAt.Date == date.Date
+            )
+            .Select(b => b.StartAt.TimeOfDay)
+            .ToListAsync();
+
+        // 3) بناء المواعيد المتاحة
+        var result = new List<AvailableSlotDto>();
+
+        // ✔ TimeSpan جاهز من غير Parse
+        var start = schedule.StartTime;
+        var end = schedule.EndTime;
+        var step = TimeSpan.FromMinutes(30);
+
+        for (var t = start; t < end; t += step)
+        {
+            bool isBooked = bookedTimes.Contains(t);
+
+            if (!isBooked) 
+            {
+                result.Add(new AvailableSlotDto
+                {
+                    Time = t.ToString(@"hh\:mm"),
+                    IsAvailable = true
+                });
+            }
+        }
+
+        return result;
+    }
+
+
+
+
+
 }

@@ -1,3 +1,4 @@
+using backend.DTOs;
 using BarberBooking.API.DTOs;
 namespace BarberBooking.API.Services;
 public interface IBookingService
@@ -7,4 +8,5 @@ public interface IBookingService
     Task<BookingDto> CreateAsync(CreateBookingDto dto);
     Task<BookingDto?> UpdateAsync(int id, UpdateBookingDto dto);
     Task<bool> DeleteAsync(int id);
+    Task<List<AvailableSlotDto>> GetAvailableSlots(int branchId, int barberId, DateTime date);
 }

@@ -112,7 +112,51 @@ namespace backend.Services
                 Message = "Success"
             };
         }
+        public async Task<AuthResponseDto> LoginWithExternalAsync(string email, string? firstName = null, string? lastName = null)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
 
+            if (user == null)
+            {
+                user = new ApplicationUser
+                {
+                    Email = email,
+                    UserName = email,
+                    FirstName = firstName ?? string.Empty,
+                    LastName = lastName ?? string.Empty,
+                    SecurityStamp = Guid.NewGuid().ToString()
+                };
+
+                var result = await _userManager.CreateAsync(user);
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    return new AuthResponseDto { Message = errors };
+                }
+
+                await _userManager.AddToRoleAsync(user, "Customer"); // default role
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            var jwtToken = GenerateJwtToken(user, roles);
+
+            var refreshToken = GenerateRefreshToken();
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+            await _userManager.UpdateAsync(user);
+
+            return new AuthResponseDto
+            {
+                IsAuthenticated = true,
+                Token = jwtToken,
+                RefreshToken = refreshToken,
+                RefreshTokenExpiration = user.RefreshTokenExpiryTime,
+                Email = user.Email!,
+                FullName = $"{user.FirstName} {user.LastName}",
+                Roles = roles.ToList(),
+                Message = "Success"
+            };
+        }
         // --- Helper Methods ---
 
         private string GenerateJwtToken(ApplicationUser user, IList<string> roles)
@@ -181,5 +225,7 @@ namespace backend.Services
 
             return principal;
         }
+
+     
     }
 }

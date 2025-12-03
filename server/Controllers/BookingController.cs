@@ -1,3 +1,4 @@
+using backend.Models;
 using BarberBooking.API.DTOs;
 using BarberBooking.API.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -49,6 +50,13 @@ public class BookingController : ControllerBase
         {
             return BadRequest(new { error = ex.Message });
         }
+    }
+    [HttpGet("available-slots")]
+    public async Task<IActionResult> GetAvailableSlots(int branchId, int barberId, DateTime date)
+    {
+        var slots = await _bookingService.GetAvailableSlots(branchId, barberId, date);
+
+        return Ok(slots);
     }
 
     [HttpDelete("{id}")]
