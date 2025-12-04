@@ -13,6 +13,7 @@ namespace backend.Models
         public DbSet<Service> Services => Set<Service>();
         public DbSet<Booking> Bookings => Set<Booking>();
         public DbSet<BarberSchedule> BarberSchedules => Set<BarberSchedule>();
+        public DbSet<Product> Products => Set<Product>();
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

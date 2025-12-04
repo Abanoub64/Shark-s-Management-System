@@ -97,20 +97,21 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// تسجيل الـ Services بتاعتك (زي ما هي)
+
 builder.Services.AddScoped<IBranchService, BranchService>();
 builder.Services.AddScoped<IBarberService, BarberService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<PayPalService>();
 builder.Services.AddScoped<IBarberScheduleService, BarberScheduleService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
-        policy => policy.WithOrigins("https://localhost:4200") // Angular dev server
+        policy => policy.WithOrigins("https://localhost:4200") 
                         .AllowAnyHeader()
                         .AllowAnyMethod());
 });
