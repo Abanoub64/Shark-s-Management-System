@@ -32,26 +32,28 @@ namespace backend.Models
             {
                 s.HasKey(x => x.Id);
                 s.Property(x => x.Name).IsRequired().HasMaxLength(200);
-                s.Property(x => x.Price).HasPrecision(18, 2); // مهم جداً
+                s.Property(x => x.Price).HasPrecision(18, 2);
             });
 
-            // ========== Fix Multiple Cascade Paths ==========
             modelBuilder.Entity<Barber>()
               .HasOne(b => b.Branch)
-              .WithMany()
+              .WithMany(br => br.Staff) 
               .HasForeignKey(b => b.BranchId)
               .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<BarberSchedule>()
-                .HasOne(bs => bs.Branch)
-                .WithMany()
-                .HasForeignKey(bs => bs.BranchId)
-                .OnDelete(DeleteBehavior.Restrict); // منع الكاسكيد
+
 
             modelBuilder.Entity<BarberSchedule>()
+                .HasOne(bs => bs.Branch)
+                .WithMany() 
+                .HasForeignKey(bs => bs.BranchId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            
+            modelBuilder.Entity<BarberSchedule>()
                 .HasOne(bs => bs.Barber)
-                .WithMany()
+                .WithMany(b => b.Schedules) 
                 .HasForeignKey(bs => bs.BarberId)
-                .OnDelete(DeleteBehavior.Restrict); // منع الكاسكيد
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
