@@ -17,10 +17,12 @@ public class BranchController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetAll()
         => Ok(await _branchService.GetAllAsync());
 
     [HttpGet("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Get(int id)
     {
         var result = await _branchService.GetByIdAsync(id);

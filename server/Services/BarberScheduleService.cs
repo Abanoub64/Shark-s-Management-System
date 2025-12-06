@@ -33,10 +33,19 @@ namespace backend.Services
 
         public async Task<BarberScheduleDto> CreateAsync(CreateBarberScheduleDto dto)
         {
+            // 1) Get barber and his branch
+            var barber = await _context.Barbers
+                .Include(b => b.Branch)
+                .FirstOrDefaultAsync(b => b.Id == dto.BarberId);
+
+            if (barber == null)
+                throw new Exception("Barber not found");
+
+            // 2) الفرع ييجي من الحلاق نفسه
             var schedule = new BarberSchedule
             {
                 BarberId = dto.BarberId,
-                BranchId = dto.BranchId,
+                BranchId = barber.BranchId, 
                 DayOfWeek = dto.DayOfWeek,
                 StartTime = dto.StartTime,
                 EndTime = dto.EndTime
@@ -49,13 +58,14 @@ namespace backend.Services
             {
                 Id = schedule.Id,
                 BarberId = schedule.BarberId,
-                BarberName = _context.Barbers.Find(schedule.BarberId)?.FullName ?? "",
-                BranchId = schedule.BranchId,
-                BranchName = _context.Branches.Find(schedule.BranchId)?.Name ?? "",
+                BarberName = barber.FullName,
+                BranchId = barber.BranchId,
+                BranchName = barber.Branch.Name,
                 DayOfWeek = schedule.DayOfWeek,
                 StartTime = schedule.StartTime.ToString(@"hh\:mm"),
                 EndTime = schedule.EndTime.ToString(@"hh\:mm")
             };
         }
+
     }
 }

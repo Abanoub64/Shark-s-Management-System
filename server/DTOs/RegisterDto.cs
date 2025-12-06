@@ -21,5 +21,12 @@ namespace backend.DTOs
         [Required]
         [Phone]
         public string PhoneNumber { get; set; } = string.Empty;
+        [Required]
+        public string Role { get; set; } = string.Empty;   
+        
+        [Required]
+        public int? BranchId { get; set; }
+
+
     }
 }

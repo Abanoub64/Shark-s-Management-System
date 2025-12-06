@@ -8,6 +8,7 @@ namespace backend.Models
         public string LastName { get; set; } = string.Empty;
 
         public string? RefreshToken { get; set; }
-        public DateTime RefreshTokenExpiryTime { get; set; }
+        public DateTime? RefreshTokenExpiryTime { get; set; }
+        public int? BranchId { get; set; }
     }
 }

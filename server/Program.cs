@@ -8,38 +8,59 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Sharks.Services;
-using System;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+// =========================
+//      CORS
+// =========================
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: MyAllowSpecificOrigins,
-                      policy =>
-                      {
-                          policy.WithOrigins("http://localhost:4200") 
-                                .AllowAnyHeader()
-                                .AllowAnyMethod()
-                                .AllowCredentials();
-                      });
+    options.AddPolicy("AllowFrontend",
+        policy => policy
+            .WithOrigins("http://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials());
 });
 
+// =========================
+//     Add Controllers
+// =========================
 builder.Services.AddControllers();
 
+// =========================
+//     Database
+// =========================
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// =========================
+//     Identity
+// =========================
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddScoped<backend.Services.IAuthService, backend.Services.AuthService>();
+// =========================
+//     Services DI
+// =========================
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IBranchService, BranchService>();
+builder.Services.AddScoped<IBarberService, BarberService>();
+builder.Services.AddScoped<IServiceService, ServiceService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IBarberScheduleService, BarberScheduleService>();
+builder.Services.AddScoped<PayPalService>();
+builder.Services.AddHttpContextAccessor();
 
-var jwtSettings = builder.Configuration.GetSection("JWT");
-var secretKey = jwtSettings["Secret"] ?? "FallbackSecretKeyForDevelopmentOnly12345";
+// =========================
+//     JWT Auth
+// =========================
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var secretKey = jwtSettings["Key"];
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -55,32 +76,35 @@ builder.Services.AddAuthentication(options =>
     {
         ValidateIssuer = true,
         ValidateAudience = true,
-        ValidAudience = jwtSettings["ValidAudience"],
-        ValidIssuer = jwtSettings["ValidIssuer"],
+        ValidAudience = jwtSettings["Audience"],
+        ValidIssuer = jwtSettings["Issuer"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
     };
-}).AddGoogle(options =>
+})
+.AddGoogle(options =>
 {
     options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
     options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
     options.CallbackPath = "/api/Auth/google-response";
 });
 
-
+// =========================
+//     Swagger
+// =========================
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Sharks API", Version = "v1" });
-
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
-        Description = "Please enter token",
+        Description = "Enter JWT token",
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "bearer"
+        Scheme = "bearer",
+        BearerFormat = "JWT"
     });
+
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -88,51 +112,37 @@ builder.Services.AddSwaggerGen(c =>
             {
                 Reference = new OpenApiReference
                 {
-                    Type=ReferenceType.SecurityScheme,
-                    Id="Bearer"
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
                 }
             },
-            new string[]{}
+            new string[] {}
         }
     });
 });
 
-// تسجيل الـ Services بتاعتك (زي ما هي)
-builder.Services.AddScoped<IBranchService, BranchService>();
-builder.Services.AddScoped<IBarberService, BarberService>();
-builder.Services.AddScoped<IServiceService, ServiceService>();
-builder.Services.AddScoped<IBookingService, BookingService>();
-builder.Services.AddScoped<PayPalService>();
-builder.Services.AddScoped<IBarberScheduleService, BarberScheduleService>();
-
-
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend",
-        policy => policy.WithOrigins("https://localhost:4200") // Angular dev server
-                        .AllowAnyHeader()
-                        .AllowAnyMethod());
-});
-
 var app = builder.Build();
 
+// =========================
+//     Middleware
+// =========================
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
-
-
-app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
+// =========================
+//     Seed Roles + Admin
+// =========================
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -143,7 +153,7 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
+        logger.LogError(ex, "Error seeding database");
     }
 }
 

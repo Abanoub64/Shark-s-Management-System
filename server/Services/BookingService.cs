@@ -12,39 +12,54 @@ public class BookingService : IBookingService
 
     public async Task<BookingDto> CreateAsync(CreateBookingDto dto)
     {
+        // 1) هات بيانات الحلاق
+        var barber = await _db.Barbers
+            .Include(b => b.Branch)
+            .FirstOrDefaultAsync(b => b.Id == dto.BarberId);
+
+        if (barber == null)
+            throw new Exception("Invalid BarberId");
+
+        // 2) التأكد من عدم وجود Overlap
         var overlap = await _db.Bookings.AnyAsync(b =>
-            b.BranchId == dto.BranchId &&
-            ((dto.BarberId == null) || b.BarberId == dto.BarberId) &&
+            b.BarberId == dto.BarberId &&
             !(dto.EndAt <= b.StartAt || dto.StartAt >= b.EndAt) &&
             b.Status != "Rejected");
 
-        if (overlap) throw new Exception("Time slot not available");
+        if (overlap)
+            throw new Exception("Time slot not available");
 
+        // 3) إنشاء الحجز
         var ent = new Booking
         {
-            BranchId = dto.BranchId,
             ServiceId = dto.ServiceId,
             BarberId = dto.BarberId,
+            BranchId = barber.BranchId,   // ← حذف branchId من البودي
             StartAt = dto.StartAt,
             EndAt = dto.EndAt,
             CustomerId = dto.CustomerId,
             Status = "Pending"
         };
+
         _db.Bookings.Add(ent);
         await _db.SaveChangesAsync();
 
+        // 4) إعادة البيانات كاملة
         return new BookingDto
         {
             Id = ent.Id,
-            BranchId = ent.BranchId,
+            BranchId = barber.BranchId,
+            BranchName = barber.Branch?.Name,        // ← اسم الفرع
             ServiceId = ent.ServiceId,
             BarberId = ent.BarberId,
+            BarberName = barber.FullName,
             StartAt = ent.StartAt,
             EndAt = ent.EndAt,
             CustomerId = ent.CustomerId,
             Status = ent.Status
         };
     }
+
 
     public async Task<bool> DeleteAsync(int id)
     {

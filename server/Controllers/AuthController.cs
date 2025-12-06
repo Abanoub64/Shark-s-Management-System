@@ -2,6 +2,7 @@
 using backend.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -18,44 +19,86 @@ namespace backend.Controllers
             _authService = authService;
         }
 
+        // ===============================
+        // REGISTER
+        // ===============================
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto model)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var result = await _authService.RegisterAsync(model);
-
             if (!result.IsAuthenticated)
                 return BadRequest(result.Message);
-
             return Ok(result);
         }
 
+        // ===============================
+        // LOGIN
+        // ===============================
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
             var result = await _authService.LoginAsync(model);
-
             if (!result.IsAuthenticated)
                 return BadRequest(result.Message);
-
             return Ok(result);
         }
 
+        // ===============================
+        // REFRESH TOKEN
+        // ===============================
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] TokenRequestDto model)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var result = await _authService.RefreshTokenAsync(model);
+            if (!result.IsAuthenticated)
+                return BadRequest(result.Message);
+            return Ok(result);
+        }
+
+        // ===============================
+        // LOGOUT  (Protected)
+        // ===============================
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _authService.LogoutAsync(userId);
 
             if (!result.IsAuthenticated)
                 return BadRequest(result.Message);
 
             return Ok(result);
         }
+
+        // ===============================
+        // CHANGE PASSWORD (Protected)
+        // ===============================
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto model)
+        {
+            var result = await _authService.ChangePasswordAsync(model);
+
+            if (!result.IsAuthenticated)
+                return BadRequest(result.Message);
+
+            return Ok(result);
+        }
+        // ===============================
+        // VALIDATE TOKEN (Protected)
+        // ===============================
+        [Authorize]
+        [HttpGet("validate-token")]
+        public IActionResult ValidateToken()
+        {
+            return Ok(new { valid = true });
+        }
+
+      
+
+        // ===============================
+        // GOOGLE LOGIN
+        // ===============================
         [HttpGet("google-login")]
         public IActionResult GoogleLogin()
         {
@@ -63,9 +106,12 @@ namespace backend.Controllers
             {
                 RedirectUri = Url.Action("GoogleResponse")
             };
-            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+            return Challenge(properties, "Google");
         }
 
+        // ===============================
+        // GOOGLE RESPONSE
+        // ===============================
         [HttpGet("google-response")]
         public async Task<IActionResult> GoogleResponse()
         {
@@ -85,8 +131,5 @@ namespace backend.Controllers
 
             return Ok(authResult);
         }
-
-
-
     }
 }

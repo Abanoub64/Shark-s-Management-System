@@ -1,4 +1,4 @@
-using BarberBooking.API.DTOs;
+﻿using BarberBooking.API.DTOs;
 using BarberBooking.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,6 +35,14 @@ public class BarberController : ControllerBase
     [Authorize(Roles = "Admin,BranchManager")]
     public async Task<IActionResult> Create(CreateBarberDto dto)
     {
+        // لو المستخدم BranchManager — لازم يتأكد إن الـ Barber من نفس الفرع
+        if (User.IsInRole("BranchManager"))
+        {
+            var branchId = User.FindFirst("BranchId")?.Value;
+
+            if (branchId == null || branchId != dto.BranchId.ToString())
+                return Unauthorized(new { message = "You cannot create barbers for another branch." });
+        }
         var c = await _barberService.CreateAsync(dto);
         return CreatedAtAction(nameof(Get), new { id = c.Id }, c);
     }
@@ -43,12 +51,40 @@ public class BarberController : ControllerBase
     [Authorize(Roles = "Admin,BranchManager")]
     public async Task<IActionResult> Update(int id, UpdateBarberDto dto)
     {
+        if (User.IsInRole("BranchManager"))
+        {
+            var branchId = User.FindFirst("BranchId")?.Value;
+
+            // نجيب الحلاق من الداتا نشيك على فرعه
+            var barber = await _barberService.GetByIdAsync(id);
+            if (barber == null)
+                return NotFound();
+
+            if (branchId == null || branchId != barber.BranchId.ToString())
+                return Unauthorized(new { message = "You cannot create barbers for another branch." });
+        }
         var r = await _barberService.UpdateAsync(id, dto);
         return r == null ? NotFound() : Ok(r);
     }
-
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin,BranchManager")]
     public async Task<IActionResult> Delete(int id)
-        => await _barberService.DeleteAsync(id) ? Ok(new { message = "Deleted" }) : NotFound();
+    {
+        if (User.IsInRole("BranchManager"))
+        {
+            var branchId = User.FindFirst("BranchId")?.Value;
+
+            var barber = await _barberService.GetByIdAsync(id);
+            if (barber == null)
+                return NotFound();
+
+            if (branchId == null || branchId != barber.BranchId.ToString())
+                return Unauthorized(new { message = "You cannot create barbers for another branch." });
+        }
+
+        return await _barberService.DeleteAsync(id)
+            ? Ok(new { message = "Deleted" })
+            : NotFound();
+    }
+
 }
