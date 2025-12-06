@@ -16,7 +16,6 @@ namespace backend.Controllers
             _productService = productService;
         }
 
-        // GET: الجميع يمكنه رؤية المنتجات
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -30,10 +29,9 @@ namespace backend.Controllers
             return result == null ? NotFound() : Ok(result);
         }
 
-
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create(CreateProductDto dto)
+        public async Task<IActionResult> Create([FromForm] CreateProductDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -43,12 +41,13 @@ namespace backend.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Update(int id, UpdateProductDto dto)
+        public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto dto)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
             var result = await _productService.UpdateAsync(id, dto);
             return result == null ? NotFound() : Ok(result);
         }
-
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]

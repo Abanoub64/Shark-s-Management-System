@@ -1,4 +1,4 @@
-﻿using backend.Data; 
+﻿using backend.Data;
 using backend.DTOs;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
@@ -8,15 +8,18 @@ namespace backend.Services
     public class ProductService : IProductService
     {
         private readonly AppDbContext _context;
+        private readonly IPhotoService _photoService; 
 
-        public ProductService(AppDbContext context)
+        public ProductService(AppDbContext context, IPhotoService photoService)
         {
             _context = context;
+            _photoService = photoService;
         }
 
         public async Task<List<ProductDto>> GetAllAsync()
         {
             return await _context.Products
+                .AsNoTracking()
                 .Select(p => new ProductDto
                 {
                     Id = p.Id,
@@ -47,12 +50,23 @@ namespace backend.Services
 
         public async Task<ProductDto> CreateAsync(CreateProductDto dto)
         {
+            string imageUrl = "https://via.placeholder.com/150";
+
+            if (dto.Image != null)
+            {
+                var uploadResult = await _photoService.AddPhotoAsync(dto.Image);
+                if (uploadResult?.SecureUrl != null)
+                {
+                    imageUrl = uploadResult.SecureUrl.AbsoluteUri;
+                }
+            }
+
             var product = new Product
             {
                 Name = dto.Name,
                 Description = dto.Description,
                 Price = dto.Price,
-                ImageUrl = dto.ImageUrl,
+                ImageUrl = imageUrl,
                 Stock = dto.Stock
             };
 
@@ -78,8 +92,16 @@ namespace backend.Services
             product.Name = dto.Name;
             product.Description = dto.Description;
             product.Price = dto.Price;
-            product.ImageUrl = dto.ImageUrl;
             product.Stock = dto.Stock;
+
+            if (dto.Image != null)
+            {
+                var uploadResult = await _photoService.AddPhotoAsync(dto.Image);
+                if (uploadResult?.SecureUrl != null)
+                {
+                    product.ImageUrl = uploadResult.SecureUrl.AbsoluteUri;
+                }
+            }
 
             await _context.SaveChangesAsync();
 

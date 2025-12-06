@@ -27,6 +27,11 @@ builder.Services.AddCors(options =>
                       });
 });
 
+
+// Cloudinary Configuration
+builder.Services.Configure<backend.Helpers.CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
+builder.Services.AddScoped<backend.Services.IPhotoService, backend.Services.PhotoService>();
+
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -61,8 +66,8 @@ builder.Services.AddAuthentication(options =>
     };
 }).AddGoogle(options =>
 {
-    options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+    options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
+    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
     options.CallbackPath = "/api/Auth/google-response";
 });
 
@@ -105,7 +110,8 @@ builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<PayPalService>();
 builder.Services.AddScoped<IBarberScheduleService, BarberScheduleService>();
 builder.Services.AddScoped<IProductService, ProductService>();
-
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IPhotoService, PhotoService>();
 
 
 builder.Services.AddCors(options =>

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http; 
 
 namespace backend.DTOs
 {
@@ -23,9 +24,8 @@ namespace backend.DTOs
         [Range(0.01, 100000)]
         public decimal Price { get; set; }
 
-        public string ImageUrl { get; set; } = string.Empty;
+        public IFormFile? Image { get; set; }
 
-        [Required]
         public int Stock { get; set; }
     }
 
@@ -34,7 +34,9 @@ namespace backend.DTOs
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public decimal Price { get; set; }
-        public string ImageUrl { get; set; } = string.Empty;
+
+        public IFormFile? Image { get; set; }
+
         public int Stock { get; set; }
     }
 }
