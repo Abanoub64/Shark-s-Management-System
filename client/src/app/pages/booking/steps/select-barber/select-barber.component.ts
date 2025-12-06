@@ -4,12 +4,11 @@ import { Router } from '@angular/router';
 import { BookingService } from '../../../../core/services/booking.service';
 import { BranchService } from '../../../../core/services/branch.service';
 import { UiButtonComponent } from '../../../../components/shared/ui-button.component';
-import { UiCardComponent } from '../../../../components/shared/ui-card.component';
 
 @Component({
   selector: 'app-select-barber',
   standalone: true,
-  imports: [CommonModule, UiButtonComponent, UiCardComponent],
+  imports: [CommonModule, UiButtonComponent],
   template: `
     <h2 class="text-2xl font-bold mb-6">Select Barber (Optional)</h2>
 

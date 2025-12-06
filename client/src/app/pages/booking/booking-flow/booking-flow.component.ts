@@ -1,12 +1,12 @@
 import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { RouterOutlet, Router } from '@angular/router';
 import { BookingService } from '../../../core/services/booking.service';
 
 @Component({
   selector: 'app-booking-flow',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterOutlet],
   template: `
     <div class="container mx-auto px-4 py-8">
       <!-- Stepper -->

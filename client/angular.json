@@ -17,7 +17,6 @@
           "builder": "@angular/build:application",
           "options": {
             "browser": "src/main.ts",
-            "index": "public/index.html",
             "tsConfig": "tsconfig.app.json",
             "polyfills": ["zone.js"],
             "assets": [
