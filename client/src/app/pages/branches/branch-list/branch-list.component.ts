@@ -2,6 +2,7 @@ import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { BranchService, Branch } from '../../../core/services/branch.service';
+import { LanguageService } from '../../../core/services/language.service';
 import { UiCardComponent } from '../../../components/shared/ui-card.component';
 import { UiButtonComponent } from '../../../components/shared/ui-button.component';
 import { UiInputComponent } from '../../../components/shared/ui-input.component';
@@ -20,13 +21,13 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
   ],
   template: `
     <div class="container mx-auto px-4 py-8">
-      <h1 class="text-3xl font-bold mb-8">Find a Branch</h1>
+      <h1 class="text-3xl font-bold mb-8">{{ t().findBranch }}</h1>
 
       <!-- Search & Filter -->
       <div class="mb-8">
         <app-ui-input
           [formControl]="searchControl"
-          placeholder="Search by name or location..."
+          [placeholder]="t().searchPlaceholder"
           class="max-w-md"
         >
           <span icon class="text-gray-400">🔍</span>
@@ -47,7 +48,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
                 [class.bg-red-100]="!branch.isOpen"
                 [class.text-red-800]="!branch.isOpen"
               >
-                {{ branch.isOpen ? 'Open' : 'Closed' }}
+                {{ branch.isOpen ? t().open : t().closed }}
               </span>
             </div>
           </div>
@@ -65,14 +66,14 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
             <div class="flex items-center justify-between mt-4">
               <span class="text-sm text-gray-500">{{ branch.hours }}</span>
               <app-ui-button [routerLink]="['/branches', branch.id]" variant="secondary" size="sm">
-                View Details
+                {{ t().viewDetails }}
               </app-ui-button>
             </div>
           </div>
         </app-ui-card>
         } @empty {
         <div class="col-span-full text-center py-12 text-gray-500">
-          No branches found matching your search.
+          {{ t().noBranchesFound }}
         </div>
         }
       </div>
@@ -81,6 +82,9 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 })
 export class BranchListComponent {
   branchService = inject(BranchService);
+  private languageService = inject(LanguageService);
+  t = this.languageService.t;
+
   searchControl = new FormControl('');
 
   filteredBranches = computed(() => {

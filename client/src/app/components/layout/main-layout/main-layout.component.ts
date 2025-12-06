@@ -8,7 +8,10 @@ import { LanguageService } from '../../../core/services/language.service';
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
   template: `
-    <div class="min-h-screen flex flex-col font-sans">
+    <div
+      class="min-h-screen flex flex-col font-sans"
+      [dir]="langService.currentLang() === 'ar' ? 'rtl' : 'ltr'"
+    >
       <!-- Header -->
       <header class="bg-white shadow-sm sticky top-0 z-50">
         <nav class="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -25,19 +28,31 @@ import { LanguageService } from '../../../core/services/language.service';
               routerLinkActive="text-secondary"
               [routerLinkActiveOptions]="{ exact: true }"
               class="text-gray-600 hover:text-primary font-medium transition-colors"
-              >Home</a
+              >{{ t().home }}</a
             >
             <a
               routerLink="/branches"
               routerLinkActive="text-secondary"
               class="text-gray-600 hover:text-primary font-medium transition-colors"
-              >Branches</a
+              >{{ t().branches }}</a
+            >
+            <a
+              routerLink="/store"
+              routerLinkActive="text-secondary"
+              class="text-gray-600 hover:text-primary font-medium transition-colors"
+              >{{ t().store }}</a
             >
             <a
               routerLink="/my-bookings"
               routerLinkActive="text-secondary"
               class="text-gray-600 hover:text-primary font-medium transition-colors"
-              >My Bookings</a
+              >{{ t().myBookings }}</a
+            >
+            <a
+              routerLink="/admin/dashboard"
+              routerLinkActive="text-secondary"
+              class="text-red-500 hover:text-red-700 font-medium transition-colors"
+              >(admin test)</a
             >
           </div>
 
@@ -53,10 +68,10 @@ import { LanguageService } from '../../../core/services/language.service';
               routerLink="/auth/login"
               class="hidden md:block bg-primary text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors"
             >
-              Sign In
+              {{ t().signIn }}
             </a>
-            <!-- Mobile Menu Button (Placeholder) -->
-            <button class="md:hidden text-gray-600">
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden text-gray-600" (click)="toggleMobileMenu()">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -74,6 +89,59 @@ import { LanguageService } from '../../../core/services/language.service';
             </button>
           </div>
         </nav>
+
+        <!-- Mobile Navigation Menu -->
+        @if (isMobileMenuOpen) {
+        <div
+          class="md:hidden border-t border-gray-100 absolute top-16 left-0 right-0 bg-white shadow-lg z-40"
+        >
+          <div class="flex flex-col p-4 gap-4">
+            <a
+              routerLink="/"
+              routerLinkActive="text-secondary"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="text-gray-600 hover:text-primary font-medium transition-colors"
+              (click)="toggleMobileMenu()"
+              >{{ t().home }}</a
+            >
+            <a
+              routerLink="/branches"
+              routerLinkActive="text-secondary"
+              class="text-gray-600 hover:text-primary font-medium transition-colors"
+              (click)="toggleMobileMenu()"
+              >{{ t().branches }}</a
+            >
+            <a
+              routerLink="/store"
+              routerLinkActive="text-secondary"
+              class="text-gray-600 hover:text-primary font-medium transition-colors"
+              (click)="toggleMobileMenu()"
+              >{{ t().store }}</a
+            >
+            <a
+              routerLink="/my-bookings"
+              routerLinkActive="text-secondary"
+              class="text-gray-600 hover:text-primary font-medium transition-colors"
+              (click)="toggleMobileMenu()"
+              >{{ t().myBookings }}</a
+            >
+            <a
+              routerLink="/admin/dashboard"
+              routerLinkActive="text-secondary"
+              class="text-red-500 hover:text-red-700 font-medium transition-colors"
+              (click)="toggleMobileMenu()"
+              >(admin test)</a
+            >
+            <a
+              routerLink="/auth/login"
+              class="bg-primary text-center text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors"
+              (click)="toggleMobileMenu()"
+            >
+              {{ t().signIn }}
+            </a>
+          </div>
+        </div>
+        }
       </header>
 
       <!-- Main Content -->
@@ -90,27 +158,39 @@ import { LanguageService } from '../../../core/services/language.service';
                 <span class="text-secondary">✂</span> BarberChain
               </h3>
               <p class="text-gray-400 text-sm">
-                Premium grooming services for the modern gentleman.
+                {{ t().footerTagline }}
               </p>
             </div>
             <div>
-              <h4 class="font-bold mb-4">Quick Links</h4>
+              <h4 class="font-bold mb-4">{{ t().quickLinks }}</h4>
               <ul class="space-y-2 text-sm text-gray-400">
-                <li><a routerLink="/branches" class="hover:text-white">Find a Branch</a></li>
-                <li><a routerLink="/services" class="hover:text-white">Services</a></li>
-                <li><a routerLink="/about" class="hover:text-white">About Us</a></li>
+                <li>
+                  <a routerLink="/branches" class="hover:text-white">{{ t().findBranch }}</a>
+                </li>
+                <li>
+                  <a routerLink="/services" class="hover:text-white">{{ t().services }}</a>
+                </li>
+                <li>
+                  <a routerLink="/about" class="hover:text-white">{{ t().aboutUs }}</a>
+                </li>
               </ul>
             </div>
             <div>
-              <h4 class="font-bold mb-4">Support</h4>
+              <h4 class="font-bold mb-4">{{ t().support }}</h4>
               <ul class="space-y-2 text-sm text-gray-400">
-                <li><a routerLink="/contact" class="hover:text-white">Contact Us</a></li>
-                <li><a routerLink="/faq" class="hover:text-white">FAQ</a></li>
-                <li><a routerLink="/privacy" class="hover:text-white">Privacy Policy</a></li>
+                <li>
+                  <a routerLink="/contact" class="hover:text-white">{{ t().contactUs }}</a>
+                </li>
+                <li>
+                  <a routerLink="/faq" class="hover:text-white">{{ t().faq }}</a>
+                </li>
+                <li>
+                  <a routerLink="/privacy" class="hover:text-white">{{ t().privacyPolicy }}</a>
+                </li>
               </ul>
             </div>
             <div>
-              <h4 class="font-bold mb-4">Connect</h4>
+              <h4 class="font-bold mb-4">{{ t().connect }}</h4>
               <div class="flex gap-4">
                 <!-- Social Icons Placeholders -->
                 <div class="w-8 h-8 bg-gray-700 rounded-full"></div>
@@ -120,7 +200,7 @@ import { LanguageService } from '../../../core/services/language.service';
             </div>
           </div>
           <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-            &copy; 2025 BarberChain. All rights reserved.
+            &copy; 2025 BarberChain. {{ t().rightsReserved }}
           </div>
         </div>
       </footer>
@@ -129,4 +209,11 @@ import { LanguageService } from '../../../core/services/language.service';
 })
 export class MainLayoutComponent {
   langService = inject(LanguageService);
+  t = this.langService.t;
+
+  isMobileMenuOpen = false;
+
+  toggleMobileMenu() {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
 }

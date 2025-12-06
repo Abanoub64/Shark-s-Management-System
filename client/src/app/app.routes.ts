@@ -1,13 +1,31 @@
 import { Routes } from '@angular/router';
-import { MainLayoutComponent } from './components/layout/main-layout/main-layout.component';
-import { LandingPageComponent } from './pages/home/landing-page/landing-page.component';
+
+// ============================================
+// ROUTE CONFIGURATION
+// ============================================
 
 export const routes: Routes = [
+  // Public Routes (Main Layout)
   {
     path: '',
-    component: MainLayoutComponent,
+    loadComponent: () =>
+      import('./components/layout/main-layout/main-layout.component').then(
+        (m) => m.MainLayoutComponent
+      ),
     children: [
-      { path: '', component: LandingPageComponent },
+      {
+        path: '',
+        loadComponent: () =>
+          import('./pages/home/landing-page/landing-page.component').then(
+            (m) => m.LandingPageComponent
+          ),
+      },
+      {
+        path: 'store',
+        loadComponent: () => import('./pages/store/store.component').then((m) => m.StoreComponent),
+      },
+
+      // Branches
       {
         path: 'branches',
         loadComponent: () =>
@@ -22,6 +40,8 @@ export const routes: Routes = [
             (m) => m.BranchDetailComponent
           ),
       },
+
+      // Booking Flow
       {
         path: 'booking',
         loadComponent: () =>
@@ -67,6 +87,8 @@ export const routes: Routes = [
           },
         ],
       },
+
+      // User Dashboard
       {
         path: 'my-bookings',
         loadComponent: () =>
@@ -74,6 +96,8 @@ export const routes: Routes = [
             (m) => m.MyBookingsComponent
           ),
       },
+
+      // Authentication
       {
         path: 'auth/login',
         loadComponent: () =>
@@ -86,6 +110,8 @@ export const routes: Routes = [
       },
     ],
   },
+
+  // Super Admin Routes
   {
     path: 'admin',
     loadComponent: () =>
@@ -101,8 +127,35 @@ export const routes: Routes = [
             (m) => m.AdminDashboardComponent
           ),
       },
+      {
+        path: 'branches',
+        loadComponent: () =>
+          import('./pages/admin/branches/branches.component').then((m) => m.BranchesComponent),
+      },
+      {
+        path: 'employees',
+        loadComponent: () =>
+          import('./pages/admin/employees/employees.component').then((m) => m.EmployeesComponent),
+      },
+      {
+        path: 'services',
+        loadComponent: () =>
+          import('./pages/admin/services/services.component').then((m) => m.ServicesComponent),
+      },
+      {
+        path: 'bookings',
+        loadComponent: () =>
+          import('./pages/admin/bookings/bookings.component').then((m) => m.BookingsComponent),
+      },
+      {
+        path: 'analytics',
+        loadComponent: () =>
+          import('./pages/admin/analytics/analytics.component').then((m) => m.AnalyticsComponent),
+      },
     ],
   },
+
+  // Branch Admin Routes
   {
     path: 'branch-admin',
     loadComponent: () =>
@@ -125,8 +178,11 @@ export const routes: Routes = [
             (m) => m.QueueManagerComponent
           ),
       },
+      // TODO: Add more branch-admin routes (schedule, staff, analytics, promotions, etc.)
     ],
   },
+
+  // Staff/Barber Routes
   {
     path: 'staff',
     loadComponent: () =>
@@ -147,8 +203,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/staff/queue/staff-queue.component').then((m) => m.StaffQueueComponent),
       },
+      // TODO: Add more staff routes (performance, availability, etc.)
     ],
   },
+
+  // Public Queue System Routes
   {
     path: 'public',
     children: [
@@ -166,7 +225,10 @@ export const routes: Routes = [
             (m) => m.QrLandingComponent
           ),
       },
+      // TODO: Add more public routes (walk-in, queue-status, etc.)
     ],
   },
+
+  // Fallback
   { path: '**', redirectTo: '' },
 ];

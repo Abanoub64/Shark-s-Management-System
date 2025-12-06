@@ -11,41 +11,64 @@ import { UiButtonComponent } from '../../../components/shared/ui-button.componen
     <div class="space-y-6">
       <!-- Live Status -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <app-ui-card class="bg-blue-600 text-white border-none">
+        <app-ui-card
+          [style.background-color]="'var(--surface)'"
+          [style.border]="'1px solid var(--border-light)'"
+        >
           <div class="p-6">
             <div class="flex justify-between items-start">
               <div>
-                <p class="text-blue-100 text-sm font-medium">Current Queue</p>
-                <h3 class="text-4xl font-bold mt-2">5</h3>
-                <p class="text-blue-100 text-xs mt-2">Est. Wait: 25 mins</p>
+                <p class="text-sm font-medium" [style.color]="'var(--text-secondary)'">
+                  Current Queue
+                </p>
+                <h3 class="text-4xl font-bold mt-2" [style.color]="'var(--text-primary)'">5</h3>
+                <p class="text-xs mt-2" [style.color]="'var(--text-tertiary)'">
+                  Est. Wait: 25 mins
+                </p>
               </div>
               <span class="text-2xl">🚶</span>
             </div>
           </div>
         </app-ui-card>
 
-        <app-ui-card class="bg-green-600 text-white border-none">
+        <app-ui-card
+          [style.background-color]="'var(--surface)'"
+          [style.border]="'1px solid var(--border-light)'"
+        >
           <div class="p-6">
             <div class="flex justify-between items-start">
               <div>
-                <p class="text-green-100 text-sm font-medium">Active Barbers</p>
-                <h3 class="text-4xl font-bold mt-2">
-                  4<span class="text-lg text-green-200 font-normal">/6</span>
+                <p class="text-sm font-medium" [style.color]="'var(--text-secondary)'">
+                  Active Barbers
+                </p>
+                <h3 class="text-4xl font-bold mt-2" [style.color]="'var(--text-primary)'">
+                  4<span class="text-lg font-normal" [style.color]="'var(--text-tertiary)'"
+                    >/6</span
+                  >
                 </h3>
-                <p class="text-green-100 text-xs mt-2">2 on break</p>
+                <p class="text-xs mt-2" [style.color]="'var(--text-tertiary)'">2 on break</p>
               </div>
               <span class="text-2xl">✂️</span>
             </div>
           </div>
         </app-ui-card>
 
-        <app-ui-card class="bg-purple-600 text-white border-none">
+        <app-ui-card
+          [style.background-color]="'var(--surface)'"
+          [style.border]="'1px solid var(--border-light)'"
+        >
           <div class="p-6">
             <div class="flex justify-between items-start">
               <div>
-                <p class="text-purple-100 text-sm font-medium">Today's Revenue</p>
-                <h3 class="text-4xl font-bold mt-2">\${{ 1250 | number }}</h3>
-                <p class="text-purple-100 text-xs mt-2">32 bookings completed</p>
+                <p class="text-sm font-medium" [style.color]="'var(--text-secondary)'">
+                  Today's Revenue
+                </p>
+                <h3 class="text-4xl font-bold mt-2" [style.color]="'var(--text-primary)'">
+                  \${{ 1250 | number }}
+                </h3>
+                <p class="text-xs mt-2" [style.color]="'var(--text-tertiary)'">
+                  32 bookings completed
+                </p>
               </div>
               <span class="text-2xl">💰</span>
             </div>
@@ -66,34 +89,44 @@ import { UiButtonComponent } from '../../../components/shared/ui-button.componen
               <div class="space-y-4">
                 @for (customer of queue; track customer.id) {
                 <div
-                  class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100"
+                  class="flex items-center justify-between p-4 rounded-lg border transition-colors hover:shadow-md"
+                  [style.background-color]="'var(--bg-secondary)'"
+                  [style.border-color]="'var(--border-light)'"
                 >
                   <div class="flex items-center gap-4">
                     <div
-                      class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold"
+                      class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white"
+                      style="background-color: var(--color-primary-500)"
                     >
                       {{ customer.ticket }}
                     </div>
                     <div>
-                      <h4 class="font-bold">{{ customer.name }}</h4>
-                      <p class="text-xs text-gray-500">
+                      <h4 class="font-bold" [style.color]="'var(--text-primary)'">
+                        {{ customer.name }}
+                      </h4>
+                      <p class="text-xs" [style.color]="'var(--text-tertiary)'">
                         {{ customer.service }} • {{ customer.barber || 'Any Barber' }}
                       </p>
                     </div>
                   </div>
                   <div class="flex items-center gap-4">
                     <div class="text-right">
-                      <p class="text-sm font-bold text-gray-700">{{ customer.waitTime }} min</p>
-                      <p class="text-xs text-gray-500">Wait Time</p>
+                      <p class="text-sm font-bold" [style.color]="'var(--text-primary)'">
+                        {{ customer.waitTime }} min
+                      </p>
+                      <p class="text-xs" [style.color]="'var(--text-tertiary)'">Wait Time</p>
                     </div>
                     <div class="flex gap-2">
                       <button
-                        class="p-2 text-green-600 hover:bg-green-50 rounded-full"
+                        class="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-950 rounded-full transition-colors"
                         title="Call Customer"
                       >
                         📢
                       </button>
-                      <button class="p-2 text-red-600 hover:bg-red-50 rounded-full" title="Remove">
+                      <button
+                        class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-full transition-colors"
+                        title="Remove"
+                      >
                         ✕
                       </button>
                     </div>

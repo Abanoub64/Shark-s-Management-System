@@ -1,4 +1,7 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { Observable } from 'rxjs';
 import { Branch } from './branch.service';
 import { Barber } from './barber.service';
 
@@ -14,6 +17,9 @@ export interface Service {
   providedIn: 'root',
 })
 export class BookingService {
+  private http = inject(HttpClient);
+  private apiUrl = `${environment.apiUrl}/bookings`;
+
   selectedBranch = signal<Branch | null>(null);
   selectedService = signal<Service | null>(null);
   selectedDate = signal<Date | null>(null);
@@ -21,41 +27,29 @@ export class BookingService {
   selectedBarber = signal<Barber | null>(null);
   paymentMethod = signal<'cash' | 'paypal' | null>(null);
 
-  // Mock Services Data
-  availableServices: Service[] = [
-    {
-      id: 's1',
-      name: 'Classic Haircut',
-      price: 25,
-      duration: 30,
-      description: 'Standard cut with scissors and clippers.',
-    },
-    {
-      id: 's2',
-      name: 'Beard Trim',
-      price: 15,
-      duration: 20,
-      description: 'Shape and trim your beard.',
-    },
-    {
-      id: 's3',
-      name: 'Hot Towel Shave',
-      price: 30,
-      duration: 45,
-      description: 'Traditional straight razor shave with hot towels.',
-    },
-    {
-      id: 's4',
-      name: 'The Full Package',
-      price: 50,
-      duration: 60,
-      description: 'Haircut, beard trim, and facial.',
-    },
-  ];
-
+  // Computed signal for total price
   totalPrice = computed(() => {
     return this.selectedService()?.price || 0;
   });
+
+  getServices(branchId?: string): Observable<Service[]> {
+    let params = {};
+    if (branchId) {
+      params = { branchId };
+    }
+    return this.http.get<Service[]>(`${environment.apiUrl}/services`, { params });
+  }
+
+  createBooking(bookingData: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl, bookingData);
+  }
+
+  // Helper to fetch available slots
+  getAvailableSlots(date: string, barberId: string): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/slots`, {
+      params: { date, barberId },
+    });
+  }
 
   reset() {
     this.selectedBranch.set(null);

@@ -11,7 +11,7 @@ import { UiButtonComponent } from '../../../../components/shared/ui-button.compo
   template: `
     <h2 class="text-2xl font-bold mb-6">Select a Service</h2>
     <div class="grid grid-cols-1 gap-4">
-      @for (service of bookingService.availableServices; track service.id) {
+      @if (services$ | async; as services) { @for (service of services; track service.id) {
       <div
         class="border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors"
         [class.border-primary]="bookingService.selectedService()?.id === service.id"
@@ -27,6 +27,8 @@ import { UiButtonComponent } from '../../../../components/shared/ui-button.compo
           <div class="text-lg font-bold">\${{ service.price }}</div>
         </div>
       </div>
+      } } @else {
+      <div class="text-center py-8 text-gray-500">Loading services...</div>
       }
     </div>
     <div class="mt-8 flex justify-end">
@@ -39,6 +41,8 @@ import { UiButtonComponent } from '../../../../components/shared/ui-button.compo
 export class SelectServiceComponent {
   bookingService = inject(BookingService);
   router = inject(Router);
+
+  services$ = this.bookingService.getServices();
 
   selectService(service: any) {
     this.bookingService.selectedService.set(service);

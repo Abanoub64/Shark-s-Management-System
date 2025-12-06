@@ -1,127 +1,305 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { LanguageService } from '../../../core/services/language.service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
   template: `
-    <div class="min-h-screen flex bg-gray-100 font-sans">
+    <div class="min-h-screen flex" [attr.data-theme]="themeService.theme()">
+      <!-- Mobile Sidebar Backdrop -->
+      @if (isMobileSidebarOpen()) {
+      <div
+        class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+        (click)="closeMobileSidebar()"
+      ></div>
+      }
+
       <!-- Sidebar -->
-      <aside class="w-64 bg-gray-900 text-white flex-shrink-0 hidden md:flex flex-col">
-        <div class="h-16 flex items-center px-6 border-b border-gray-800">
-          <span class="text-2xl font-bold text-white flex items-center gap-2">
-            <span class="text-secondary">✂</span> Admin
+      <aside
+        class="fixed md:static inset-y-0 left-0 z-50 w-64 flex-shrink-0 flex flex-col transition-transform duration-300 md:translate-x-0"
+        [class.-translate-x-full]="!isMobileSidebarOpen()"
+        [style.background-color]="'var(--surface)'"
+        [style.border-right]="'1px solid var(--border-light)'"
+      >
+        <!-- Logo -->
+        <div
+          class="h-16 flex items-center justify-between px-6"
+          [style.border-bottom]="'1px solid var(--border-light)'"
+        >
+          <span
+            class="text-2xl font-bold flex items-center gap-2"
+            [style.color]="'var(--text-primary)'"
+          >
+            <span style="color: var(--color-primary-500)">✂</span> {{ langService.t().admin }}
           </span>
+          <button
+            class="md:hidden text-gray-500 hover:text-gray-700"
+            (click)="closeMobileSidebar()"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
         </div>
 
-        <nav class="flex-1 py-6 px-3 space-y-1">
-          <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-3">
-            Head Office
+        <!-- Navigation -->
+        <nav class="flex-1 py-6 px-3 space-y-1 overflow-y-auto custom-scrollbar">
+          <div
+            class="text-xs font-semibold uppercase tracking-wider mb-2 px-3"
+            [style.color]="'var(--text-tertiary)'"
+          >
+            {{ langService.t().headOffice }}
           </div>
           <a
             routerLink="/admin/dashboard"
-            routerLinkActive="bg-gray-800 text-white"
-            class="flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white group"
+            routerLinkActive="nav-link-active"
+            class="nav-link"
+            (click)="closeMobileSidebar()"
           >
-            <span class="mr-3">📊</span> Dashboard
+            <span class="mr-3">📊</span> {{ langService.t().dashboard }}
           </a>
           <a
             routerLink="/admin/branches"
-            routerLinkActive="bg-gray-800 text-white"
-            class="flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white group"
+            routerLinkActive="nav-link-active"
+            class="nav-link"
+            (click)="closeMobileSidebar()"
           >
-            <span class="mr-3">🏢</span> Branches
+            <span class="mr-3">🏢</span> {{ langService.t().branches }}
           </a>
           <a
-            routerLink="/admin/barbers"
-            routerLinkActive="bg-gray-800 text-white"
-            class="flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white group"
+            routerLink="/admin/employees"
+            routerLinkActive="nav-link-active"
+            class="nav-link"
+            (click)="closeMobileSidebar()"
           >
-            <span class="mr-3">💇</span> Barbers
+            <span class="mr-3">👥</span> {{ langService.t().employees }}
+          </a>
+          <a
+            routerLink="/admin/services"
+            routerLinkActive="nav-link-active"
+            class="nav-link"
+            (click)="closeMobileSidebar()"
+          >
+            <span class="mr-3">💇</span> {{ langService.t().services }}
           </a>
           <a
             routerLink="/admin/bookings"
-            routerLinkActive="bg-gray-800 text-white"
-            class="flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white group"
+            routerLinkActive="nav-link-active"
+            class="nav-link"
+            (click)="closeMobileSidebar()"
           >
-            <span class="mr-3">📅</span> All Bookings
+            <span class="mr-3">📅</span> {{ langService.t().bookings }}
+          </a>
+          <a
+            routerLink="/admin/analytics"
+            routerLinkActive="nav-link-active"
+            class="nav-link"
+            (click)="closeMobileSidebar()"
+          >
+            <span class="mr-3">📈</span> {{ langService.t().analytics }}
           </a>
 
-          <div class="mt-8 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-3">
-            Branch Manager
+          <div
+            class="mt-8 text-xs font-semibold uppercase tracking-wider mb-2 px-3"
+            [style.color]="'var(--text-tertiary)'"
+          >
+            {{ langService.t().branchManager }}
           </div>
           <a
             routerLink="/branch-admin/dashboard"
-            routerLinkActive="bg-gray-800 text-white"
-            class="flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white group"
+            routerLinkActive="nav-link-active"
+            class="nav-link"
+            (click)="closeMobileSidebar()"
           >
-            <span class="mr-3">📈</span> Branch Overview
+            <span class="mr-3">📊</span> {{ langService.t().branchOverview }}
           </a>
           <a
             routerLink="/branch-admin/queue"
-            routerLinkActive="bg-gray-800 text-white"
-            class="flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white group"
+            routerLinkActive="nav-link-active"
+            class="nav-link"
+            (click)="closeMobileSidebar()"
           >
-            <span class="mr-3">🚶</span> Queue System
-          </a>
-          <a
-            routerLink="/branch-admin/schedule"
-            routerLinkActive="bg-gray-800 text-white"
-            class="flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white group"
-          >
-            <span class="mr-3">🕒</span> Staff Schedule
+            <span class="mr-3">🚶</span> {{ langService.t().queueSystem }}
           </a>
         </nav>
 
-        <div class="p-4 border-t border-gray-800">
+        <!-- User Profile -->
+        <div class="p-4" [style.border-top]="'1px solid var(--border-light)'">
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">A</div>
-            <div>
-              <p class="text-sm font-medium text-white">Admin User</p>
-              <p class="text-xs text-gray-500">Head Office</p>
+            <div
+              class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold"
+              style="background: var(--color-primary-500)"
+            >
+              A
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium truncate" [style.color]="'var(--text-primary)'">
+                Admin User
+              </p>
+              <p class="text-xs truncate" [style.color]="'var(--text-tertiary)'">
+                {{ langService.t().headOffice }}
+              </p>
             </div>
           </div>
         </div>
       </aside>
 
       <!-- Main Content -->
-      <div class="flex-1 flex flex-col overflow-hidden">
+      <div
+        class="flex-1 flex flex-col overflow-hidden min-w-0"
+        [style.background-color]="'var(--bg-secondary)'"
+      >
         <!-- Header -->
-        <header class="bg-white shadow-sm h-16 flex items-center justify-between px-6 z-10">
-          <div class="flex items-center gap-4">
-            <button class="md:hidden text-gray-500 hover:text-gray-700">
-              <span class="text-2xl">☰</span>
-            </button>
-            <h1 class="text-xl font-semibold text-gray-800">Dashboard</h1>
-          </div>
+        <header
+          class="h-16 flex items-center justify-between px-4 md:px-6 z-10 shadow-sm"
+          [style.background-color]="'var(--surface)'"
+          [style.border-bottom]="'1px solid var(--border-light)'"
+        >
           <div class="flex items-center gap-4">
             <button
+              class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              (click)="toggleMobileSidebar()"
+              [style.color]="'var(--text-secondary)'"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </button>
+            <h1 class="text-lg md:text-xl font-semibold" [style.color]="'var(--text-primary)'">
+              {{ langService.t().dashboard }}
+            </h1>
+          </div>
+
+          <div class="flex items-center gap-2 md:gap-4">
+            <!-- Theme Toggle -->
+            <button
+              (click)="themeService.toggleTheme()"
+              class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              [style.color]="'var(--text-secondary)'"
+              title="Toggle theme"
+            >
+              @if (themeService.isDark()) {
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                />
+              </svg>
+              } @else {
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                />
+              </svg>
+              }
+            </button>
+
+            <!-- Language Toggle -->
+            <button
               (click)="langService.toggleLanguage()"
-              class="text-sm font-medium text-gray-600 hover:text-primary"
+              class="text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              [style.color]="'var(--text-secondary)'"
             >
               {{ langService.currentLang() === 'en' ? 'العربية' : 'English' }}
             </button>
-            <button class="text-gray-500 hover:text-gray-700 relative">
-              🔔
+
+            <!-- Notifications -->
+            <button
+              class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative"
+              [style.color]="'var(--text-secondary)'"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                />
+              </svg>
               <span
-                class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"
+                class="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2"
+                style="ring-color: var(--surface)"
               ></span>
             </button>
-            <a routerLink="/" class="text-sm text-gray-600 hover:text-primary">Exit Admin</a>
+
+            <!-- Exit Admin -->
+            <a
+              routerLink="/"
+              class="hidden md:block text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              [style.color]="'var(--text-secondary)'"
+            >
+              {{ langService.t().exit }}
+            </a>
           </div>
         </header>
 
         <!-- Page Content -->
-        <main class="flex-1 overflow-y-auto p-6">
-          <router-outlet></router-outlet>
+        <main class="flex-1 overflow-y-auto custom-scrollbar">
+          <div class="p-4 md:p-6">
+            <router-outlet></router-outlet>
+          </div>
         </main>
       </div>
     </div>
   `,
+  styles: [
+    `
+      .nav-link {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-radius: 0.375rem;
+        transition: all 0.2s;
+        color: var(--text-secondary);
+      }
+
+      .nav-link:hover {
+        background-color: var(--bg-tertiary);
+        color: var(--text-primary);
+      }
+
+      .nav-link-active {
+        background-color: var(--color-primary-500);
+        color: white !important;
+      }
+
+      .nav-link-active:hover {
+        background-color: var(--color-primary-600);
+      }
+    `,
+  ],
 })
 export class AdminLayoutComponent {
   langService = inject(LanguageService);
+  themeService = inject(ThemeService);
+  isMobileSidebarOpen = signal(false);
+
+  toggleMobileSidebar() {
+    this.isMobileSidebarOpen.update((v) => !v);
+  }
+
+  closeMobileSidebar() {
+    this.isMobileSidebarOpen.set(false);
+  }
 }

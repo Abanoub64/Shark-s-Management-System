@@ -1,332 +1,498 @@
-import { ModalComponent } from '../../../components/shared/modal/modal.component';
-import { BranchFormComponent } from '../../../components/forms/branch-form/branch-form.component';
-import { BarberFormComponent } from '../../../components/forms/barber-form/barber-form.component';
-import { ServiceFormComponent } from '../../../components/forms/service-form/service-form.component';
-import { BranchService, Branch } from '../../../core/services/branch.service';
-import { BarberService, Barber } from '../../../core/services/barber.service';
-import { ShopServiceService, ShopService } from '../../../core/services/shop-service.service';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UiCardComponent } from '../../../components/shared/ui-card.component';
-import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { StatCardComponent } from '../../../components/shared/stat-card/stat-card.component';
+import { ChartComponent } from '../../../components/shared/chart/chart.component';
+import { AnalyticsService } from '../../../core/services/analytics.service';
+import { LanguageService } from '../../../core/services/language.service';
+import { DashboardStats, RevenueBreakdown, TrendData } from '../../../core/models/models';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [
-    CommonModule,
-    UiCardComponent,
-    ModalComponent,
-    BranchFormComponent,
-    BarberFormComponent,
-    ServiceFormComponent,
-  ],
+  imports: [CommonModule, FormsModule, StatCardComponent, ChartComponent],
   template: `
-    <div class="space-y-6">
-      <!-- Management Actions -->
-      <div class="flex gap-4">
-        <button
-          (click)="openBranchModal()"
-          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Add Branch
-        </button>
-        <button
-          (click)="openBarberModal()"
-          class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Add Barber
-        </button>
-        <button
-          (click)="openServiceModal()"
-          class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Add Service
-        </button>
-      </div>
-
-      <!-- Modals -->
-      <app-modal *ngIf="showBranchModal" title="Manage Branch" (closeEvent)="closeBranchModal()">
-        <app-branch-form (save)="onSaveBranch($event)"></app-branch-form>
-      </app-modal>
-
-      <app-modal *ngIf="showBarberModal" title="Manage Barber" (closeEvent)="closeBarberModal()">
-        <app-barber-form (save)="onSaveBarber($event)"></app-barber-form>
-      </app-modal>
-
-      <app-modal *ngIf="showServiceModal" title="Manage Service" (closeEvent)="closeServiceModal()">
-        <app-service-form (save)="onSaveService($event)"></app-service-form>
-      </app-modal>
-      <!-- Stats Overview -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <app-ui-card class="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-none">
-          <div class="p-6">
-            <p class="text-blue-100 text-sm font-medium">Total Revenue</p>
-            <h3 class="text-3xl font-bold mt-2">\${{ stats.revenue | number }}</h3>
-            <p class="text-blue-100 text-xs mt-2">↑ 12% from last month</p>
-          </div>
-        </app-ui-card>
-
-        <app-ui-card class="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-none">
-          <div class="p-6">
-            <p class="text-purple-100 text-sm font-medium">Total Bookings</p>
-            <h3 class="text-3xl font-bold mt-2">{{ stats.bookings | number }}</h3>
-            <p class="text-purple-100 text-xs mt-2">↑ 8% from last month</p>
-          </div>
-        </app-ui-card>
-
-        <app-ui-card class="bg-gradient-to-br from-green-500 to-green-600 text-white border-none">
-          <div class="p-6">
-            <p class="text-green-100 text-sm font-medium">Active Branches</p>
-            <h3 class="text-3xl font-bold mt-2">{{ stats.branches }}</h3>
-            <p class="text-green-100 text-xs mt-2">All systems operational</p>
-          </div>
-        </app-ui-card>
-
-        <app-ui-card class="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-none">
-          <div class="p-6">
-            <p class="text-orange-100 text-sm font-medium">Avg. Wait Time</p>
-            <h3 class="text-3xl font-bold mt-2">12 min</h3>
-            <p class="text-orange-100 text-xs mt-2">↓ 2 min from last week</p>
-          </div>
-        </app-ui-card>
-      </div>
-
-      <!-- Charts Section (Mocked with CSS/HTML) -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Revenue Chart -->
-        <div class="lg:col-span-2">
-          <app-ui-card>
-            <div class="p-6">
-              <h3 class="text-lg font-bold mb-6">Monthly Revenue</h3>
-              <div class="h-64 flex items-end justify-between gap-2">
-                @for (item of revenueData; track item.month) {
-                <div class="flex flex-col items-center gap-2 flex-1 group">
-                  <div
-                    class="w-full bg-blue-100 rounded-t-sm relative h-full flex items-end overflow-hidden group-hover:bg-blue-200 transition-colors"
-                  >
-                    <div
-                      class="w-full bg-blue-500 transition-all duration-500"
-                      [style.height.%]="(item.amount / maxRevenue) * 100"
-                    ></div>
-                    <!-- Tooltip -->
-                    <div
-                      class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10"
-                    >
-                      \${{ item.amount | number }}
-                    </div>
-                  </div>
-                  <span class="text-xs text-gray-500">{{ item.month }}</span>
-                </div>
-                }
-              </div>
-            </div>
-          </app-ui-card>
-        </div>
-
-        <!-- Top Branches -->
+    <div class="space-y-4 md:space-y-6 fade-in">
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <app-ui-card class="h-full">
-            <div class="p-6">
-              <h3 class="text-lg font-bold mb-6">Top Performing Branches</h3>
-              <div class="space-y-6">
-                @for (branch of topBranches; track branch.name) {
-                <div>
-                  <div class="flex justify-between text-sm mb-1">
-                    <span class="font-medium">{{ branch.name }}</span>
-                    <span class="text-gray-500">\${{ branch.revenue | number }}</span>
-                  </div>
-                  <div class="w-full bg-gray-100 rounded-full h-2">
-                    <div
-                      class="bg-primary h-2 rounded-full"
-                      [style.width.%]="branch.percentage"
-                    ></div>
-                  </div>
-                </div>
-                }
-              </div>
-              <div class="mt-8 pt-6 border-t border-gray-100">
-                <h4 class="text-sm font-bold mb-4">Service Popularity</h4>
-                <div class="flex flex-wrap gap-2">
-                  <span class="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-600"
-                    >Haircut (45%)</span
-                  >
-                  <span class="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-600"
-                    >Beard Trim (30%)</span
-                  >
-                  <span class="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-600"
-                    >Shave (15%)</span
-                  >
-                  <span class="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-600"
-                    >Facial (10%)</span
-                  >
-                </div>
-              </div>
-            </div>
-          </app-ui-card>
+          <h1 class="text-2xl md:text-3xl font-bold" [style.color]="'var(--text-primary)'">
+            {{ langService.t().superAdminDashboard }}
+          </h1>
+          <p class="text-sm md:text-base mt-1" [style.color]="'var(--text-secondary)'">
+            {{ langService.t().welcomeMessage }}
+          </p>
+        </div>
+        <div class="flex gap-2 md:gap-3">
+          <button class="btn-outline text-sm md:text-base hidden sm:flex">
+            <svg
+              class="w-4 h-4 md:w-5 md:h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 0 01.707.293l5.414 5.414a1 0 01.293.707V19a2 0 01-2 2z"
+              />
+            </svg>
+            <span class="hidden md:inline">{{ langService.t().exportReport }}</span>
+          </button>
+          <button class="btn-primary text-sm md:text-base">
+            <svg
+              class="w-4 h-4 md:w-5 md:h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            <span class="hidden sm:inline">{{ langService.t().quickActions }}</span>
+          </button>
         </div>
       </div>
 
-      <!-- Recent Activity Table -->
-      <app-ui-card>
-        <div class="p-6">
-          <h3 class="text-lg font-bold mb-4">Recent Bookings</h3>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-              <thead class="bg-gray-50 text-gray-500">
-                <tr>
-                  <th class="px-4 py-3 font-medium">ID</th>
-                  <th class="px-4 py-3 font-medium">Customer</th>
-                  <th class="px-4 py-3 font-medium">Branch</th>
-                  <th class="px-4 py-3 font-medium">Service</th>
-                  <th class="px-4 py-3 font-medium">Amount</th>
-                  <th class="px-4 py-3 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-100">
-                @for (booking of recentBookings; track booking.id) {
-                <tr class="hover:bg-gray-50">
-                  <td class="px-4 py-3 text-gray-500">{{ booking.id }}</td>
-                  <td class="px-4 py-3 font-medium">{{ booking.customer }}</td>
-                  <td class="px-4 py-3 text-gray-500">{{ booking.branch }}</td>
-                  <td class="px-4 py-3 text-gray-500">{{ booking.service }}</td>
-                  <td class="px-4 py-3">\${{ booking.amount }}</td>
-                  <td class="px-4 py-3">
-                    <span
-                      class="px-2 py-1 rounded-full text-xs font-medium"
-                      [class.bg-green-100]="booking.status === 'Completed'"
-                      [class.text-green-800]="booking.status === 'Completed'"
-                      [class.bg-blue-100]="booking.status === 'Confirmed'"
-                      [class.text-blue-800]="booking.status === 'Confirmed'"
-                      [class.bg-gray-100]="booking.status === 'Pending'"
-                      [class.text-gray-800]="booking.status === 'Pending'"
-                    >
-                      {{ booking.status }}
-                    </span>
-                  </td>
-                </tr>
-                }
-              </tbody>
-            </table>
+      <!-- KPI Cards -->
+      @if (stats) {
+      <div class="dashboard-grid">
+        <app-stat-card
+          [title]="langService.t().totalRevenueYTD"
+          [value]="stats.ytdRevenue"
+          [subtitle]="langService.t().yearToDateEarnings"
+          [trend]="12.5"
+          icon="💰"
+          variant="primary"
+        />
+        <app-stat-card
+          [title]="langService.t().totalBookings"
+          [value]="stats.totalBookings"
+          [subtitle]="langService.t().allTimeBookings"
+          [trend]="8.2"
+          icon="📅"
+          variant="success"
+        />
+        <app-stat-card
+          [title]="langService.t().activeBranches"
+          [value]="stats.totalBranches"
+          [subtitle]="langService.t().operationalLocations"
+          icon="🏪"
+          variant="default"
+        />
+        <app-stat-card
+          [title]="langService.t().avgWaitTime"
+          [value]="stats.averageWaitTime"
+          [subtitle]="langService.t().minutesPerCustomer"
+          [trend]="-15.3"
+          icon="⏱️"
+          variant="warning"
+        />
+      </div>
+      }
+
+      <!-- Revenue Metrics -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+        <div class="card p-4 md:p-6">
+          <div class="text-center">
+            <p class="text-xs md:text-sm" [style.color]="'var(--text-secondary)'">
+              {{ langService.t().dailyRevenue }}
+            </p>
+            <h3 class="text-xl md:text-2xl font-bold mt-1" [style.color]="'var(--text-primary)'">
+              \${{ stats?.dailyRevenue | number }}
+            </h3>
           </div>
         </div>
-      </app-ui-card>
+        <div class="card p-4 md:p-6">
+          <div class="text-center">
+            <p class="text-xs md:text-sm" [style.color]="'var(--text-secondary)'">
+              {{ langService.t().weeklyRevenue }}
+            </p>
+            <h3 class="text-xl md:text-2xl font-bold mt-1" [style.color]="'var(--text-primary)'">
+              \${{ stats?.weeklyRevenue | number }}
+            </h3>
+          </div>
+        </div>
+        <div class="card p-4 md:p-6">
+          <div class="text-center">
+            <p class="text-xs md:text-sm" [style.color]="'var(--text-secondary)'">
+              {{ langService.t().monthlyRevenue }}
+            </p>
+            <h3 class="text-xl md:text-2xl font-bold mt-1" [style.color]="'var(--text-primary)'">
+              \${{ stats?.monthlyRevenue | number }}
+            </h3>
+          </div>
+        </div>
+        <div class="card p-4 md:p-6">
+          <div class="text-center">
+            <p class="text-xs md:text-sm" [style.color]="'var(--text-secondary)'">
+              {{ langService.t().completedBookings }}
+            </p>
+            <h3 class="text-xl md:text-2xl font-bold mt-1" [style.color]="'var(--text-primary)'">
+              {{ stats?.completedBookings | number }}
+            </h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 1 -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+        <!-- Revenue Trends -->
+        <div class="card p-4 md:p-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <h3 class="text-base md:text-lg font-semibold" [style.color]="'var(--text-primary)'">
+              {{ langService.t().revenueTrends }}
+            </h3>
+            <select
+              class="input text-xs md:text-sm py-1 px-2 w-full sm:w-auto"
+              [(ngModel)]="revenuePeriod"
+              (change)="loadRevenueTrends()"
+            >
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
+          @if (revenueTrendData) {
+          <app-chart
+            type="line"
+            [data]="revenueTrendData"
+            [options]="lineChartOptions"
+            [height]="'250px'"
+          />
+          }
+        </div>
+
+        <!-- Revenue by Branch -->
+        <div class="card p-4 md:p-6">
+          <h3 class="text-base md:text-lg font-semibold mb-4" [style.color]="'var(--text-primary)'">
+            {{ langService.t().revenueByBranch }}
+          </h3>
+          @if (revenueByBranchData) {
+          <app-chart
+            type="bar"
+            [data]="revenueByBranchData"
+            [options]="barChartOptions"
+            [height]="'250px'"
+          />
+          }
+        </div>
+      </div>
+
+      <!-- Charts Row 2 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <!-- Revenue by Service -->
+        <div class="card p-4 md:p-6">
+          <h3 class="text-base md:text-lg font-semibold mb-4" [style.color]="'var(--text-primary)'">
+            {{ langService.t().revenueByService }}
+          </h3>
+          @if (revenueByServiceData) {
+          <app-chart
+            type="doughnut"
+            [data]="revenueByServiceData"
+            [options]="doughnutChartOptions"
+            [height]="'250px'"
+          />
+          }
+        </div>
+
+        <!-- Top Barbers -->
+        <div class="card p-4 md:p-6">
+          <h3 class="text-base md:text-lg font-semibold mb-4" [style.color]="'var(--text-primary)'">
+            {{ langService.t().topPerformingBarbers }}
+          </h3>
+          @if (revenueByBarberData) {
+          <app-chart
+            type="bar"
+            [data]="revenueByBarberData"
+            [options]="horizontalBarOptions"
+            [height]="'250px'"
+          />
+          }
+        </div>
+
+        <!-- Customer Stats -->
+        <div class="card p-4 md:p-6">
+          <h3 class="text-base md:text-lg font-semibold mb-4" [style.color]="'var(--text-primary)'">
+            {{ langService.t().customerBreakdown }}
+          </h3>
+          @if (customerData) {
+          <app-chart
+            type="pie"
+            [data]="customerData"
+            [options]="pieChartOptions"
+            [height]="'250px'"
+          />
+          }
+        </div>
+      </div>
+
+      <!-- Peak Hours Chart -->
+      <div class="card p-4 md:p-6">
+        <h3 class="text-base md:text-lg font-semibold mb-4" [style.color]="'var(--text-primary)'">
+          {{ langService.t().revenueByTimeOfDay }}
+        </h3>
+        @if (revenueByTimeData) {
+        <app-chart
+          type="line"
+          [data]="revenueByTimeData"
+          [options]="areaChartOptions"
+          [height]="'200px'"
+        />
+        }
+      </div>
+
+      <!-- Quick Stats Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+        <div class="card p-4 md:p-6 text-center">
+          <div class="text-2xl md:text-3xl mb-2">👥</div>
+          <h4 class="text-xl md:text-2xl font-bold" [style.color]="'var(--text-primary)'">
+            {{ stats?.newCustomers | number }}
+          </h4>
+          <p class="text-xs md:text-sm mt-1" [style.color]="'var(--text-secondary)'">
+            {{ langService.t().newCustomers }}
+          </p>
+        </div>
+        <div class="card p-4 md:p-6 text-center">
+          <div class="text-2xl md:text-3xl mb-2">🔄</div>
+          <h4 class="text-xl md:text-2xl font-bold" [style.color]="'var(--text-primary)'">
+            {{ stats?.returningCustomers | number }}
+          </h4>
+          <p class="text-xs md:text-sm mt-1" [style.color]="'var(--text-secondary)'">
+            {{ langService.t().returningCustomers }}
+          </p>
+        </div>
+        <div class="card p-4 md:p-6 text-center">
+          <div class="text-2xl md:text-3xl mb-2">❌</div>
+          <h4 class="text-xl md:text-2xl font-bold" [style.color]="'var(--text-primary)'">
+            {{ stats?.cancelledBookings | number }}
+          </h4>
+          <p class="text-xs md:text-sm mt-1" [style.color]="'var(--text-secondary)'">
+            {{ langService.t().cancelledBookings }}
+          </p>
+        </div>
+        <div class="card p-4 md:p-6 text-center">
+          <div class="text-2xl md:text-3xl mb-2">⭐</div>
+          <h4 class="text-xl md:text-2xl font-bold" [style.color]="'var(--text-primary)'">4.8</h4>
+          <p class="text-xs md:text-sm mt-1" [style.color]="'var(--text-secondary)'">
+            {{ langService.t().averageRating }}
+          </p>
+        </div>
+      </div>
     </div>
   `,
+  styles: [],
 })
-export class AdminDashboardComponent {
-  stats = {
-    revenue: 125000,
-    bookings: 3450,
-    branches: 12,
-    wait_time: 12,
+export class AdminDashboardComponent implements OnInit {
+  private analyticsService = inject(AnalyticsService);
+  langService = inject(LanguageService);
+
+  stats: DashboardStats | null = null;
+  revenueBreakdown: RevenueBreakdown | null = null;
+  revenuePeriod: 'daily' | 'weekly' | 'monthly' = 'monthly';
+
+  // Chart data
+  revenueTrendData: any = null;
+  revenueByBranchData: any = null;
+  revenueByServiceData: any = null;
+  revenueByBarberData: any = null;
+  revenueByTimeData: any = null;
+  customerData: any = null;
+
+  // Chart options
+  lineChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value: any) => '$' + value.toLocaleString(),
+        },
+      },
+    },
   };
 
-  revenueData = [
-    { month: 'Jan', amount: 65000 },
-    { month: 'Feb', amount: 72000 },
-    { month: 'Mar', amount: 85000 },
-    { month: 'Apr', amount: 92000 },
-    { month: 'May', amount: 88000 },
-    { month: 'Jun', amount: 98000 },
-    { month: 'Jul', amount: 115000 },
-    { month: 'Aug', amount: 125000 },
-  ];
-
-  maxRevenue = Math.max(...this.revenueData.map((d) => d.amount)) * 1.1;
-
-  topBranches = [
-    { name: 'Downtown Elite', revenue: 45000, percentage: 85 },
-    { name: 'Zamalek Classic', revenue: 38000, percentage: 70 },
-    { name: 'New Cairo Hub', revenue: 32000, percentage: 60 },
-    { name: 'Alexandria Bay', revenue: 28000, percentage: 50 },
-  ];
-
-  recentBookings = [
-    {
-      id: '#BK-9921',
-      customer: 'Ahmed Ali',
-      branch: 'Downtown Elite',
-      service: 'Haircut + Beard',
-      amount: 45,
-      status: 'Completed',
+  barChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
     },
-    {
-      id: '#BK-9922',
-      customer: 'Sarah Smith',
-      branch: 'Zamalek Classic',
-      service: 'Hair Dye',
-      amount: 80,
-      status: 'Confirmed',
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value: any) => '$' + value.toLocaleString(),
+        },
+      },
     },
-    {
-      id: '#BK-9923',
-      customer: 'Mike Johnson',
-      branch: 'New Cairo Hub',
-      service: 'Full Package',
-      amount: 120,
-      status: 'Pending',
-    },
-    {
-      id: '#BK-9924',
-      customer: 'Omar Khaled',
-      branch: 'Downtown Elite',
-      service: 'Haircut',
-      amount: 25,
-      status: 'Completed',
-    },
-    {
-      id: '#BK-9925',
-      customer: 'Karim Hassan',
-      branch: 'Alexandria Bay',
-      service: 'Beard Trim',
-      amount: 15,
-      status: 'Confirmed',
-    },
-  ];
-  showBranchModal = false;
-  showBarberModal = false;
-  showServiceModal = false;
+  };
 
-  constructor(
-    private branchService: BranchService,
-    private barberService: BarberService,
-    private shopService: ShopServiceService
-  ) {}
+  horizontalBarOptions = {
+    indexAxis: 'y' as const,
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value: any) => '$' + value.toLocaleString(),
+        },
+      },
+    },
+  };
 
-  openBranchModal() {
-    this.showBranchModal = true;
+  doughnutChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'bottom' as const,
+      },
+    },
+  };
+
+  pieChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'bottom' as const,
+      },
+    },
+  };
+
+  areaChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      filler: {
+        propagate: true,
+      },
+    },
+    elements: {
+      line: {
+        tension: 0.4,
+        fill: true,
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value: any) => '$' + value.toLocaleString(),
+        },
+      },
+    },
+  };
+
+  ngOnInit(): void {
+    this.loadDashboardData();
   }
-  closeBranchModal() {
-    this.showBranchModal = false;
+
+  private loadDashboardData(): void {
+    // Load stats
+    this.analyticsService.getDashboardStats().subscribe((stats) => {
+      this.stats = stats;
+    });
+
+    // Load revenue breakdown
+    this.analyticsService.getRevenueBreakdown().subscribe((breakdown) => {
+      this.revenueBreakdown = breakdown;
+      this.prepareChartData(breakdown);
+    });
+
+    // Load revenue trends
+    this.loadRevenueTrends();
   }
-  onSaveBranch(branch: Branch) {
-    this.branchService.createBranch(branch).subscribe(() => {
-      this.closeBranchModal();
-      // Refresh data if needed
+
+  loadRevenueTrends(): void {
+    this.analyticsService.getRevenueTrends(this.revenuePeriod).subscribe((trends) => {
+      this.revenueTrendData = {
+        labels: trends.map((t) => t.label),
+        datasets: [
+          {
+            label: 'Revenue',
+            data: trends.map((t) => t.value),
+            borderColor: '#0d9999',
+            backgroundColor: 'rgba(13, 153, 153, 0.1)',
+            fill: true,
+            tension: 0.4,
+          },
+        ],
+      };
     });
   }
 
-  openBarberModal() {
-    this.showBarberModal = true;
-  }
-  closeBarberModal() {
-    this.showBarberModal = false;
-  }
-  onSaveBarber(barber: Barber) {
-    this.barberService.createBarber(barber).subscribe(() => {
-      this.closeBarberModal();
-    });
-  }
+  private prepareChartData(breakdown: RevenueBreakdown): void {
+    // Revenue by Branch
+    this.revenueByBranchData = {
+      labels: breakdown.byBranch.map((b) => b.branchName),
+      datasets: [
+        {
+          label: 'Revenue',
+          data: breakdown.byBranch.map((b) => b.revenue),
+          backgroundColor: '#0d9999',
+        },
+      ],
+    };
 
-  openServiceModal() {
-    this.showServiceModal = true;
-  }
-  closeServiceModal() {
-    this.showServiceModal = false;
-  }
-  onSaveService(service: ShopService) {
-    this.shopService.createService(service).subscribe(() => {
-      this.closeServiceModal();
-    });
+    // Revenue by Service
+    this.revenueByServiceData = {
+      labels: breakdown.byService.map((s) => s.serviceName),
+      datasets: [
+        {
+          data: breakdown.byService.map((s) => s.revenue),
+          backgroundColor: ['#0d9999', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+        },
+      ],
+    };
+
+    // Revenue by Barber
+    this.revenueByBarberData = {
+      labels: breakdown.byBarber.map((b) => b.barberName),
+      datasets: [
+        {
+          label: 'Revenue',
+          data: breakdown.byBarber.map((b) => b.revenue),
+          backgroundColor: '#10b981',
+        },
+      ],
+    };
+
+    // Revenue by Time of Day
+    this.revenueByTimeData = {
+      labels: breakdown.byTimeOfDay.map((t) => `${t.hour}:00`),
+      datasets: [
+        {
+          label: 'Revenue',
+          data: breakdown.byTimeOfDay.map((t) => t.revenue),
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245, 158, 11, 0.2)',
+          fill: true,
+          tension: 0.4,
+        },
+      ],
+    };
+
+    // Customer Data
+    if (this.stats) {
+      this.customerData = {
+        labels: ['New Customers', 'Returning Customers'],
+        datasets: [
+          {
+            data: [this.stats.newCustomers, this.stats.returningCustomers],
+            backgroundColor: ['#0d9999', '#10b981'],
+          },
+        ],
+      };
+    }
   }
 }
