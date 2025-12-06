@@ -51,7 +51,7 @@ import { LanguageService } from '../../../core/services/language.service';
               routerLink="/services"
               variant="outline"
               size="lg"
-              class="border-gray-500 text-gray-200 hover:bg-white/5 hover:border-white hover:text-white backdrop-blur-sm transition-all"
+              class="border-white text-white hover:bg-white/10 hover:border-white backdrop-blur-sm transition-all"
             >
               {{ t().exploreServices }}
             </app-ui-button>

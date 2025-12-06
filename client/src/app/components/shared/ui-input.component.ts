@@ -34,7 +34,7 @@ import {
         />
         <!-- Optional Icon Slot -->
         <div
-          class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400"
+          class="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none text-gray-400"
         >
           <ng-content select="[icon]"></ng-content>
         </div>
