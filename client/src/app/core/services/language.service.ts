@@ -169,6 +169,22 @@ export class LanguageService {
       searchPlaceholder: 'Search by name or location...',
       viewDetails: 'View Details',
       noBranchesFound: 'No branches found matching your search.',
+
+      // Hairstyle Recommender
+      tryHaircut: 'Try Haircut',
+      hairstyleRecommender: 'AI Hairstyle Recommender',
+      hairstyleSubtitle: 'Upload your photo and discover your next look with professional barber insights.',
+      uploadPhoto: 'Upload Photo',
+      dragDropWrapper: 'Drag & drop or click to browse',
+      changePhoto: 'Change Photo',
+      selectHairstyle: 'Select Hairstyle',
+      generateNewLook: 'Generate New Look',
+      processing: 'Processing...',
+      yourNewLook: 'Your New Look',
+      barberNote: "Barber's Note",
+      validImageError: 'Please upload a valid image file.',
+      uploadFirstError: 'Please upload an image first.',
+      failedToGenerate: 'Failed to generate hairstyle',
     },
     ar: {
       // Layout
@@ -314,6 +330,22 @@ export class LanguageService {
       searchPlaceholder: 'ابحث بالاسم أو الموقع...',
       viewDetails: 'عرض التفاصيل',
       noBranchesFound: 'لا توجد فروع تطابق بحثك.',
+
+      // Hairstyle Recommender
+      tryHaircut: 'جرب قصة الشعر',
+      hairstyleRecommender: 'مستشار قصات الشعر بالذكاء الاصطناعي',
+      hairstyleSubtitle: 'ارفع صورتك واكتشف مظهرك الجديد مع نصائح حلاقة احترافية.',
+      uploadPhoto: 'رفع صورة',
+      dragDropWrapper: 'اسحب وأفلت أو انقر للتصفح',
+      changePhoto: 'تغيير الصورة',
+      selectHairstyle: 'اختر قصة الشعر',
+      generateNewLook: 'إنشاء مظهر جديد',
+      processing: 'جاري المعالجة...',
+      yourNewLook: 'مظهرك الجديد',
+      barberNote: 'ملاحظة الحلاق',
+      validImageError: 'يرجى رفع ملف صورة صالح.',
+      uploadFirstError: 'يرجى رفع صورة أولاً.',
+      failedToGenerate: 'فشل إنشاء قصة الشعر',
     },
   };
 

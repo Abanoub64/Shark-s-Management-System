@@ -31,6 +31,12 @@ import { LanguageService } from '../../../core/services/language.service';
               >{{ t().home }}</a
             >
             <a
+              routerLink="/hairstyle-recommender"
+              routerLinkActive="text-secondary"
+              class="text-gray-600 hover:text-primary font-medium transition-colors"
+              >{{ t().tryHaircut }}</a
+            >
+            <a
               routerLink="/branches"
               routerLinkActive="text-secondary"
               class="text-gray-600 hover:text-primary font-medium transition-colors"
@@ -103,6 +109,13 @@ import { LanguageService } from '../../../core/services/language.service';
               class="text-gray-600 hover:text-primary font-medium transition-colors"
               (click)="toggleMobileMenu()"
               >{{ t().home }}</a
+            >
+            <a
+              routerLink="/hairstyle-recommender"
+              routerLinkActive="text-secondary"
+              class="text-gray-600 hover:text-primary font-medium transition-colors"
+              (click)="toggleMobileMenu()"
+              >{{ t().tryHaircut }}</a
             >
             <a
               routerLink="/branches"
