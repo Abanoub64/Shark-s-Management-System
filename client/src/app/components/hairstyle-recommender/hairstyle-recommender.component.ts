@@ -10,6 +10,7 @@ interface HairTypeOption {
     prompt: string;
     description: string;
     recommendation: string;
+    arabicRecommendation: string;
 }
 
 @Component({
@@ -45,7 +46,8 @@ export class HairstyleRecommenderComponent {
             arabicLabel: 'فرينش كروب (القصر العشوائي)',
             prompt: `${this.baseRealismPrompt} Men's French Crop hairstyle. High skin fade on the sides and back. The top is textured, choppy, and directed forward with a short fringe across the forehead. Matte finish styling product look. Suitable for the subject's face shape.`,
             description: 'Short sides, textured top with fringe.',
-            recommendation: 'Ask the barber for a "High Skin Fade" on the sides and a "Textured Crop" on top. Use matte wax or styling powder to create the messy texture.'
+            recommendation: 'Ask the barber for a "High Skin Fade" on the sides and a "Textured Crop" on top. Use matte wax or styling powder to create the messy texture.',
+            arabicRecommendation: 'اطلب من الحلاق "High Skin Fade" (تدريجة عالية) من الجوانب و "Textured Crop" من الأعلى. استخدم شمع غير لامع (Matte Wax) أو بودرة تصفيف للحصول على المظهر الفوضوي.'
         },
         {
             id: 2,
@@ -53,7 +55,8 @@ export class HairstyleRecommenderComponent {
             arabicLabel: 'التدريجة الكلاسيك (Taper)',
             prompt: `${this.baseRealismPrompt} Classic Taper Fade hairstyle. Clean, sharp geometric hairline (line-up). The fade starts low around the ears and neck, blending smoothly into longer hair on top. Neat, professional, groomed look. Side part hint.`,
             description: 'Clean edges, professional gradient.',
-            recommendation: 'Request a "Low Taper Fade" with a sharp line-up (C-Cup). Keep the top long enough to comb back or to the side. This is the go-to professional cut in Egypt.'
+            recommendation: 'Request a "Low Taper Fade" with a sharp line-up (C-Cup). Keep the top long enough to comb back or to the side. This is the go-to professional cut in Egypt.',
+            arabicRecommendation: 'اطلب "Low Taper Fade" مع تحديد حاد (C-Cup). اترك الشعر من الأعلى طويلاً بما يكفي لتمشيطه للخلف أو للجانب. هذه هي القصة الكلاسيكية المفضلة للمحترفين في مصر.'
         },
         {
             id: 3,
@@ -61,7 +64,8 @@ export class HairstyleRecommenderComponent {
             arabicLabel: 'كيرلي مع تدريجة (The Broccoli)',
             prompt: `${this.baseRealismPrompt} Modern Curly hairstyle with Temple Fade. Sides are faded down (drop fade). The top creates a voluminous silhouette with defined natural curls or twists. Sharp hairline edges. Youthful and trendy aesthetic.`,
             description: 'Volume on top, faded sides for contrast.',
-            recommendation: 'Ask for a "Drop Fade" or "Temple Fade". Tell the barber to use a curl sponge on the top and define the curls with curling cream. Keep the volume high.'
+            recommendation: 'Ask for a "Drop Fade" or "Temple Fade". Tell the barber to use a curl sponge on the top and define the curls with curling cream. Keep the volume high.',
+            arabicRecommendation: 'اطلب "Drop Fade" أو "Temple Fade". اطلب من الحلاق استخدام إسفنجة الكيرلي (Curl Sponge) من الأعلى وتحديد الخصلات باستخدام كريم الكيرلي. حافظ على كثافة الشعر عالية.'
         },
         {
             id: 4,
@@ -69,7 +73,8 @@ export class HairstyleRecommenderComponent {
             arabicLabel: 'ع الزيرو (الميري / 1)',
             prompt: `${this.baseRealismPrompt} Buzz Cut hairstyle. Very short uniform length (guard #1 or #2). Extremely sharp, geometric box hairline on the forehead. Masculine, rugged look. Highlights the facial bone structure.`,
             description: 'Uniform short length, low maintenance.',
-            recommendation: 'Ask for a "Number 1 or 2 all over". The secret here is the "Tahdeed" (Line-up). Even if the hair is short, the forehead line must be razor sharp.'
+            recommendation: 'Ask for a "Number 1 or 2 all over". The secret here is the "Tahdeed" (Line-up). Even if the hair is short, the forehead line must be razor sharp.',
+            arabicRecommendation: 'اطلب "رقم 1 أو 2" للشعر بالكامل. السر هنا يكمن في "التحديد". حتى لو كان الشعر قصيراً، يجب أن يكون خط الجبهة حاداً جداً.'
         },
         {
             id: 5,
@@ -77,13 +82,15 @@ export class HairstyleRecommenderComponent {
             arabicLabel: 'السبايكي المودرن (Quiff)',
             prompt: `${this.baseRealismPrompt} Modern Quiff hairstyle. Short faded sides (mid-fade). The hair on top is long and blow-dried upwards and backwards with volume. textured and airy look, not greasy. sophisticated and stylish.`,
             description: 'Voluminous front, brushed back/up.',
-            recommendation: 'Ask for a "Mid Fade". For the top, request a "Quiff" using a blow dryer and a round brush to get that volume. Finish with strong-hold hairspray.'
+            recommendation: 'Ask for a "Mid Fade". For the top, request a "Quiff" using a blow dryer and a round brush to get that volume. Finish with strong-hold hairspray.',
+            arabicRecommendation: 'اطلب "Mid Fade". بالنسبة للأعلى، اطلب تسريحة "Quiff" (السبايكي المودرن) باستخدام السشوار والفرشاة الدائرية للحصول على الكثافة. ثبت الشعر بمثبت قوي (Hairspray).'
         }
     ];
 
     get currentRecommendation(): string {
         const type = this.hairTypes.find(t => t.id === this.selectedHairType());
-        return type ? type.recommendation : '';
+        if (!type) return '';
+        return this.langService.currentLang() === 'ar' ? type.arabicRecommendation : type.recommendation;
     }
 
     onFileSelected(event: Event) {
