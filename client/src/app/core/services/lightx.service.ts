@@ -7,7 +7,7 @@ import { switchMap, map, take, retryWhen, delay, catchError, filter } from 'rxjs
     providedIn: 'root'
 })
 export class LightXService {
-    private readonly API_KEY = 'b318b4002238490cac558f779d532bb4_808c610e8bbf4f9399473df04b1cbab8_andoraitools';
+    private readonly API_KEY = '8c57718bcdcb4c0cbcb2ae002adfb5ea_4b090ede3e2e416e8f4263fd86ab400f_andoraitools';
     private readonly BASE_URL = '/api/lightx'; // Uses proxy to https://api.lightxeditor.com/external/api
 
     constructor(private http: HttpClient) { }
