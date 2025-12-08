@@ -24,7 +24,7 @@ namespace backend.Services
                     BarberName = s.Barber.FullName,
                     BranchId = s.BranchId,
                     BranchName = s.Branch.Name,
-                    DayOfWeek = s.DayOfWeek,
+                    DayOfWeek = ((DayOfWeek)s.DayOfWeek).ToString(),
                     StartTime = s.StartTime.ToString(@"hh\:mm"),
                     EndTime = s.EndTime.ToString(@"hh\:mm")
                 })
@@ -61,7 +61,7 @@ namespace backend.Services
                 BarberName = barber.FullName,
                 BranchId = barber.BranchId,
                 BranchName = barber.Branch.Name,
-                DayOfWeek = schedule.DayOfWeek,
+                DayOfWeek = ((DayOfWeek)schedule.DayOfWeek).ToString(),
                 StartTime = schedule.StartTime.ToString(@"hh\:mm"),
                 EndTime = schedule.EndTime.ToString(@"hh\:mm")
             };

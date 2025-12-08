@@ -8,7 +8,7 @@ namespace Sharks.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class PayPalController : ControllerBase
     {
         private readonly PayPalService _paypal;
