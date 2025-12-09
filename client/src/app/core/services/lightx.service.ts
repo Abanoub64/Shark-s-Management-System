@@ -7,7 +7,7 @@ import { switchMap, map, take, retryWhen, delay, catchError, filter } from 'rxjs
     providedIn: 'root'
 })
 export class LightXService {
-    private readonly API_KEY = '8c57718bcdcb4c0cbcb2ae002adfb5ea_4b090ede3e2e416e8f4263fd86ab400f_andoraitools';
+    private readonly API_KEY = '9101c9def7b84d65a6b5a32f11bf058d_fa1695d7cb6849758a804dc9cde25f2b_andoraitools';
     private readonly BASE_URL = '/api/lightx'; // Uses proxy to https://api.lightxeditor.com/external/api
 
     constructor(private http: HttpClient) { }
@@ -54,7 +54,7 @@ export class LightXService {
     }
 
     private initiateGeneration(imageUrl: string, prompt: string): Observable<string> {
-        const url = `${this.BASE_URL}/v1/hairstyle`;
+        const url = `${this.BASE_URL}/v2/hairstyle`;
         const body = {
             imageUrl: imageUrl,
             textPrompt: prompt
@@ -75,7 +75,7 @@ export class LightXService {
     }
 
     private pollStatus(orderId: string): Observable<string> {
-        const url = `${this.BASE_URL}/v1/order-status`;
+        const url = `${this.BASE_URL}/v2/order-status`;
         const body = { orderId: orderId };
         const headers = new HttpHeaders({
             'Content-Type': 'application/json',
