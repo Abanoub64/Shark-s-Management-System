@@ -55,6 +55,7 @@ builder.Services.AddScoped<IBarberScheduleService, BarberScheduleService>();
 builder.Services.AddScoped<PayPalService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<BranchRatingService>();
 
 // =========================
 //     JWT Auth

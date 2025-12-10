@@ -81,7 +81,10 @@ namespace backend.Services
                 NewCustomersCount = newCustomersCount,
                 ReturningCustomersCount = returningCustomersCount,
                 CancelledBookingsCount = cancelledCount,
-                AverageRating = 4.5 // placeholder
+                AverageRating = await _context.BranchRatings
+                    .Where(r => branchId == null || r.BranchId == branchId)
+                    .AverageAsync(r => (double?)r.Rating) ?? 0
+
             };
 
             // ===========================
