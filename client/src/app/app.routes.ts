@@ -1,4 +1,9 @@
 import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { AdminGuard } from './core/guards/admin.guard';
+import { BranchManagerGuard } from './core/guards/branch-manager.guard';
+import { BarberGuard } from './core/guards/barber.guard';
+import { GuestGuard } from './core/guards/guest.guard';
 
 // ============================================
 // ROUTE CONFIGURATION
@@ -24,6 +29,13 @@ export const routes: Routes = [
         path: 'store',
         loadComponent: () => import('./pages/store/store.component').then((m) => m.StoreComponent),
       },
+      {
+        path: 'hairstyle-recommender',
+        loadComponent: () =>
+          import('./pages/hairstyle-recommender/hairstyle-recommender.component').then(
+            (m) => m.HairstyleRecommenderComponent
+          ),
+      },
 
       // Branches
       {
@@ -39,6 +51,37 @@ export const routes: Routes = [
           import('./pages/branches/branch-detail/branch-detail.component').then(
             (m) => m.BranchDetailComponent
           ),
+      },
+
+      // Cart & Checkout
+      {
+        path: 'cart',
+        loadComponent: () => import('./pages/cart/cart.component').then((m) => m.CartComponent),
+      },
+      {
+        path: 'checkout',
+        loadComponent: () =>
+          import('./pages/checkout/checkout.component').then((m) => m.CheckoutComponent),
+      },
+
+      // My History
+      {
+        path: 'my-history',
+        loadComponent: () =>
+          import('./pages/my-history/my-history.component').then((m) => m.MyHistoryComponent),
+      },
+
+      // FAQ
+      {
+        path: 'faq',
+        loadComponent: () => import('./pages/faq/faq.component').then((m) => m.FaqComponent),
+      },
+
+      // Contact
+      {
+        path: 'contact',
+        loadComponent: () =>
+          import('./pages/contact/contact.component').then((m) => m.ContactComponent),
       },
 
       // Booking Flow
@@ -102,6 +145,21 @@ export const routes: Routes = [
         path: 'auth/login',
         loadComponent: () =>
           import('./pages/auth/login/login.component').then((m) => m.LoginComponent),
+        canActivate: [() => inject(GuestGuard).canActivate()],
+      },
+      {
+        path: 'auth/register',
+        loadComponent: () =>
+          import('./pages/auth/register/register.component').then((m) => m.RegisterComponent),
+        canActivate: [() => inject(GuestGuard).canActivate()],
+      },
+      {
+        path: 'auth/complete-profile',
+        loadComponent: () =>
+          import('./pages/auth/complete-profile/complete-profile.component').then(
+            (m) => m.CompleteProfileComponent
+          ),
+        canActivate: [() => inject(GuestGuard).canActivate()],
       },
       {
         path: 'profile',
@@ -111,6 +169,13 @@ export const routes: Routes = [
     ],
   },
 
+  // Live Queue Display (Standalone - No Layout)
+  {
+    path: 'live-queue/:branchId',
+    loadComponent: () =>
+      import('./pages/public/live-queue/live-queue.component').then((m) => m.LiveQueueComponent),
+  },
+
   // Super Admin Routes
   {
     path: 'admin',
@@ -118,6 +183,7 @@ export const routes: Routes = [
       import('./components/layout/admin-layout/admin-layout.component').then(
         (m) => m.AdminLayoutComponent
       ),
+    canActivate: [() => inject(AdminGuard).canActivate()],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
@@ -143,14 +209,24 @@ export const routes: Routes = [
           import('./pages/admin/services/services.component').then((m) => m.ServicesComponent),
       },
       {
+        path: 'products',
+        loadComponent: () =>
+          import('./pages/admin/products/products.component').then((m) => m.ProductsComponent),
+      },
+      {
         path: 'bookings',
         loadComponent: () =>
           import('./pages/admin/bookings/bookings.component').then((m) => m.BookingsComponent),
       },
       {
-        path: 'analytics',
+        path: 'orders',
         loadComponent: () =>
-          import('./pages/admin/analytics/analytics.component').then((m) => m.AnalyticsComponent),
+          import('./pages/admin/orders/orders.component').then((m) => m.OrdersComponent),
+      },
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./pages/admin/users/users.component').then((m) => m.UsersComponent),
       },
     ],
   },
@@ -162,6 +238,7 @@ export const routes: Routes = [
       import('./components/layout/admin-layout/admin-layout.component').then(
         (m) => m.AdminLayoutComponent
       ),
+    canActivate: [() => inject(BranchManagerGuard).canActivate()],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
@@ -182,6 +259,37 @@ export const routes: Routes = [
     ],
   },
 
+  // Branch Panel Routes
+  {
+    path: 'branch-panel',
+    loadComponent: () =>
+      import('./components/layout/branch-panel-layout/branch-panel-layout.component').then(
+        (m) => m.BranchPanelLayoutComponent
+      ),
+    // Using BranchManagerGuard for now, user can adjust if needed
+    canActivate: [() => inject(BranchManagerGuard).canActivate()],
+    children: [
+      { path: '', redirectTo: 'bookings', pathMatch: 'full' },
+      {
+        path: 'bookings',
+        loadComponent: () =>
+          import('./pages/admin/bookings/bookings.component').then((m) => m.BookingsComponent),
+      },
+      {
+        path: 'queue',
+        loadComponent: () =>
+          import('./pages/branch-admin/queue-manager/queue-manager.component').then(
+            (m) => m.QueueManagerComponent
+          ),
+      },
+      {
+        path: 'surveys',
+        loadComponent: () =>
+          import('./pages/branch-panel/surveys/surveys.component').then((m) => m.SurveysComponent),
+      },
+    ],
+  },
+
   // Staff/Barber Routes
   {
     path: 'staff',
@@ -189,6 +297,7 @@ export const routes: Routes = [
       import('./components/layout/staff-layout/staff-layout.component').then(
         (m) => m.StaffLayoutComponent
       ),
+    canActivate: [() => inject(BarberGuard).canActivate()],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
@@ -223,6 +332,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/public/qr-landing/qr-landing.component').then(
             (m) => m.QrLandingComponent
+          ),
+      },
+      {
+        path: 'feedback/:branchId',
+        loadComponent: () =>
+          import('./pages/public/branch-feedback/branch-feedback.component').then(
+            (m) => m.BranchFeedbackComponent
           ),
       },
       // TODO: Add more public routes (walk-in, queue-status, etc.)

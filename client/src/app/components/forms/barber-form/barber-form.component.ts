@@ -10,28 +10,40 @@ import { Barber } from '../../../core/services/barber.service';
   template: `
     <form (ngSubmit)="onSubmit()">
       <div class="mb-4">
-        <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Name</label>
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="firstName">First Name</label>
         <input
-          [(ngModel)]="barber.name"
-          name="name"
+          [(ngModel)]="barber.firstName"
+          name="firstName"
           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          id="name"
+          id="firstName"
           type="text"
-          placeholder="Barber Name"
+          placeholder="First Name"
           required
         />
       </div>
       <div class="mb-4">
-        <label class="block text-gray-700 text-sm font-bold mb-2" for="specialization"
-          >Specialization</label
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="lastName">Last Name</label>
+        <input
+          [(ngModel)]="barber.lastName"
+          name="lastName"
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          id="lastName"
+          type="text"
+          placeholder="Last Name"
+          required
+        />
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="phoneNumber"
+          >Phone Number</label
         >
         <input
-          [(ngModel)]="barber.specialization"
-          name="specialization"
+          [(ngModel)]="barber.phoneNumber"
+          name="phoneNumber"
           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          id="specialization"
-          type="text"
-          placeholder="Specialization"
+          id="phoneNumber"
+          type="tel"
+          placeholder="Phone Number"
           required
         />
       </div>
@@ -60,7 +72,7 @@ import { Barber } from '../../../core/services/barber.service';
   styles: [],
 })
 export class BarberFormComponent {
-  @Input() barber: Barber = { name: '', specialization: '', branchId: 0 };
+  @Input() barber: Barber = { firstName: '', lastName: '', phoneNumber: '', branchId: 0 };
   @Output() save = new EventEmitter<Barber>();
 
   onSubmit() {

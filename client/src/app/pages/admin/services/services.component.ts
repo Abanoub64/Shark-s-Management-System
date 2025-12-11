@@ -1,18 +1,16 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { DeleteConfirmationModalComponent } from '../../../components/shared/delete-confirmation-modal/delete-confirmation-modal.component';
+import { ShopServiceService, Service } from '../../../core/services/shop-service.service';
 
-interface Service {
-  id: number;
-  name: string;
-  price: number;
-  description: string;
-  category: string;
-  duration: number;
-  bookings: number;
-  icon: string;
+interface ServiceUI extends Service {
+  description?: string;
+  category?: string;
+  duration?: number;
+  bookings?: number;
+  icon?: string;
 }
 
 @Component({
@@ -264,82 +262,59 @@ interface Service {
     }
   `,
 })
-export class ServicesComponent {
+export class ServicesComponent implements OnInit {
   private toastService = inject(ToastService);
+  private shopService = inject(ShopServiceService);
 
-  services = signal<Service[]>([
-    {
-      id: 1,
-      name: 'Classic Haircut',
-      category: 'Haircuts',
-      price: 250,
-      duration: 30,
-      bookings: 1250,
-      icon: '✂️',
-      description: 'Traditional haircut with styling',
-    },
-    {
-      id: 2,
-      name: 'Beard Trim',
-      category: 'Grooming',
-      price: 150,
-      duration: 20,
-      bookings: 890,
-      icon: '🧔',
-      description: 'Professional beard shaping and trim',
-    },
-    {
-      id: 3,
-      name: 'Hot Towel Shave',
-      category: 'Shaving',
-      price: 300,
-      duration: 45,
-      bookings: 560,
-      icon: '🪒',
-      description: 'Luxury hot towel shave experience',
-    },
-    {
-      id: 4,
-      name: 'Hair Coloring',
-      category: 'Styling',
-      price: 500,
-      duration: 90,
-      bookings: 340,
-      icon: '🎨',
-      description: 'Professional hair coloring service',
-    },
-    {
-      id: 5,
-      name: 'Facial Treatment',
-      category: 'Spa',
-      price: 400,
-      duration: 60,
-      bookings: 420,
-      icon: '💆',
-      description: 'Relaxing facial treatment',
-    },
-    {
-      id: 6,
-      name: 'Kids Haircut',
-      category: 'Haircuts',
-      price: 200,
-      duration: 25,
-      bookings: 680,
-      icon: '👦',
-      description: 'Special haircut for children',
-    },
-  ]);
+  services = signal<ServiceUI[]>([]);
+
+  ngOnInit() {
+    this.loadServices();
+  }
+
+  loadServices() {
+    this.shopService.getServices().subscribe({
+      next: (services) => {
+        // Merge API data with default UI values
+        const enhancedServices: ServiceUI[] = services.map((s) => ({
+          ...s,
+          id: s.id || 0,
+          description: 'No description available',
+          category: 'Haircuts',
+          duration: 30,
+          bookings: 0,
+          icon: this.getDefaultIcon(s.name),
+        }));
+        this.services.set(enhancedServices);
+      },
+      error: (error) => {
+        console.error('Error loading services:', error);
+        this.toastService.error('Error', 'Failed to load services');
+      },
+    });
+  }
+
+  getDefaultIcon(name: string): string {
+    const nameLower = name.toLowerCase();
+    if (nameLower.includes('hair') || nameLower.includes('cut')) return '✂️';
+    if (nameLower.includes('beard')) return '🧔';
+    if (nameLower.includes('shave')) return '🪒';
+    if (nameLower.includes('color')) return '🎨';
+    if (nameLower.includes('facial') || nameLower.includes('spa')) return '💆';
+    if (nameLower.includes('kid')) return '👦';
+    return '💈';
+  }
 
   availableIcons = ['✂️', '🧔', '🪒', '💇', '💆', '👦', '🎨', '💈', '🧴', '🪮', '👨', '👩'];
 
   showModal = signal(false);
   showDeleteModal = signal(false);
   isEditMode = signal(false);
-  serviceToDelete = signal<Service | null>(null);
-  formData = signal<Partial<Service>>({});
+  serviceToDelete = signal<ServiceUI | null>(null);
+  formData = signal<Partial<ServiceUI>>({});
 
   getMostPopular() {
-    const sorted = [...this.services()].sort((a, b) => b.bookings - a.bookings);
+    const sorted = [...this.services()].sort((a, b) => (b.bookings || 0) - (a.bookings || 0));
     return sorted[0]?.name || 'N/A';
   }
 
@@ -349,7 +324,7 @@ export class ServicesComponent {
   }
 
   getTotalBookings() {
-    return this.services().reduce((sum, s) => sum + s.bookings, 0);
+    return this.services().reduce((sum, s) => sum + (s.bookings || 0), 0);
   }
 
   openAddModal() {
@@ -358,9 +333,19 @@ export class ServicesComponent {
     this.showModal.set(true);
   }
 
-  openEditModal(service: Service) {
+  openEditModal(service: ServiceUI) {
     this.isEditMode.set(true);
-    this.formData.set({ ...service });
+    // Explicitly set the id and other fields to ensure form data is correct
+    this.formData.set({
+      id: service.id,
+      name: service.name,
+      price: service.price,
+      description: service.description,
+      category: service.category,
+      duration: service.duration,
+      bookings: service.bookings,
+      icon: service.icon,
+    });
     this.showModal.set(true);
   }
 
@@ -375,35 +360,73 @@ export class ServicesComponent {
 
   saveService() {
     const data = this.formData();
-    if (!data.name || !data.price || !data.description) {
+    if (!data.name || !data.price) {
       this.toastService.error('Validation Error', 'Please fill all required fields');
       return;
     }
 
-    if (this.isEditMode()) {
-      this.services.update((services) =>
-        services.map((s) => (s.id === data.id ? ({ ...s, ...data } as Service) : s))
-      );
-      this.toastService.success('Success', 'Service updated successfully');
-    } else {
-      const newService: Service = {
-        id: Math.max(...this.services().map((s) => s.id)) + 1,
-        name: data.name!,
-        price: data.price!,
-        description: data.description!,
-        category: data.category || 'Haircuts',
-        duration: data.duration || 30,
-        bookings: 0,
-        icon: data.icon || '✂️',
-      };
-      this.services.update((services) => [...services, newService]);
-      this.toastService.success('Success', 'Service created successfully');
-    }
+    const serviceData: Service = {
+      id: data.id,
+      name: data.name,
+      price: data.price,
+    };
 
-    this.closeModal();
+    if (this.isEditMode() && data.id) {
+      // Update existing service
+      this.shopService.updateService(data.id, serviceData).subscribe({
+        next: (updated) => {
+          // Update local state with API response merged with UI data since API doesn't return UI fields
+          this.services.update((services) =>
+            services.map((s) => {
+              if (s.id === data.id) {
+                return {
+                  ...s, // Keep existing UI state like desc, bookings etc
+                  ...updated, // Apply API updates (name, price)
+                  // Apply form updates for UI fields even if not persisted to backend
+                  description: data.description || s.description,
+                  category: data.category || s.category,
+                  duration: data.duration || s.duration,
+                  icon: data.icon || s.icon,
+                };
+              }
+              return s;
+            })
+          );
+          this.toastService.success('Success', 'Service updated successfully');
+          this.closeModal();
+        },
+        error: (error) => {
+          console.error('Error updating service:', error);
+          this.toastService.error('Error', 'Failed to update service');
+        },
+      });
+    } else {
+      // Create new service
+      this.shopService.createService(serviceData).subscribe({
+        next: (created) => {
+          // Add to local state with API response merged with UI data
+          const newService: ServiceUI = {
+            ...created,
+            id: created.id || 0,
+            description: data.description || 'No description available',
+            category: data.category || 'Haircuts',
+            duration: data.duration || 30,
+            bookings: 0,
+            icon: data.icon || '✂️',
+          };
+          this.services.update((services) => [...services, newService]);
+          this.toastService.success('Success', 'Service created successfully');
+          this.closeModal();
+        },
+        error: (error) => {
+          console.error('Error creating service:', error);
+          this.toastService.error('Error', 'Failed to create service');
+        },
+      });
+    }
   }
 
-  openDeleteModal(service: Service) {
+  openDeleteModal(service: ServiceUI) {
     this.serviceToDelete.set(service);
     this.showDeleteModal.set(true);
   }
@@ -415,10 +438,18 @@ export class ServicesComponent {
 
   confirmDelete() {
     const service = this.serviceToDelete();
-    if (service) {
-      this.services.update((services) => services.filter((s) => s.id !== service.id));
-      this.toastService.success('Deleted', `Service "${service.name}" has been deleted`);
-      this.closeDeleteModal();
+    if (service && service.id) {
+      this.shopService.deleteService(service.id).subscribe({
+        next: () => {
+          this.services.update((services) => services.filter((s) => s.id !== service.id));
+          this.toastService.success('Deleted', `Service "${service.name}" has been deleted`);
+          this.closeDeleteModal();
+        },
+        error: (error) => {
+          console.error('Error deleting service:', error);
+          this.toastService.error('Error', 'Failed to delete service');
+        },
+      });
     }
   }
 }

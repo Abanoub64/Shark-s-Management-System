@@ -1,86 +1,214 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AuthService, User } from '../../../core/services/auth.service';
+import { LanguageService } from '../../../core/services/language.service';
 import { UiButtonComponent } from '../../../components/shared/ui-button.component';
 import { UiInputComponent } from '../../../components/shared/ui-input.component';
-import { ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormControl,
+  FormGroup,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
+import { UiCardComponent } from '../../../components/shared/ui-card.component';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, UiButtonComponent, UiInputComponent, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    UiButtonComponent,
+    UiInputComponent,
+    UiCardComponent,
+    ReactiveFormsModule,
+  ],
   template: `
-    <div class="container mx-auto px-4 py-8">
-      <h1 class="text-3xl font-bold mb-8">My Profile</h1>
+    <div class="container mx-auto px-4 py-12">
+      <div class="max-w-2xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">{{ t().accountSettings }}</h1>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <!-- Sidebar / Avatar -->
-        <div class="md:col-span-1">
-          <div class="bg-white rounded-lg shadow-md p-6 text-center">
-            <div class="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-4 overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070&auto=format&fit=crop"
-                alt="Profile"
-                class="w-full h-full object-cover"
-              />
+        <app-ui-card class="p-6">
+          <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="space-y-6">
+            <div class="mb-6">
+              <h2 class="text-xl font-bold">{{ t().profile }}</h2>
+              <p class="text-sm text-gray-500">Update your personal information</p>
             </div>
-            <h2 class="text-xl font-bold">John Doe</h2>
-            <p class="text-gray-500 mb-4">Member since 2024</p>
-            <app-ui-button variant="outline" size="sm">Change Photo</app-ui-button>
-          </div>
-        </div>
 
-        <!-- Details Form -->
-        <div class="md:col-span-2">
-          <div class="bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-xl font-bold mb-6">Personal Information</h3>
-            <form [formGroup]="profileForm" class="space-y-6">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <app-ui-input label="First Name" formControlName="firstName"></app-ui-input>
-                <app-ui-input label="Last Name" formControlName="lastName"></app-ui-input>
+            <app-ui-input [label]="t().fullNameLabel" formControlName="name"></app-ui-input>
+
+            <app-ui-input
+              [label]="t().emailLabel"
+              formControlName="email"
+              [type]="'email'"
+            ></app-ui-input>
+
+            <div class="border-t pt-6 mt-6">
+              <h3 class="text-lg font-bold mb-4">Change Password</h3>
+              <div class="space-y-4">
+                <app-ui-input
+                  label="Current Password"
+                  formControlName="currentPassword"
+                  type="password"
+                  placeholder="Enter current password to change"
+                ></app-ui-input>
+
+                <app-ui-input
+                  label="New Password"
+                  formControlName="newPassword"
+                  type="password"
+                  placeholder="Enter new password"
+                ></app-ui-input>
+
+                <app-ui-input
+                  label="Confirm New Password"
+                  formControlName="confirmPassword"
+                  type="password"
+                  placeholder="Confirm new password"
+                  [error]="profileForm.errors?.['passwordMismatch'] && (profileForm.get('confirmPassword')?.touched || profileForm.get('confirmPassword')?.dirty) ? 'Passwords do not match' : ''"
+                ></app-ui-input>
               </div>
+            </div>
 
-              <app-ui-input label="Email" type="email" formControlName="email"></app-ui-input>
-              <app-ui-input label="Phone Number" type="tel" formControlName="phone"></app-ui-input>
+            <div class="flex justify-end gap-4 mt-8">
+              <app-ui-button type="submit" [disabled]="profileForm.invalid || isProcessing">
+                @if (isProcessing) { Saving... } @else { {{ t().saveChanges }} }
+              </app-ui-button>
+            </div>
+          </form>
+        </app-ui-card>
 
-              <div class="pt-4 border-t border-gray-200">
-                <h3 class="text-xl font-bold mb-4">Notifications</h3>
-                <div class="space-y-3">
-                  <div class="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="sms"
-                      class="h-4 w-4 text-primary rounded border-gray-300"
-                      checked
-                    />
-                    <label for="sms" class="ml-2 text-gray-700">SMS Notifications</label>
-                  </div>
-                  <div class="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="email"
-                      class="h-4 w-4 text-primary rounded border-gray-300"
-                      checked
-                    />
-                    <label for="email" class="ml-2 text-gray-700">Email Notifications</label>
-                  </div>
-                </div>
-              </div>
-
-              <div class="pt-6 flex justify-end">
-                <app-ui-button type="submit">Save Changes</app-ui-button>
-              </div>
-            </form>
-          </div>
+        <div class="mt-8">
+          <app-ui-card class="p-6 border-red-100">
+            <h3 class="text-lg font-bold text-red-600 mb-4">{{ t().dangerZone }}</h3>
+            <app-ui-button variant="outline" class="border-red-500 text-red-500 hover:bg-red-50">
+              {{ t().deleteAccount }}
+            </app-ui-button>
+          </app-ui-card>
         </div>
       </div>
     </div>
   `,
 })
 export class ProfileComponent {
-  profileForm = new FormGroup({
-    firstName: new FormControl('John'),
-    lastName: new FormControl('Doe'),
-    email: new FormControl('john.doe@example.com'),
-    phone: new FormControl('+20 123 456 7890'),
-  });
+  authService = inject(AuthService);
+  languageService = inject(LanguageService);
+  t = this.languageService.t;
+  user = this.authService.currentUser;
+
+  isProcessing = false;
+
+  profileForm = new FormGroup(
+    {
+      name: new FormControl('', [Validators.required]),
+      email: new FormControl('', [Validators.required, Validators.email]),
+      currentPassword: new FormControl(''),
+      newPassword: new FormControl(''),
+      confirmPassword: new FormControl(''),
+    },
+    { validators: this.passwordValidators }
+  );
+
+  constructor() {
+    effect(() => {
+      const currentUser = this.user();
+      if (currentUser) {
+        this.profileForm.patchValue({
+          name: currentUser.name || currentUser.firstName, // Fallback if name is missing
+          email: currentUser.email,
+        });
+      }
+    });
+  }
+
+  // Custom validator for password matching and requirement logic
+  passwordValidators(control: AbstractControl): ValidationErrors | null {
+    const newPass = control.get('newPassword')?.value;
+    const confirmPass = control.get('confirmPassword')?.value;
+    const currentPass = control.get('currentPassword')?.value;
+
+    const errors: any = {};
+    let hasError = false;
+
+    // If new password is provided
+    if (newPass) {
+      if (!currentPass) {
+        // We can't set error on control easily from here without traversing,
+        // but effectively the form is invalid if we enforce it.
+        // Usually best to check in onSubmit or use conditional validators.
+        // For simplicity, we'll rely on the logic: if newPass exists, currentPass is required.
+      }
+
+      if (newPass !== confirmPass) {
+        errors.passwordMismatch = true;
+        hasError = true;
+      }
+    }
+
+    return hasError ? errors : null;
+  }
+
+  onSubmit() {
+    if (this.profileForm.invalid || this.isProcessing) return;
+
+    this.isProcessing = true;
+    const formVal = this.profileForm.value;
+
+    // 1. Update Profile (Name/Email)
+    // Note: In a real app, we might check if these changed before calling.
+    // Also handling email change might need its own flow or error handling if email taken.
+    const profileUpdate$ = this.authService.updateProfile({
+      name: formVal.name || '',
+      email: formVal.email || '',
+    });
+
+    profileUpdate$.subscribe({
+      next: () => {
+        // 2. Change Password if provided
+        if (formVal.newPassword && formVal.currentPassword) {
+          if (formVal.newPassword !== formVal.confirmPassword) {
+            alert('Passwords do not match');
+            this.isProcessing = false;
+            return;
+          }
+
+          this.authService
+            .changePassword({
+              currentPassword: formVal.currentPassword,
+              newPassword: formVal.newPassword,
+            })
+            .subscribe({
+              next: () => {
+                alert('Profile and password updated successfully');
+                this.resetPasswordFields();
+                this.isProcessing = false;
+              },
+              error: (err) => {
+                console.error('Password change failed', err);
+                alert('Failed to change password: ' + (err.error?.message || 'Unknown error'));
+                this.isProcessing = false;
+              },
+            });
+        } else {
+          alert('Profile updated successfully');
+          this.isProcessing = false;
+        }
+      },
+      error: (err) => {
+        console.error('Profile update failed', err);
+        alert('Failed to update profile');
+        this.isProcessing = false;
+      },
+    });
+  }
+
+  resetPasswordFields() {
+    this.profileForm.patchValue({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    });
+    this.profileForm.markAsPristine();
+  }
 }

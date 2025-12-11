@@ -5,10 +5,22 @@ import { environment } from '../../../environments/environment';
 
 export interface Barber {
   id?: number;
-  name: string;
-  specialization: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
   branchId: number;
-  // Add other fields as needed
+}
+
+export interface DayScheduleData {
+  isWorking: boolean;
+  startTime: string;
+  endTime: string;
+}
+
+export interface BarberSchedule {
+  days: {
+    [key: string]: DayScheduleData;
+  };
 }
 
 @Injectable({
@@ -16,6 +28,7 @@ export interface Barber {
 })
 export class BarberService {
   private apiUrl = `${environment.apiUrl}/Barber`;
+  private scheduleApiUrl = `${environment.apiUrl}/BarberSchedule`;
 
   constructor(private http: HttpClient) {}
 
@@ -37,5 +50,9 @@ export class BarberService {
 
   deleteBarber(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  updateBarberSchedule(barberId: number, schedule: BarberSchedule): Observable<any> {
+    return this.http.put(`${this.scheduleApiUrl}/${barberId}`, schedule);
   }
 }

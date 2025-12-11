@@ -3,12 +3,10 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-export interface ShopService {
+export interface Service {
   id?: number;
   name: string;
   price: number;
-  duration: number; // in minutes
-  // Add other fields as needed
 }
 
 @Injectable({
@@ -19,20 +17,20 @@ export class ShopServiceService {
 
   constructor(private http: HttpClient) {}
 
-  getServices(): Observable<ShopService[]> {
-    return this.http.get<ShopService[]>(this.apiUrl);
+  getServices(): Observable<Service[]> {
+    return this.http.get<Service[]>(this.apiUrl);
   }
 
-  getService(id: number): Observable<ShopService> {
-    return this.http.get<ShopService>(`${this.apiUrl}/${id}`);
+  getService(id: number): Observable<Service> {
+    return this.http.get<Service>(`${this.apiUrl}/${id}`);
   }
 
-  createService(service: ShopService): Observable<ShopService> {
-    return this.http.post<ShopService>(this.apiUrl, service);
+  createService(service: Service): Observable<Service> {
+    return this.http.post<Service>(this.apiUrl, service);
   }
 
-  updateService(id: number, service: ShopService): Observable<ShopService> {
-    return this.http.put<ShopService>(`${this.apiUrl}/${id}`, service);
+  updateService(id: number, service: Service): Observable<Service> {
+    return this.http.put<Service>(`${this.apiUrl}/${id}`, service);
   }
 
   deleteService(id: number): Observable<void> {

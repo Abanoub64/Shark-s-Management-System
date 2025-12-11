@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import {
@@ -12,12 +13,23 @@ import {
   ServicePopularity,
   PeakHoursData,
   CancellationReason,
+  BranchAnalytics,
 } from '../models/models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AnalyticsService {
+  private apiUrl = `${environment.apiUrl}/Analytics`;
+
+  constructor(private http: HttpClient) {}
+
+  // Fetch branch analytics from API
+  getBranchAnalytics(branchId: number, days: number = 30): Observable<BranchAnalytics> {
+    return this.http.get<BranchAnalytics>(`${this.apiUrl}/branch/${branchId}?days=${days}`);
+  }
+
   // Dashboard Stats
   getDashboardStats(): Observable<DashboardStats> {
     const stats: DashboardStats = {

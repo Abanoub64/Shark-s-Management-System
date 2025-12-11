@@ -92,6 +92,14 @@ import { ThemeService } from '../../../core/services/theme.service';
             <span class="mr-3">💇</span> {{ langService.t().services }}
           </a>
           <a
+            routerLink="/admin/products"
+            routerLinkActive="nav-link-active"
+            class="nav-link"
+            (click)="closeMobileSidebar()"
+          >
+            <span class="mr-3">📦</span> {{ langService.t().products }}
+          </a>
+          <a
             routerLink="/admin/bookings"
             routerLinkActive="nav-link-active"
             class="nav-link"
@@ -100,35 +108,20 @@ import { ThemeService } from '../../../core/services/theme.service';
             <span class="mr-3">📅</span> {{ langService.t().bookings }}
           </a>
           <a
-            routerLink="/admin/analytics"
+            routerLink="/admin/orders"
             routerLinkActive="nav-link-active"
             class="nav-link"
             (click)="closeMobileSidebar()"
           >
-            <span class="mr-3">📈</span> {{ langService.t().analytics }}
-          </a>
-
-          <div
-            class="mt-8 text-xs font-semibold uppercase tracking-wider mb-2 px-3"
-            [style.color]="'var(--text-tertiary)'"
-          >
-            {{ langService.t().branchManager }}
-          </div>
-          <a
-            routerLink="/branch-admin/dashboard"
-            routerLinkActive="nav-link-active"
-            class="nav-link"
-            (click)="closeMobileSidebar()"
-          >
-            <span class="mr-3">📊</span> {{ langService.t().branchOverview }}
+            <span class="mr-3">🛒</span> {{ langService.t().orders }}
           </a>
           <a
-            routerLink="/branch-admin/queue"
+            routerLink="/admin/users"
             routerLinkActive="nav-link-active"
             class="nav-link"
             (click)="closeMobileSidebar()"
           >
-            <span class="mr-3">🚶</span> {{ langService.t().queueSystem }}
+            <span class="mr-3">👥</span> {{ langService.t().users }}
           </a>
         </nav>
 

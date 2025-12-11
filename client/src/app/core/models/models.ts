@@ -139,25 +139,69 @@ export interface ServiceCategory {
 }
 
 export interface Booking {
-  id: string;
+  id: string; // or number based on backend, spec says number for Create response ID but string in models? Spec says "id": 456. Keeping string for now to match interface but might need number.
   customerId: string;
-  customerName: string;
+  customerName: string; // added
   customerPhone: string;
   customerEmail?: string;
-  branchId: string;
-  barberId: string;
-  serviceId: string;
+  branchId: string; // or number
+  barberId: string; // or number
+  barberName?: string; // added
+  serviceId: string; // or number
+  serviceName?: string; // added
+  servicePrice?: number; // added
   date: string; // ISO date string
   startTime: string; // HH:mm
-  endTime: string; // HH:mm
+  endTime?: string; // HH:mm
+  startAt?: string; // ISO
+  endAt?: string; // ISO
+  durationMinutes?: number;
   status: BookingStatus;
-  paymentMethod: PaymentMethod;
-  paymentStatus: PaymentStatus;
-  totalAmount: number;
+  paymentMethod: string; // changed from enum to string to match DTO if needed, or keep enum if compatible
+  paymentStatus: string; // changed from enum to string
+  totalAmount?: number;
   notes?: string;
   isWalkIn: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+export interface CreateBookingRequest {
+  customerId: string;
+  customerName: string; // FirstName + LastName
+  barberId: number;
+  serviceId: number;
+  branchId: number;
+  startAt: string; // ISO 8601
+}
+
+export interface BookingDto {
+  id: number;
+  customerId: string;
+  customerName: string;
+  barberId: number;
+  barberName: string;
+  serviceId: number;
+  serviceName: string;
+  servicePrice: number;
+  branchId: number;
+  startAt: string;
+  endAt: string;
+  durationMinutes: number;
+  status: string;
+  paymentStatus: string;
+  paymentMethod: string;
+  createdAt: string;
+}
+
+export interface UserOrdersAndBookingsDto {
+  orders: any[]; // using any temporarily or import OrderDto if possible, but circular dependency risk if importing from order.model. Will use generic or define inline if simple. Steps below will fix imports.
+  // Actually, I can rely on 'any' for now or better yet, define a loose shape or import properly.
+  // Ideally models.ts shouldn't depend on features.
+  // Let's use 'any' for orders here to avoid coupling if not already coupled, or move OrderDto here.
+  // But wait, OrderDto is in order.model.ts.
+  // I will just define `orders: any[]` for now and cast it in service.
+  bookings: BookingDto[];
 }
 
 export interface QueueItem {
@@ -339,6 +383,21 @@ export interface CancellationReason {
   percentage: number;
 }
 
+// Branch Analytics from API
+export interface BranchAnalytics {
+  branchId: number;
+  totalBookings: number;
+  totalBookingsLastDays: number;
+  totalRevenue: number;
+  totalRevenueLastDays: number;
+  avgRating: number;
+  peakHour: number;
+  peakHourCount: number;
+  bookingsPerDay: { date: string; count: number }[];
+  revenuePerDay: { date: string; amount: number }[];
+  topServices: { serviceName: string; count: number; revenue: number }[];
+}
+
 // ========================================
 // CALENDAR & SCHEDULING
 // ========================================
@@ -456,4 +515,18 @@ export interface AuditLogFilters {
   entityType?: string;
   dateFrom?: string;
   dateTo?: string;
+}
+
+// ========================================
+// FEEDBACK
+// ========================================
+
+export interface CreateFeedbackRequest {
+  branchId: number;
+  rating: number;
+}
+
+export interface FeedbackResponse {
+  success: boolean;
+  message?: string;
 }

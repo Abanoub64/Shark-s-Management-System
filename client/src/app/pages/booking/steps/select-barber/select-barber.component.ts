@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { BookingService } from '../../../../core/services/booking.service';
@@ -30,17 +30,25 @@ import { UiButtonComponent } from '../../../../components/shared/ui-button.compo
       </div>
 
       <!-- Barber Options -->
-      @if (branch; as branch) { @for (barber of branch.barbers; track barber.id) {
+      @if (isLoading()) {
+      <div class="col-span-full flex justify-center p-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+      } @else { @for (barber of availableBarbers(); track barber.barberId) {
       <div
         class="border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors flex items-center gap-4"
-        [class.border-primary]="bookingService.selectedBarber()?.id === barber.id"
-        [class.bg-gray-50]="bookingService.selectedBarber()?.id === barber.id"
+        [class.border-primary]="bookingService.selectedBarber()?.barberId === barber.barberId"
+        [class.bg-gray-50]="bookingService.selectedBarber()?.barberId === barber.barberId"
         (click)="selectBarber(barber)"
       >
-        <img [src]="barber.image" class="w-12 h-12 rounded-full object-cover" />
+        <div
+          class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-xl font-bold text-gray-500"
+        >
+          {{ barber.firstName.charAt(0) }}{{ barber.lastName.charAt(0) }}
+        </div>
         <div>
-          <h3 class="font-bold">{{ barber.name }}</h3>
-          <p class="text-sm text-gray-500">{{ barber.experience }} years exp.</p>
+          <h3 class="font-bold">{{ barber.firstName }} {{ barber.lastName }}</h3>
+          <p class="text-sm text-gray-500">{{ barber.phoneNumber }}</p>
         </div>
       </div>
       } }
@@ -57,9 +65,58 @@ export class SelectBarberComponent {
   branchService = inject(BranchService);
   router = inject(Router);
 
-  // In a real app, we'd get the branch from the booking service or route
-  // For now, let's assume we have a branch selected or default to first one for demo
-  branch = this.branchService.branches()[0];
+  availableBarbers = signal<any[]>([]);
+  isLoading = signal<boolean>(false);
+
+  constructor() {
+    this.loadAvailableBarbers();
+  }
+
+  loadAvailableBarbers() {
+    const selectedDate = this.bookingService.selectedDate();
+    const selectedTime = this.bookingService.selectedTime();
+
+    // Retrieve branchId from signal.
+    // If undefined/null, handle gracefully (e.g. redirect or alert)
+    const branch = this.bookingService.selectedBranch();
+    if (!branch) {
+      console.warn('No branch selected! Redirecting or showing error.');
+      // Ideally redirect to branch selection
+      return;
+    }
+    const branchId = branch.id;
+
+    if (selectedDate && selectedTime) {
+      this.isLoading.set(true);
+
+      // Calculate effective date (handle next day logic for 00:00-02:00)
+      const effectiveDate = new Date(selectedDate);
+      const hour = parseInt(selectedTime.split(':')[0]);
+      if (hour >= 0 && hour <= 2) {
+        effectiveDate.setDate(effectiveDate.getDate() + 1);
+      }
+
+      const dateStr = this.formatDate(effectiveDate);
+
+      this.bookingService.getAvailableBarbers(branchId, dateStr, selectedTime).subscribe({
+        next: (barbers) => {
+          this.availableBarbers.set(barbers);
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          console.error('Failed to load barbers', err);
+          this.isLoading.set(false);
+        },
+      });
+    }
+  }
+
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
 
   selectBarber(barber: any) {
     this.bookingService.selectedBarber.set(barber);

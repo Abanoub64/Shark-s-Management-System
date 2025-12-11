@@ -1,11 +1,16 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastService } from '../../../core/services/toast.service';
+import { BookingService } from '../../../core/services/booking.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { BookingDto } from '../../../core/models/models';
+import { DeleteConfirmationModalComponent } from '../../../components/shared/delete-confirmation-modal/delete-confirmation-modal.component';
+import { LanguageService } from '../../../core/services/language.service';
 
 @Component({
   selector: 'app-bookings',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DeleteConfirmationModalComponent],
   template: `
     <div class="space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -14,7 +19,7 @@ import { ToastService } from '../../../core/services/toast.service';
             Bookings Management
           </h1>
           <p class="text-sm md:text-base mt-1" [style.color]="'var(--text-secondary)'">
-            View and manage all bookings across branches
+            {{ langService.t().viewManageBookings }}
           </p>
         </div>
         <div class="flex gap-2">
@@ -38,30 +43,8 @@ import { ToastService } from '../../../core/services/toast.service';
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            New Booking
+            {{ langService.t().newBooking }}
           </button>
-        </div>
-      </div>
-
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="card p-4 md:p-6">
-          <p class="text-xs md:text-sm" [style.color]="'var(--text-secondary)'">Today's Bookings</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-1" [style.color]="'var(--text-primary)'">
-            42
-          </h3>
-        </div>
-        <div class="card p-4 md:p-6">
-          <p class="text-xs md:text-sm" [style.color]="'var(--text-secondary)'">Confirmed</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-1 text-green-600">35</h3>
-        </div>
-        <div class="card p-4 md:p-6">
-          <p class="text-xs md:text-sm" [style.color]="'var(--text-secondary)'">Pending</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-1 text-orange-600">5</h3>
-        </div>
-        <div class="card p-4 md:p-6">
-          <p class="text-xs md:text-sm" [style.color]="'var(--text-secondary)'">Cancelled</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-1 text-red-600">2</h3>
         </div>
       </div>
 
@@ -126,7 +109,27 @@ import { ToastService } from '../../../core/services/toast.service';
               </tr>
             </thead>
             <tbody class="divide-y" [style.divide-color]="'var(--border-light)'">
-              @for (booking of mockBookings; track booking.id) {
+              @if (isLoading()) {
+              <tr>
+                <td colspan="7" class="px-4 py-8 text-center">
+                  <div class="flex justify-center">
+                    <div
+                      class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"
+                    ></div>
+                  </div>
+                </td>
+              </tr>
+              } @else if (filteredBookings().length === 0) {
+              <tr>
+                <td
+                  colspan="7"
+                  class="px-4 py-8 text-center"
+                  [style.color]="'var(--text-secondary)'"
+                >
+                  {{ langService.t().noBookingsFound }}
+                </td>
+              </tr>
+              } @else { @for (booking of filteredBookings(); track booking.id) {
               <tr
                 class="hover:bg-opacity-50 dark:hover:bg-opacity-50 transition-colors cursor-pointer"
                 style="hover:background-color: var(--bg-tertiary)"
@@ -135,16 +138,16 @@ import { ToastService } from '../../../core/services/toast.service';
                   {{ booking.id }}
                 </td>
                 <td class="px-4 py-3 text-sm" [style.color]="'var(--text-secondary)'">
-                  {{ booking.customer }}
+                  {{ booking.customerName || 'N/A' }}
                 </td>
                 <td class="px-4 py-3 text-sm" [style.color]="'var(--text-secondary)'">
-                  {{ booking.service }}
+                  {{ booking.serviceName }} ({{ booking.servicePrice }} EGP)
                 </td>
                 <td class="px-4 py-3 text-sm" [style.color]="'var(--text-secondary)'">
-                  {{ booking.barber }}
+                  {{ booking.barberName }}
                 </td>
                 <td class="px-4 py-3 text-sm" [style.color]="'var(--text-secondary)'">
-                  {{ booking.datetime }}
+                  {{ formatDateTime(booking.startAt) }}
                 </td>
                 <td class="px-4 py-3">
                   <span
@@ -158,97 +161,137 @@ import { ToastService } from '../../../core/services/toast.service';
                 </td>
                 <td class="px-4 py-3">
                   <div class="flex gap-2">
+                    @if (booking.status !== 'Completed') {
                     <button
-                      class="text-blue-600 hover:text-blue-800 text-sm"
-                      (click)="viewBooking(booking.id)"
+                      class="text-green-600 hover:text-green-800 text-sm font-medium"
+                      (click)="completeBooking(booking)"
                     >
-                      View
-                    </button>
-                    @if (booking.status === 'Pending') {
-                    <button
-                      class="text-green-600 hover:text-green-800 text-sm"
-                      (click)="confirmBooking(booking.id)"
-                    >
-                      Confirm
+                      {{ langService.t().complete }}
                     </button>
                     }
                     <button
-                      class="text-red-600 hover:text-red-800 text-sm"
-                      (click)="cancelBooking(booking.id)"
+                      class="text-red-600 hover:text-red-800 text-sm font-medium"
+                      (click)="openDeleteModal(booking)"
                     >
-                      Cancel
+                      Delete
                     </button>
                   </div>
                 </td>
               </tr>
-              }
+              } }
             </tbody>
           </table>
         </div>
       </div>
+
+      <!-- Delete Confirmation Modal -->
+      <app-delete-confirmation-modal
+        [isOpen]="showDeleteModal()"
+        [entityType]="'Booking'"
+        [entityName]="selectedBooking()?.id?.toString() || ''"
+        (confirmed)="confirmDelete()"
+        (cancelled)="closeDeleteModal()"
+      />
     </div>
   `,
 })
-export class BookingsComponent {
+export class BookingsComponent implements OnInit {
   private toastService = signal(new ToastService()).asReadonly();
+  private bookingService = signal(inject(BookingService)).asReadonly();
+  private authService = signal(inject(AuthService)).asReadonly();
+  langService = inject(LanguageService);
 
-  mockBookings = [
-    {
-      id: 'BK-9921',
-      customer: 'Ahmed Ali',
-      service: 'Haircut + Beard',
-      barber: 'Mohamed Hassan',
-      datetime: 'Today, 2:30 PM',
-      status: 'Confirmed',
-    },
-    {
-      id: 'BK-9922',
-      customer: 'Sarah Smith',
-      service: 'Hair Coloring',
-      barber: 'Omar Khaled',
-      datetime: 'Today, 3:00 PM',
-      status: 'Pending',
-    },
-    {
-      id: 'BK-9923',
-      customer: 'Mike Johnson',
-      service: 'Full Package',
-      barber: 'Karim Youssef',
-      datetime: 'Today, 3:30 PM',
-      status: 'Confirmed',
-    },
-    {
-      id: 'BK-9924',
-      customer: 'Omar Khaled',
-      service: 'Haircut',
-      barber: 'Ahmed Hassan',
-      datetime: 'Today, 4:00 PM',
-      status: 'Cancelled',
-    },
-    {
-      id: 'BK-9925',
-      customer: 'Karim Hassan',
-      service: 'Beard Trim',
-      barber: 'Tarek Mahmoud',
-      datetime: 'Today, 4:30 PM',
-      status: 'Confirmed',
-    },
-  ];
+  bookings = signal<BookingDto[]>([]);
+  filteredBookings = signal<BookingDto[]>([]);
+  isLoading = signal(true);
+  showDeleteModal = signal(false);
+  selectedBooking = signal<BookingDto | null>(null);
+
+  ngOnInit() {
+    this.loadBookings();
+  }
+
+  loadBookings() {
+    this.isLoading.set(true);
+    const managedBranchId = this.authService().managedBranchId;
+
+    this.bookingService()
+      .getAllBookings(managedBranchId || undefined)
+      .subscribe({
+        next: (bookings) => {
+          this.bookings.set(bookings);
+          this.filteredBookings.set(bookings);
+          this.isLoading.set(false);
+        },
+        error: (error) => {
+          console.error('Error loading bookings:', error);
+          this.toastService().error('Error', 'Failed to load bookings');
+          this.isLoading.set(false);
+        },
+      });
+  }
+
+  formatDateTime(dateTime: string): string {
+    const date = new Date(dateTime);
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  completeBooking(booking: BookingDto) {
+    this.bookingService()
+      .updateBookingStatus(booking.id, 'Completed')
+      .subscribe({
+        next: () => {
+          this.toastService().success('Success', `Booking #${booking.id} marked as completed`);
+          this.loadBookings();
+        },
+        error: (error) => {
+          console.error('Error updating booking:', error);
+          this.toastService().error('Error', 'Failed to update booking status');
+        },
+      });
+  }
+
+  openDeleteModal(booking: BookingDto) {
+    this.selectedBooking.set(booking);
+    this.showDeleteModal.set(true);
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal.set(false);
+    this.selectedBooking.set(null);
+  }
+
+  confirmDelete() {
+    const booking = this.selectedBooking();
+    if (!booking) return;
+
+    this.bookingService()
+      .deleteBooking(booking.id)
+      .subscribe({
+        next: () => {
+          this.toastService().success('Deleted', `Booking #${booking.id} has been deleted`);
+          this.closeDeleteModal();
+          this.loadBookings();
+        },
+        error: (error) => {
+          console.error('Error deleting booking:', error);
+          this.toastService().error('Error', 'Failed to delete booking');
+          this.closeDeleteModal();
+        },
+      });
+  }
 
   createBooking() {
     this.toastService().info('New Booking', 'Booking creation form will open here');
   }
 
-  viewBooking(id: string) {
+  viewBooking(id: number) {
     this.toastService().info('View Booking', `Viewing booking ${id}`);
-  }
-
-  confirmBooking(id: string) {
-    this.toastService().success('Confirmed', `Booking ${id} has been confirmed`);
-  }
-
-  cancelBooking(id: string) {
-    this.toastService().warning('Cancel Booking', `Cancellation confirmation for ${id}`);
   }
 
   filterBookings() {

@@ -1,13 +1,24 @@
-import { Component, signal, inject, computed } from '@angular/core';
+import { Component, signal, inject, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { DeleteConfirmationModalComponent } from '../../../components/shared/delete-confirmation-modal/delete-confirmation-modal.component';
+import {
+  BarberScheduleFormComponent,
+  DaySchedule,
+} from '../../../components/forms/barber-schedule-form/barber-schedule-form.component';
+import { BranchService, Branch } from '../../../core/services/branch.service';
+import {
+  BarberService,
+  BarberSchedule,
+  DayScheduleData,
+} from '../../../core/services/barber.service';
 
 interface Employee {
   id: number;
-  name: string;
+  firstName: string;
+  lastName: string;
   phone: string;
   photo?: string;
   role: string;
@@ -15,12 +26,18 @@ interface Employee {
   branchId: number;
   status: string;
   rating: number;
+  schedule?: DaySchedule[];
 }
 
 @Component({
   selector: 'app-employees',
   standalone: true,
-  imports: [CommonModule, FormsModule, DeleteConfirmationModalComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    DeleteConfirmationModalComponent,
+    BarberScheduleFormComponent,
+  ],
   template: `
     <div class="space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -69,14 +86,6 @@ interface Employee {
           </p>
           <h3 class="text-2xl md:text-3xl font-bold mt-1 text-orange-600">
             {{ getOnLeaveEmployees() }}
-          </h3>
-        </div>
-        <div class="card p-4 md:p-6">
-          <p class="text-xs md:text-sm" [style.color]="'var(--text-secondary)'">
-            {{ langService.t().avgPerformance }}
-          </p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-1" [style.color]="'var(--text-primary)'">
-            {{ getAvgRating() }}⭐
           </h3>
         </div>
       </div>
@@ -153,12 +162,6 @@ interface Employee {
                   class="px-4 py-3 text-left text-xs font-medium uppercase"
                   [style.color]="'var(--text-tertiary)'"
                 >
-                  {{ langService.t().rating }}
-                </th>
-                <th
-                  class="px-4 py-3 text-left text-xs font-medium uppercase"
-                  [style.color]="'var(--text-tertiary)'"
-                >
                   {{ langService.t().actions }}
                 </th>
               </tr>
@@ -175,19 +178,19 @@ interface Employee {
                     <img
                       [src]="employee.photo"
                       class="w-10 h-10 rounded-full object-cover"
-                      [alt]="employee.name"
+                      [alt]="employee.firstName + ' ' + employee.lastName"
                     />
                     } @else {
                     <div
                       class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm"
                       style="background: var(--color-primary-500)"
                     >
-                      {{ employee.name.charAt(0) }}
+                      {{ employee.firstName.charAt(0) }}
                     </div>
                     }
-                    <span class="font-medium" [style.color]="'var(--text-primary)'">{{
-                      employee.name
-                    }}</span>
+                    <span class="font-medium" [style.color]="'var(--text-primary)'"
+                      >{{ employee.firstName }} {{ employee.lastName }}</span
+                    >
                   </div>
                 </td>
                 <td class="px-4 py-3 text-sm" [style.color]="'var(--text-secondary)'">
@@ -207,9 +210,6 @@ interface Employee {
                   >
                     {{ employee.status }}
                   </span>
-                </td>
-                <td class="px-4 py-3 text-sm" [style.color]="'var(--text-primary)'">
-                  {{ employee.rating }} ⭐
                 </td>
                 <td class="px-4 py-3">
                   <div class="flex gap-2">
@@ -231,7 +231,7 @@ interface Employee {
               } @empty {
               <tr>
                 <td
-                  colspan="7"
+                  colspan="6"
                   class="px-4 py-8 text-center"
                   [style.color]="'var(--text-secondary)'"
                 >
@@ -315,20 +315,37 @@ interface Employee {
                   </div>
                 </div>
 
-                <!-- Name -->
+                <!-- First Name -->
                 <div>
                   <label
                     class="block text-sm font-medium mb-2"
                     [style.color]="'var(--text-primary)'"
-                    >{{ langService.t().fullName }} *</label
+                    >First Name *</label
                   >
                   <input
                     type="text"
-                    [(ngModel)]="formData().name"
-                    name="name"
+                    [(ngModel)]="formData().firstName"
+                    name="firstName"
                     required
                     class="input w-full"
-                    placeholder="Enter full name"
+                    placeholder="Enter first name"
+                  />
+                </div>
+
+                <!-- Last Name -->
+                <div>
+                  <label
+                    class="block text-sm font-medium mb-2"
+                    [style.color]="'var(--text-primary)'"
+                    >Last Name *</label
+                  >
+                  <input
+                    type="text"
+                    [(ngModel)]="formData().lastName"
+                    name="lastName"
+                    required
+                    class="input w-full"
+                    placeholder="Enter last name"
                   />
                 </div>
 
@@ -363,10 +380,18 @@ interface Employee {
                     class="input w-full"
                   >
                     <option value="">{{ langService.t().selectBranch }}</option>
-                    @for (branch of availableBranches; track branch.id) {
-                    <option [value]="branch.id">{{ branch.name }}</option>
+                    @for (branch of availableBranches(); track branch.id) {
+                    <option [ngValue]="branch.id">{{ branch.name }}</option>
                     }
                   </select>
+                </div>
+
+                <!-- Working Schedule -->
+                <div>
+                  <app-barber-schedule-form
+                    [schedules]="formData().schedule || []"
+                    (schedulesChange)="onScheduleChange($event)"
+                  ></app-barber-schedule-form>
                 </div>
 
                 <!-- Actions -->
@@ -389,7 +414,7 @@ interface Employee {
         @if (showDeleteModal()) {
         <app-delete-confirmation-modal
           [entityType]="'employee'"
-          [entityName]="employeeToDelete()?.name || ''"
+          [entityName]="employeeToDelete()?.firstName + ' ' + employeeToDelete()?.lastName || ''"
           (confirmed)="confirmDelete()"
           (cancelled)="closeDeleteModal()"
         />
@@ -398,70 +423,15 @@ interface Employee {
     </div>
   `,
 })
-export class EmployeesComponent {
+export class EmployeesComponent implements OnInit {
   private toastService = inject(ToastService);
+  private branchService = inject(BranchService);
+  private barberService = inject(BarberService);
   langService = inject(LanguageService);
 
-  employees = signal<Employee[]>([
-    {
-      id: 1,
-      name: 'Ahmed Hassan',
-      phone: '+20 123 456 7890',
-      role: 'Senior Barber',
-      branch: 'Downtown Elite',
-      branchId: 1,
-      status: 'Active',
-      rating: 4.9,
-    },
-    {
-      id: 2,
-      name: 'Mohamed Ali',
-      phone: '+20 123 456 7891',
-      role: 'Barber',
-      branch: 'Zamalek Classic',
-      branchId: 2,
-      status: 'Active',
-      rating: 4.7,
-    },
-    {
-      id: 3,
-      name: 'Omar Khaled',
-      phone: '+20 123 456 7892',
-      role: 'Junior Barber',
-      branch: 'New Cairo Hub',
-      branchId: 3,
-      status: 'Active',
-      rating: 4.5,
-    },
-    {
-      id: 4,
-      name: 'Karim Youssef',
-      phone: '+20 123 456 7893',
-      role: 'Senior Barber',
-      branch: 'Alexandria Bay',
-      branchId: 4,
-      status: 'On Leave',
-      rating: 4.8,
-    },
-    {
-      id: 5,
-      name: 'Tarek Mahmoud',
-      phone: '+20 123 456 7894',
-      role: 'Barber',
-      branch: 'Downtown Elite',
-      branchId: 1,
-      status: 'Active',
-      rating: 4.6,
-    },
-  ]);
+  employees = signal<Employee[]>([]);
 
-  availableBranches = [
-    { id: 1, name: 'Downtown Elite' },
-    { id: 2, name: 'Zamalek Classic' },
-    { id: 3, name: 'New Cairo Hub' },
-    { id: 4, name: 'Alexandria Bay' },
-    { id: 5, name: 'Giza Plaza' },
-  ];
+  availableBranches = signal<Branch[]>([]);
 
   nameFilter = signal('');
   showModal = signal(false);
@@ -473,7 +443,9 @@ export class EmployeesComponent {
   filteredEmployees = computed(() => {
     const filter = this.nameFilter().toLowerCase().trim();
     if (!filter) return this.employees();
-    return this.employees().filter((emp) => emp.name.toLowerCase().includes(filter));
+    return this.employees().filter((emp) =>
+      `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(filter)
+    );
   });
 
   getActiveEmployees() {
@@ -486,7 +458,7 @@ export class EmployeesComponent {
 
   getAvgRating() {
     const total = this.employees().reduce((sum, e) => sum + e.rating, 0);
-    return (total / this.employees().length).toFixed(1);
+    return this.employees().length ? (total / this.employees().length).toFixed(1) : '0.0';
   }
 
   openAddModal() {
@@ -506,6 +478,10 @@ export class EmployeesComponent {
     this.formData.set({});
   }
 
+  onScheduleChange(schedule: DaySchedule[]) {
+    this.formData.update((data) => ({ ...data, schedule }));
+  }
+
   onFileSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
@@ -519,43 +495,206 @@ export class EmployeesComponent {
 
   saveEmployee() {
     const data = this.formData();
-    if (!data.name || !data.phone || !data.branchId) {
+    if (!data.firstName || !data.lastName || !data.phone || !data.branchId) {
       this.toastService.error('Validation Error', 'Please fill all required fields');
       return;
     }
 
-    const branch = this.availableBranches.find((b) => b.id === data.branchId);
+    const branchId = Number(data.branchId);
+    const branch = this.availableBranches().find((b) => b.id === branchId);
+
     if (!branch) {
       this.toastService.error('Error', 'Invalid branch selected');
       return;
     }
 
     if (this.isEditMode()) {
-      // Update existing employee
-      this.employees.update((employees) =>
-        employees.map((e) =>
-          e.id === data.id ? ({ ...e, ...data, branch: branch.name } as Employee) : e
-        )
-      );
-      this.toastService.success('Success', 'Employee updated successfully');
-    } else {
-      // Add new employee
-      const newEmployee: Employee = {
-        id: Math.max(...this.employees().map((e) => e.id)) + 1,
-        name: data.name!,
-        phone: data.phone!,
-        photo: data.photo,
-        role: data.role || 'Barber',
-        branch: branch.name,
-        branchId: data.branchId!,
-        status: 'Active',
-        rating: 4.5,
+      // Update existing barber via API
+      const barberData = {
+        id: data.id,
+        firstName: data.firstName!,
+        lastName: data.lastName!,
+        phoneNumber: data.phone!,
+        branchId: branchId,
       };
-      this.employees.update((employees) => [...employees, newEmployee]);
-      this.toastService.success('Success', 'Employee added successfully');
-    }
 
-    this.closeModal();
+      this.barberService.updateBarber(data.id!, barberData).subscribe({
+        next: (updatedBarber) => {
+          // Convert schedule data to API format
+          const scheduleData = this.convertScheduleToApiFormat(data.schedule || []);
+
+          // Update barber schedule
+          this.barberService.updateBarberSchedule(data.id!, scheduleData).subscribe({
+            next: () => {
+              // Update local state
+              this.employees.update((employees) =>
+                employees.map((e) =>
+                  e.id === data.id
+                    ? ({
+                        ...e,
+                        firstName: updatedBarber.firstName,
+                        lastName: updatedBarber.lastName,
+                        phone: updatedBarber.phoneNumber,
+                        branchId: updatedBarber.branchId,
+                        branch: branch.name,
+                        schedule: data.schedule,
+                        photo: data.photo, // Preserve photo if changed locally (mock)
+                      } as Employee)
+                    : e
+                )
+              );
+              this.toastService.success('Success', 'Employee and schedule updated successfully');
+              this.closeModal();
+            },
+            error: (error) => {
+              console.error('Error updating schedule:', error);
+              this.toastService.error('Warning', 'Employee updated but schedule failed');
+              // Still update UI for barber details
+              this.employees.update((employees) =>
+                employees.map((e) =>
+                  e.id === data.id
+                    ? ({
+                        ...e,
+                        firstName: updatedBarber.firstName,
+                        lastName: updatedBarber.lastName,
+                        phone: updatedBarber.phoneNumber,
+                        branchId: updatedBarber.branchId,
+                        branch: branch.name,
+                        photo: data.photo,
+                      } as Employee)
+                    : e
+                )
+              );
+              this.closeModal();
+            },
+          });
+        },
+        error: (error) => {
+          console.error('Error updating employee:', error);
+          this.toastService.error('Error', 'Failed to update employee');
+        },
+      });
+    } else {
+      // Create new barber via API
+      const barberData = {
+        firstName: data.firstName!,
+        lastName: data.lastName!,
+        phoneNumber: data.phone!,
+        branchId: branchId,
+      };
+
+      this.barberService.createBarber(barberData).subscribe({
+        next: (createdBarber) => {
+          // Convert schedule data to API format
+          const scheduleData = this.convertScheduleToApiFormat(data.schedule || []);
+
+          // Update barber schedule
+          this.barberService.updateBarberSchedule(createdBarber.id!, scheduleData).subscribe({
+            next: () => {
+              // Add to local state for UI
+              const newEmployee: Employee = {
+                id: createdBarber.id!,
+                firstName: data.firstName!,
+                lastName: data.lastName!,
+                phone: data.phone!,
+                photo: data.photo,
+                role: data.role || 'Barber',
+                branch: branch.name,
+                branchId: data.branchId!,
+                status: 'Active',
+                rating: 4.5,
+                schedule: data.schedule,
+              };
+              this.employees.update((employees) => [...employees, newEmployee]);
+              this.toastService.success('Success', 'Employee and schedule created successfully');
+              this.closeModal();
+            },
+            error: (error) => {
+              console.error('Error creating schedule:', error);
+              this.toastService.error('Warning', 'Employee created but schedule failed');
+              // Still add to UI without schedule
+              const newEmployee: Employee = {
+                id: createdBarber.id!,
+                firstName: data.firstName!,
+                lastName: data.lastName!,
+                phone: data.phone!,
+                photo: data.photo,
+                role: data.role || 'Barber',
+                branch: branch.name,
+                branchId: data.branchId!,
+                status: 'Active',
+                rating: 4.5,
+              };
+              this.employees.update((employees) => [...employees, newEmployee]);
+              this.closeModal();
+            },
+          });
+        },
+        error: (error) => {
+          console.error('Error creating employee:', error);
+          this.toastService.error('Error', 'Failed to create employee');
+        },
+      });
+    }
+  }
+
+  convertScheduleToApiFormat(schedule: DaySchedule[]): BarberSchedule {
+    const days: { [key: string]: DayScheduleData } = {};
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    schedule.forEach((daySchedule) => {
+      const dayName = dayNames[daySchedule.dayOfWeek];
+      days[dayName] = {
+        isWorking: daySchedule.enabled,
+        startTime: daySchedule.startTime || '',
+        endTime: daySchedule.endTime || '',
+      };
+    });
+
+    return { days };
+  }
+
+  ngOnInit() {
+    this.loadData();
+  }
+
+  loadData() {
+    // Load branches first, then barbers
+    this.branchService.getAllBranches().subscribe({
+      next: (branches) => {
+        this.availableBranches.set(branches);
+
+        // Fetch barbers after branches are loaded
+        this.barberService.getBarbers().subscribe({
+          next: (barbers) => {
+            const employees: Employee[] = barbers.map((barber) => {
+              const branch = branches.find((b) => b.id === barber.branchId);
+              return {
+                id: barber.id!,
+                firstName: barber.firstName,
+                lastName: barber.lastName,
+                phone: barber.phoneNumber,
+                role: 'Barber', // Default role
+                branch: branch ? branch.name : 'Unknown Branch',
+                branchId: barber.branchId,
+                status: 'Active', // Default status
+                rating: 5.0, // Default rating
+                photo: undefined,
+              };
+            });
+            this.employees.set(employees);
+          },
+          error: (error) => {
+            console.error('Error loading barbers:', error);
+            this.toastService.error('Error', 'Failed to load barbers');
+          },
+        });
+      },
+      error: (error) => {
+        console.error('Error loading branches:', error);
+        this.toastService.error('Error', 'Failed to load branches');
+      },
+    });
   }
 
   openDeleteModal(employee: Employee) {
@@ -572,7 +711,10 @@ export class EmployeesComponent {
     const employee = this.employeeToDelete();
     if (employee) {
       this.employees.update((employees) => employees.filter((e) => e.id !== employee.id));
-      this.toastService.success('Deleted', `Employee "${employee.name}" has been deleted`);
+      this.toastService.success(
+        'Deleted',
+        `Employee "${employee.firstName} ${employee.lastName}" has been deleted`
+      );
       this.closeDeleteModal();
     }
   }

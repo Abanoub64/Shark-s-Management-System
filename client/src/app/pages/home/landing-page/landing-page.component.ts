@@ -1,9 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { UiButtonComponent } from '../../../components/shared/ui-button.component';
 import { UiCardComponent } from '../../../components/shared/ui-card.component';
 import { LanguageService } from '../../../core/services/language.service';
+import { BranchService, BranchExtended } from '../../../core/services/branch.service';
 
 @Component({
   selector: 'app-landing-page',
@@ -40,7 +41,7 @@ import { LanguageService } from '../../../core/services/language.service';
               >{{ t().masterfulGrooming }}</span
             >
           </h1>
-          <p class="text-lg md:text-xl text-gray-300 mb-8 max-w-xl leading-relaxed">
+          <p class="text-lg md:text-xl text-gray-200 mb-8 max-w-xl leading-relaxed">
             {{ t().heroSubtitle }}
           </p>
           <div class="flex flex-col sm:flex-row gap-4">
@@ -80,8 +81,8 @@ import { LanguageService } from '../../../core/services/language.service';
     <section class="py-16 bg-white dark:bg-gray-800 dark:text-white transition-colors duration-300">
       <div class="container mx-auto px-4">
         <div class="text-center mb-12">
-          <h2 class="text-3xl font-bold mb-4">{{ t().whyChoose }}</h2>
-          <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          <h2 class="text-3xl font-bold mb-4 text-gray-900 dark:text-white">{{ t().whyChoose }}</h2>
+          <p class="text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
             {{ t().whyChooseSubtitle }}
           </p>
         </div>
@@ -92,8 +93,10 @@ import { LanguageService } from '../../../core/services/language.service';
             >
               ✂️
             </div>
-            <h3 class="text-xl font-bold mb-2">{{ t().expertBarbers }}</h3>
-            <p class="text-gray-600 dark:text-gray-300">
+            <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">
+              {{ t().expertBarbers }}
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300">
               {{ t().expertBarbersDesc }}
             </p>
           </div>
@@ -103,8 +106,10 @@ import { LanguageService } from '../../../core/services/language.service';
             >
               💺
             </div>
-            <h3 class="text-xl font-bold mb-2">{{ t().premiumComfort }}</h3>
-            <p class="text-gray-600 dark:text-gray-300">
+            <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">
+              {{ t().premiumComfort }}
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300">
               {{ t().premiumComfortDesc }}
             </p>
           </div>
@@ -114,8 +119,10 @@ import { LanguageService } from '../../../core/services/language.service';
             >
               📅
             </div>
-            <h3 class="text-xl font-bold mb-2">{{ t().easyBooking }}</h3>
-            <p class="text-gray-600 dark:text-gray-300">
+            <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">
+              {{ t().easyBooking }}
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300">
               {{ t().easyBookingDesc }}
             </p>
           </div>
@@ -123,13 +130,15 @@ import { LanguageService } from '../../../core/services/language.service';
       </div>
     </section>
 
-    <!-- Branch Spotlight (Mock) -->
+    <!-- Branch Spotlight -->
     <section class="py-16 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       <div class="container mx-auto px-4">
         <div class="flex justify-between items-end mb-8">
           <div>
-            <h2 class="text-3xl font-bold mb-2 dark:text-white">{{ t().popularBranches }}</h2>
-            <p class="text-gray-600 dark:text-gray-400">{{ t().findLocation }}</p>
+            <h2 class="text-3xl font-bold mb-2 text-gray-900 dark:text-white">
+              {{ t().popularBranches }}
+            </h2>
+            <p class="text-gray-700 dark:text-gray-300">{{ t().findLocation }}</p>
           </div>
           <a routerLink="/branches" class="text-primary font-medium hover:underline"
             >{{ t().viewAll }} -></a
@@ -137,83 +146,70 @@ import { LanguageService } from '../../../core/services/language.service';
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <!-- Mock Branch 1 -->
+          @for (branch of popularBranches(); track branch.id) {
           <app-ui-card>
             <img
-              src="https://images.unsplash.com/photo-1503951914875-452162b7f304?q=80&w=2070&auto=format&fit=crop"
-              alt="Downtown Branch"
+              [src]="branch.image || defaultImage"
+              [alt]="branch.name"
               class="w-full h-48 object-cover"
             />
             <div class="p-4">
               <div class="flex justify-between items-start mb-2">
-                <h3 class="text-lg font-bold dark:text-white">Downtown Elite</h3>
-                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">{{
-                  t().open
-                }}</span>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ branch.name }}</h3>
+                <span
+                  class="text-xs px-2 py-1 rounded-full"
+                  [class.bg-green-100]="branch.isOpen !== false"
+                  [class.text-green-800]="branch.isOpen !== false"
+                  [class.bg-red-100]="branch.isOpen === false"
+                  [class.text-red-800]="branch.isOpen === false"
+                >
+                  {{ branch.isOpen !== false ? t().open : t().closed }}
+                </span>
               </div>
-              <p class="text-gray-500 text-sm mb-4">123 Main St, Cairo</p>
+              <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 flex items-center gap-1">
+                <span>📍</span> {{ branch.location }}
+              </p>
               <div class="flex justify-between items-center">
-                <span class="text-yellow-500 text-sm font-bold">★ 4.9 (120)</span>
-                <app-ui-button size="sm" variant="secondary" routerLink="/branches/1">{{
-                  t().book
-                }}</app-ui-button>
+                <span class="text-yellow-500 text-sm font-bold">
+                  ★ {{ branch.rating || 'New' }}
+                  <span class="text-gray-400 font-normal">({{ branch.reviewCount || 0 }})</span>
+                </span>
+                <app-ui-button
+                  size="sm"
+                  variant="secondary"
+                  [routerLink]="['/branches', branch.id]"
+                >
+                  {{ t().book }}
+                </app-ui-button>
               </div>
             </div>
           </app-ui-card>
-
-          <!-- Mock Branch 2 -->
-          <app-ui-card>
-            <img
-              src="https://images.unsplash.com/photo-1622287162716-f311baa36489?q=80&w=2070&auto=format&fit=crop"
-              alt="Zamalek Branch"
-              class="w-full h-48 object-cover"
-            />
-            <div class="p-4">
-              <div class="flex justify-between items-start mb-2">
-                <h3 class="text-lg font-bold dark:text-white">Zamalek Classic</h3>
-                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">{{
-                  t().open
-                }}</span>
-              </div>
-              <p class="text-gray-500 text-sm mb-4">45 Nile St, Zamalek</p>
-              <div class="flex justify-between items-center">
-                <span class="text-yellow-500 text-sm font-bold">★ 4.8 (95)</span>
-                <app-ui-button size="sm" variant="secondary" routerLink="/branches/2">{{
-                  t().book
-                }}</app-ui-button>
-              </div>
-            </div>
-          </app-ui-card>
-
-          <!-- Mock Branch 3 -->
-          <app-ui-card>
-            <img
-              src="https://images.unsplash.com/photo-1599351431202-1e0f0137899a?q=80&w=1976&auto=format&fit=crop"
-              alt="New Cairo Branch"
-              class="w-full h-48 object-cover"
-            />
-            <div class="p-4">
-              <div class="flex justify-between items-start mb-2">
-                <h3 class="text-lg font-bold dark:text-white">New Cairo Hub</h3>
-                <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">{{
-                  t().closed
-                }}</span>
-              </div>
-              <p class="text-gray-500 text-sm mb-4">90th St, New Cairo</p>
-              <div class="flex justify-between items-center">
-                <span class="text-yellow-500 text-sm font-bold">★ 4.7 (80)</span>
-                <app-ui-button size="sm" variant="secondary" routerLink="/branches/3">{{
-                  t().book
-                }}</app-ui-button>
-              </div>
-            </div>
-          </app-ui-card>
+          } @empty {
+          <div class="col-span-3 text-center py-12 text-gray-500">
+            No branches available at the moment.
+          </div>
+          }
         </div>
       </div>
     </section>
   `,
 })
-export class LandingPageComponent {
+export class LandingPageComponent implements OnInit {
   private languageService = inject(LanguageService);
+  private branchService = inject(BranchService);
+
   t = this.languageService.t;
+  popularBranches = signal<BranchExtended[]>([]);
+  defaultImage =
+    'https://images.unsplash.com/photo-1503951914875-452162b7f304?q=80&w=2070&auto=format&fit=crop';
+
+  ngOnInit() {
+    this.branchService.getAllBranches().subscribe({
+      next: (branches) => {
+        // Take first 3 branches as popular ones
+        this.popularBranches.set(branches.slice(0, 3) as BranchExtended[]);
+      },
+      error: (err) => console.error('Error fetching branches:', err),
+    });
+  }
 }

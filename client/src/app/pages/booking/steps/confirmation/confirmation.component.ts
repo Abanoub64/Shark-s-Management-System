@@ -38,9 +38,12 @@ import { UiButtonComponent } from '../../../../components/shared/ui-button.compo
           </div>
           <div class="flex justify-between">
             <span class="text-gray-500">Barber</span>
-            <span class="font-medium">{{
-              bookingService.selectedBarber()?.name || 'Any Professional'
-            }}</span>
+            <span class="font-medium">
+              @if (bookingService.selectedBarber()) {
+              {{ bookingService.selectedBarber()?.firstName }}
+              {{ bookingService.selectedBarber()?.lastName }}
+              } @else { Any Professional }
+            </span>
           </div>
           <div class="flex justify-between">
             <span class="text-gray-500">Payment</span>

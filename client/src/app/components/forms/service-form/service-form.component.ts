@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ShopService } from '../../../core/services/shop-service.service';
+import { Service } from '../../../core/services/shop-service.service';
 
 @Component({
   selector: 'app-service-form',
@@ -33,20 +33,7 @@ import { ShopService } from '../../../core/services/shop-service.service';
           required
         />
       </div>
-      <div class="mb-4">
-        <label class="block text-gray-700 text-sm font-bold mb-2" for="duration"
-          >Duration (minutes)</label
-        >
-        <input
-          [(ngModel)]="service.duration"
-          name="duration"
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          id="duration"
-          type="number"
-          placeholder="Duration"
-          required
-        />
-      </div>
+      <!-- Duration field removed as it's not in the base Service interface -->
       <div class="flex items-center justify-end">
         <button
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
@@ -60,8 +47,8 @@ import { ShopService } from '../../../core/services/shop-service.service';
   styles: [],
 })
 export class ServiceFormComponent {
-  @Input() service: ShopService = { name: '', price: 0, duration: 0 };
-  @Output() save = new EventEmitter<ShopService>();
+  @Input() service: Service = { name: '', price: 0 };
+  @Output() save = new EventEmitter<Service>();
 
   onSubmit() {
     this.save.emit(this.service);

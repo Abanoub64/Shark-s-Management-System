@@ -1,7 +1,8 @@
 import { Component, inject, input, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { BranchService } from '../../../core/services/branch.service';
+import { Observable, map } from 'rxjs';
+import { BranchService, BranchExtended } from '../../../core/services/branch.service';
 import { UiButtonComponent } from '../../../components/shared/ui-button.component';
 import { UiCardComponent } from '../../../components/shared/ui-card.component';
 
@@ -24,7 +25,7 @@ import { UiCardComponent } from '../../../components/shared/ui-card.component';
           <div class="flex-1">
             <h1 class="text-3xl font-bold mb-2">{{ branch.name }}</h1>
             <p class="text-gray-500 mb-4 flex items-center gap-2">
-              <span>📍</span> {{ branch.address }}
+              <span>📍</span> {{ branch.location }}
             </p>
             <div class="flex items-center gap-4 mb-6">
               <span class="flex items-center text-yellow-500 font-bold">
@@ -113,6 +114,8 @@ export class BranchDetailComponent {
 
   branch = computed(() => {
     const branchId = this.id();
-    return branchId ? this.branchService.getBranch(branchId) : undefined;
+    return branchId
+      ? (this.branchService.getBranch(branchId) as Observable<BranchExtended>)
+      : undefined;
   });
 }
