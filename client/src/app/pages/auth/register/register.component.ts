@@ -6,6 +6,7 @@ import { UiButtonComponent } from '../../../components/shared/ui-button.componen
 import { ReactiveFormsModule, FormControl, Validators, FormGroup } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { LanguageService } from '../../../core/services/language.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-register',
@@ -69,6 +70,59 @@ import { LanguageService } from '../../../core/services/language.service';
               [required]="true"
             ></app-ui-input>
 
+            <!-- Password Requirements Feedback -->
+            <div
+              class="text-sm space-y-1 bg-gray-50 p-3 rounded-md"
+              *ngIf="registerForm.get('password')?.value"
+            >
+              <p class="font-medium text-gray-700 mb-2">Password must contain:</p>
+              <div
+                class="flex items-center gap-2"
+                [class.text-green-600]="checkPassword('minLength')"
+                [class.text-gray-500]="!checkPassword('minLength')"
+              >
+                <span *ngIf="checkPassword('minLength')">✓</span>
+                <span *ngIf="!checkPassword('minLength')">○</span>
+                At least 6 characters
+              </div>
+              <div
+                class="flex items-center gap-2"
+                [class.text-green-600]="checkPassword('uppercase')"
+                [class.text-gray-500]="!checkPassword('uppercase')"
+              >
+                <span *ngIf="checkPassword('uppercase')">✓</span>
+                <span *ngIf="!checkPassword('uppercase')">○</span>
+                Uppercase letter
+              </div>
+              <div
+                class="flex items-center gap-2"
+                [class.text-green-600]="checkPassword('lowercase')"
+                [class.text-gray-500]="!checkPassword('lowercase')"
+              >
+                <span *ngIf="checkPassword('lowercase')">✓</span>
+                <span *ngIf="!checkPassword('lowercase')">○</span>
+                Lowercase letter
+              </div>
+              <div
+                class="flex items-center gap-2"
+                [class.text-green-600]="checkPassword('number')"
+                [class.text-gray-500]="!checkPassword('number')"
+              >
+                <span *ngIf="checkPassword('number')">✓</span>
+                <span *ngIf="!checkPassword('number')">○</span>
+                Number
+              </div>
+              <div
+                class="flex items-center gap-2"
+                [class.text-green-600]="checkPassword('special')"
+                [class.text-gray-500]="!checkPassword('special')"
+              >
+                <span *ngIf="checkPassword('special')">✓</span>
+                <span *ngIf="!checkPassword('special')">○</span>
+                Special character
+              </div>
+            </div>
+
             <app-ui-input
               [label]="t().confirmPasswordLabel"
               type="password"
@@ -93,6 +147,7 @@ export class RegisterComponent {
   authService = inject(AuthService);
   router = inject(Router);
   languageService = inject(LanguageService);
+  toastService = inject(ToastService);
   t = this.languageService.t;
 
   registerForm = new FormGroup({
@@ -107,6 +162,25 @@ export class RegisterComponent {
     confirmPassword: new FormControl('', [Validators.required]),
   });
 
+  // ... component logic
+  passwordValidators = {
+    minLength: (val: string) => val.length >= 6,
+    uppercase: (val: string) => /[A-Z]/.test(val),
+    lowercase: (val: string) => /[a-z]/.test(val),
+    number: (val: string) => /[0-9]/.test(val),
+    special: (val: string) => /[!@#$%^&*(),.?":{}|<>]/.test(val),
+  };
+
+  checkPassword(criterion: keyof typeof this.passwordValidators): boolean {
+    const val = this.registerForm.get('password')?.value || '';
+    return this.passwordValidators[criterion](val);
+  }
+
+  isPasswordValid(): boolean {
+    const val = this.registerForm.get('password')?.value || '';
+    return Object.values(this.passwordValidators).every((validator) => validator(val));
+  }
+
   passwordMismatchError(): string | null {
     if (
       this.registerForm.get('confirmPassword')?.touched &&
@@ -118,7 +192,7 @@ export class RegisterComponent {
   }
 
   onSubmit() {
-    if (this.registerForm.valid && !this.passwordMismatchError()) {
+    if (this.registerForm.valid && !this.passwordMismatchError() && this.isPasswordValid()) {
       const { firstName, lastName, phoneNumber, email, password } = this.registerForm.value;
       this.authService
         .register({
@@ -136,9 +210,19 @@ export class RegisterComponent {
           },
           error: (err) => {
             console.error('Registration failed', err);
-            // Ideally show a toast here
+            this.toastService.error('Registration Failed', 'Please try again.');
           },
         });
+    } else {
+      this.registerForm.markAllAsTouched();
+      if (!this.isPasswordValid()) {
+        this.toastService.error(
+          'Weak Password',
+          'Please ensure your password meets all requirements.'
+        );
+      } else {
+        this.toastService.error('Invalid Form', 'Please fill in all required fields correctly.');
+      }
     }
   }
 }

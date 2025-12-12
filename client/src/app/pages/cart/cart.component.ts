@@ -4,6 +4,7 @@ import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../core/services/cart.service';
 import { LanguageService } from '../../core/services/language.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-cart',
@@ -167,6 +168,7 @@ export class CartComponent implements OnInit {
   cartService = inject(CartService);
   langService = inject(LanguageService);
   private router = inject(Router);
+  private authService = inject(AuthService);
 
   phone = '';
   address = '';
@@ -186,7 +188,13 @@ export class CartComponent implements OnInit {
 
   proceedToCheckout() {
     if (this.isValid()) {
-      this.router.navigate(['/checkout']);
+      if (this.authService.isAuthenticated) {
+        this.router.navigate(['/checkout']);
+      } else {
+        this.router.navigate(['/auth/login'], {
+          queryParams: { returnUrl: '/checkout' },
+        });
+      }
     }
   }
 

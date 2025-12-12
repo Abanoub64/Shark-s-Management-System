@@ -198,6 +198,54 @@ import { FooterComponent } from '../footer/footer.component';
             >
               (AI) {{ t().tryHaircut }}
             </a>
+
+            @if (authService.isAuthenticated) {
+            <div class="border-t border-gray-100 pt-4 flex flex-col gap-3">
+              <!-- Role Links -->
+              @if (authService.isAdmin) {
+              <a
+                routerLink="/admin"
+                class="text-red-500 font-medium hover:text-red-600"
+                (click)="toggleMobileMenu()"
+                >Admin Panel</a
+              >
+              } @if (authService.isBranchManager) {
+              <a
+                routerLink="/branch-panel"
+                class="text-blue-500 font-medium hover:text-blue-600"
+                (click)="toggleMobileMenu()"
+                >Branch Panel</a
+              >
+              } @if (authService.isBarber) {
+              <a
+                routerLink="/staff"
+                class="text-green-500 font-medium hover:text-green-600"
+                (click)="toggleMobileMenu()"
+                >Barber Dashboard</a
+              >
+              }
+
+              <!-- User Links -->
+              <a
+                routerLink="/profile"
+                class="text-gray-600 hover:text-primary font-medium"
+                (click)="toggleMobileMenu()"
+                >{{ t().profile }}</a
+              >
+              <a
+                routerLink="/my-history"
+                class="text-gray-600 hover:text-primary font-medium"
+                (click)="toggleMobileMenu()"
+                >My History</a
+              >
+              <button
+                (click)="authService.logout(); toggleMobileMenu()"
+                class="text-left text-red-600 font-medium hover:text-red-700"
+              >
+                {{ t().logout }}
+              </button>
+            </div>
+            } @else {
             <a
               routerLink="/auth/login"
               class="bg-primary text-center text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors"
@@ -205,6 +253,7 @@ import { FooterComponent } from '../footer/footer.component';
             >
               {{ t().signIn }}
             </a>
+            }
           </div>
         </div>
         }

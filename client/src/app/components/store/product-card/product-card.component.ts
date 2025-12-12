@@ -10,60 +10,77 @@ import { CartService } from '../../../core/services/cart.service';
   imports: [CommonModule],
   template: `
     <div
-      class="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group h-full flex flex-col"
+      class="group bg-white rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-300 h-full flex flex-col border border-gray-100"
     >
       <!-- Product Image -->
-      <div class="relative h-48 overflow-hidden">
+      <div class="relative aspect-[4/5] overflow-hidden bg-gray-50">
         <img
-          [src]="product.image"
+          [src]="product.image || defaultImage"
           [alt]="product.name"
-          class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+          class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
         />
-        <div class="absolute top-2 right-2">
+
+        <!-- Stock Badge -->
+        <div class="absolute top-4 left-4">
           <span
-            class="px-2 py-1 text-xs font-semibold rounded-full"
+            class="px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full shadow-sm backdrop-blur-md"
             [ngClass]="
               product.stock && product.stock > 0
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800'
+                ? 'bg-white/90 text-green-700'
+                : 'bg-red-500 text-white'
             "
           >
             {{ product.stock && product.stock > 0 ? t().inStock : t().outOfStock }}
           </span>
         </div>
-      </div>
 
-      <!-- Content -->
-      <div class="p-4 flex-1 flex flex-col">
-        <div class="flex-1">
-          <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">{{ product.name }}</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-3">
-            {{ product.description }}
-          </p>
-        </div>
-
-        <div class="mt-4 flex items-center justify-between">
-          <div class="flex flex-col">
-            <span class="text-xs text-gray-500">{{ t().price }}</span>
-            <span class="text-xl font-bold text-primary-600 dark:text-primary-400">
-              {{ product.price }} EGP
-            </span>
-          </div>
-
+        <!-- Add to Cart Overlay Button (Desktop) -->
+        <div
+          class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20 pointer-events-none group-hover:pointer-events-auto"
+        >
           <button
             (click)="addToCart()"
             [disabled]="!product.stock || product.stock === 0"
-            class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 bg-gradient-to-r from-secondary to-yellow-500 hover:from-yellow-500 hover:to-secondary text-black font-bold shadow-xl px-6 py-3 rounded-full flex items-center gap-2 border-none"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
               />
             </svg>
-            <span class="hidden sm:inline">Add to Cart</span>
+            Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="p-5 flex-1 flex flex-col">
+        <div class="flex-1">
+          <div class="flex justify-between items-start gap-2 mb-2">
+            <h3 class="text-lg font-bold text-black leading-tight font-serif">
+              {{ product.name }}
+            </h3>
+            <span class="text-lg font-bold text-secondary whitespace-nowrap">
+              EGP {{ product.price }}
+            </span>
+          </div>
+
+          <p class="text-sm text-gray-500 line-clamp-2 mb-4">
+            {{ product.description }}
+          </p>
+        </div>
+
+        <!-- Mobile Action (Always visible on mobile) -->
+        <div class="md:hidden mt-2">
+          <button
+            (click)="addToCart()"
+            [disabled]="!product.stock || product.stock === 0"
+            class="w-full bg-black text-white py-2 text-sm rounded-xl flex items-center justify-center gap-2 hover:bg-secondary hover:text-black transition-colors duration-300 font-bold"
+          >
+            {{ t().addToCart }}
           </button>
         </div>
       </div>
@@ -72,6 +89,9 @@ import { CartService } from '../../../core/services/cart.service';
 })
 export class ProductCardComponent {
   @Input() product!: Product;
+
+  readonly defaultImage =
+    'https://st4.depositphotos.com/16122460/21586/i/1600/depositphotos_215866804-stock-photo-flat-lay-composition-hair-salon.jpg';
 
   langService = inject(LanguageService);
   private cartService = inject(CartService);

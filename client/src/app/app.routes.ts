@@ -26,13 +26,6 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'hairstyle-recommender',
-        loadComponent: () =>
-          import('./components/hairstyle-recommender/hairstyle-recommender.component').then(
-            (m) => m.HairstyleRecommenderComponent
-          ),
-      },
-      {
         path: 'store',
         loadComponent: () => import('./pages/store/store.component').then((m) => m.StoreComponent),
       },

@@ -211,13 +211,19 @@ export class BranchFeedbackComponent implements OnInit {
   }
 
   loadBranch(id: number) {
-    this.branchService.getBranch(id).subscribe({
-      next: (branch) => {
-        this.branch.set(branch);
+    // Use getAllBranches (public) instead of getBranch (protected) to allow guest access
+    this.branchService.getAllBranches().subscribe({
+      next: (branches) => {
+        const foundBranch = branches.find((b) => b.id === id);
+        if (foundBranch) {
+          this.branch.set(foundBranch);
+        } else {
+          console.error('Branch not found in public list');
+        }
         this.isLoading.set(false);
       },
       error: (error) => {
-        console.error('Error loading branch:', error);
+        console.error('Error loading branches:', error);
         this.isLoading.set(false);
       },
     });

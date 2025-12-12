@@ -152,7 +152,7 @@ export class LanguageService {
       loginNow: 'Login Now',
 
       // Dashboard
-      superAdminDashboard: 'Super Admin Dashboard',
+      superAdminDashboard: 'Sharks Dashboard',
       welcomeMessage: "Welcome back! Here's what's happening today.",
       totalRevenueYTD: 'Total Revenue (YTD)',
       yearToDateEarnings: 'Year to date earnings',
@@ -231,7 +231,7 @@ export class LanguageService {
       // averageRating key exists in Dashboard section
       happyClients: 'Happy Clients',
       yearsExperience: 'Years Experience',
-      whyChoose: 'Why Choose BarberChain?',
+      whyChoose: 'Why Choose Sharks?',
       whyChooseSubtitle:
         'We combine traditional techniques with modern style to give you the best look.',
       expertBarbers: 'Expert Barbers',
@@ -452,7 +452,7 @@ export class LanguageService {
       loginNow: 'سجل دخول الآن',
 
       // Dashboard
-      superAdminDashboard: 'لوحة تحكم الإدارة العليا',
+      superAdminDashboard: 'لوحة تحكم Sharks',
       welcomeMessage: 'مرحباً بعودتك! إليك ملخص اليوم.',
       totalRevenueYTD: 'إجمالي الإيرادات (السنة الحالية)',
       yearToDateEarnings: 'أرباح منذ بداية العام',
@@ -531,7 +531,7 @@ export class LanguageService {
       // averageRating key exists in Dashboard section
       happyClients: 'عميل سعيد',
       yearsExperience: 'سنوات خبرة',
-      whyChoose: 'لماذا تختار BarberChain؟',
+      whyChoose: 'لماذا تختار Sharks',
       whyChooseSubtitle: 'نجمع بين التقنيات التقليدية والأسلوب الحديث لمنحك أفضل مظهر.',
       expertBarbers: 'حلاقون خبراء',
       expertBarbersDesc: 'فريقنا يتكون من محترفين مدربين تدريباً عالياً ولديهم سنوات من الخبرة.',

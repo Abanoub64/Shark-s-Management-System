@@ -8,48 +8,64 @@ import { LanguageService } from '../../../core/services/language.service';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <footer class="bg-primary text-white py-12">
+    <footer class="bg-black text-white py-12 border-t border-white/10">
       <div class="container mx-auto px-4">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
-              <span class="text-secondary">✂</span> BarberChain
+            <h3 class="text-2xl font-bold mb-4 flex items-center gap-2 text-secondary font-serif">
+              <span>✂</span> Sharks
             </h3>
-            <p class="text-gray-400 text-sm">
+            <p class="text-gray-400 text-sm leading-relaxed">
               {{ t().footerTagline }}
             </p>
           </div>
           <div>
-            <h4 class="font-bold mb-4">{{ t().quickLinks }}</h4>
+            <h4 class="font-bold mb-4 text-secondary uppercase tracking-wider text-sm">
+              {{ t().quickLinks }}
+            </h4>
             <ul class="space-y-2 text-sm text-gray-400">
               <li>
-                <a routerLink="/branches" class="hover:text-white">{{ t().findBranch }}</a>
+                <a routerLink="/branches" class="hover:text-secondary transition-colors">{{
+                  t().findBranch
+                }}</a>
               </li>
               <li>
-                <a routerLink="/booking" class="hover:text-white">{{ t().bookAppointment }}</a>
+                <a routerLink="/booking" class="hover:text-secondary transition-colors">{{
+                  t().bookAppointment
+                }}</a>
               </li>
               <li>
-                <a routerLink="/store" class="hover:text-white">{{ t().store }}</a>
+                <a routerLink="/store" class="hover:text-secondary transition-colors">{{
+                  t().store
+                }}</a>
               </li>
             </ul>
           </div>
           <div>
-            <h4 class="font-bold mb-4">{{ t().support }}</h4>
+            <h4 class="font-bold mb-4 text-secondary uppercase tracking-wider text-sm">
+              {{ t().support }}
+            </h4>
             <ul class="space-y-2 text-sm text-gray-400">
               <li>
-                <a routerLink="/contact" class="hover:text-white">{{ t().contactUs }}</a>
+                <a routerLink="/contact" class="hover:text-secondary transition-colors">{{
+                  t().contactUs
+                }}</a>
               </li>
               <li>
-                <a routerLink="/faq" class="hover:text-white">{{ t().faq }}</a>
+                <a routerLink="/faq" class="hover:text-secondary transition-colors">{{
+                  t().faq
+                }}</a>
               </li>
             </ul>
           </div>
           <div>
-            <h4 class="font-bold mb-4">{{ t().connect }}</h4>
+            <h4 class="font-bold mb-4 text-secondary uppercase tracking-wider text-sm">
+              {{ t().connect }}
+            </h4>
             <a
               href="https://www.facebook.com/profile.php?id=61551409970406"
               target="_blank"
-              class="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+              class="inline-flex items-center gap-2 text-gray-400 hover:text-secondary transition-colors"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -66,8 +82,8 @@ import { LanguageService } from '../../../core/services/language.service';
             </a>
           </div>
         </div>
-        <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-          &copy; 2025 BarberChain. {{ t().rightsReserved }}
+        <div class="border-t border-white/10 mt-12 pt-8 text-center text-sm text-gray-500">
+          &copy; 2025 Sharks. {{ t().rightsReserved }}
         </div>
       </div>
     </footer>

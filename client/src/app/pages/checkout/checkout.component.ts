@@ -14,116 +14,169 @@ declare var paypal: any;
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="container mx-auto px-4 py-8">
-      <h1 class="text-3xl font-bold mb-8">Checkout</h1>
+    <div class="min-h-screen bg-white py-12">
+      <div class="container mx-auto px-4">
+        <h1 class="text-4xl font-bold mb-8 text-black font-serif border-b border-gray-100 pb-4">
+          Checkout
+        </h1>
 
-      @if (cartService.items().length === 0) {
-      <div class="text-center py-16">
-        <p class="text-gray-600 mb-4">Your cart is empty</p>
-        <a routerLink="/store" class="text-primary-600 hover:underline">Continue Shopping</a>
-      </div>
-      } @else {
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Order Summary -->
-        <div>
-          <h2 class="text-2xl font-bold mb-4">Order Summary</h2>
-          <div class="bg-white rounded-lg shadow-md p-6">
-            <!-- Contact Info Preview -->
-            <div class="mb-6 pb-6 border-b">
-              <h3 class="font-semibold text-gray-900 mb-2">Shipping Details</h3>
-              <p class="text-gray-600">
-                <span class="font-medium">Phone:</span> {{ cartService.checkoutPhone() }}
-              </p>
-              <p class="text-gray-600">
-                <span class="font-medium">Address:</span> {{ cartService.checkoutAddress() }}
-              </p>
-            </div>
-
-            @for (item of cartService.items(); track item.productId) {
-            <div class="flex justify-between mb-3 pb-3 border-b">
-              <div>
-                <p class="font-medium">{{ item.productName }}</p>
-                <p class="text-sm text-gray-500">Qty: {{ item.quantity }} × {{ item.price }} EGP</p>
+        @if (cartService.items().length === 0) {
+        <div class="text-center py-20 bg-gray-50 rounded-3xl border border-gray-100">
+          <div class="text-6xl mb-4">🛒</div>
+          <p class="text-gray-500 mb-6 text-lg">Your cart is empty</p>
+          <a
+            routerLink="/store"
+            class="inline-block bg-black text-white px-8 py-3 rounded-full font-bold hover:bg-secondary hover:text-black transition-colors duration-300 shadow-lg"
+          >
+            Continue Shopping
+          </a>
+        </div>
+        } @else {
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Order Summary -->
+          <div class="lg:col-span-2">
+            <h2 class="text-2xl font-bold mb-6 text-black flex items-center gap-2">
+              <span class="text-secondary">01.</span> Order Summary
+            </h2>
+            <div class="bg-gray-50 rounded-3xl p-8 border border-gray-100 shadow-sm">
+              <!-- Contact Info Preview -->
+              <div class="mb-8 pb-8 border-b border-gray-200">
+                <h3 class="font-bold text-gray-900 mb-4 uppercase tracking-wider text-sm">
+                  Shipping Details
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="bg-white p-4 rounded-xl border border-gray-100">
+                    <span class="block text-xs text-gray-400 uppercase tracking-widest mb-1"
+                      >Phone</span
+                    >
+                    <span class="font-medium text-black">{{ cartService.checkoutPhone() }}</span>
+                  </div>
+                  <div class="bg-white p-4 rounded-xl border border-gray-100">
+                    <span class="block text-xs text-gray-400 uppercase tracking-widest mb-1"
+                      >Address</span
+                    >
+                    <span class="font-medium text-black">{{ cartService.checkoutAddress() }}</span>
+                  </div>
+                </div>
               </div>
-              <p class="font-semibold">{{ item.price * item.quantity }} EGP</p>
-            </div>
-            }
-            <div class="mt-4 pt-4 border-t">
-              <div class="flex justify-between text-xl font-bold">
-                <span>Total</span>
-                <span>{{ cartService.totalPrice() }} EGP</span>
+
+              <div class="space-y-4">
+                @for (item of cartService.items(); track item.productId) {
+                <div
+                  class="flex items-center justify-between bg-white p-4 rounded-xl border border-gray-100"
+                >
+                  <div class="flex items-center gap-4">
+                    <div
+                      class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-xl"
+                    >
+                      🛍️
+                    </div>
+                    <div>
+                      <p class="font-bold text-black">{{ item.productName }}</p>
+                      <p class="text-sm text-gray-500">
+                        Qty: {{ item.quantity }} × {{ item.price }} EGP
+                      </p>
+                    </div>
+                  </div>
+                  <p class="font-bold text-lg text-black">
+                    {{ item.price * item.quantity }} <span class="text-sm text-gray-400">EGP</span>
+                  </p>
+                </div>
+                }
+              </div>
+
+              <div class="mt-8 pt-6 border-t border-gray-200">
+                <div class="flex justify-between items-end">
+                  <span class="text-gray-500 font-medium">Total Amount</span>
+                  <span class="text-3xl font-bold text-black font-serif"
+                    >{{ cartService.totalPrice() }}
+                    <span class="text-secondary text-lg">EGP</span></span
+                  >
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Payment -->
-        <div>
-          <h2 class="text-2xl font-bold mb-4">Payment Method</h2>
-          <div class="bg-white rounded-lg shadow-md p-6">
-            <!-- Payment Method Selection -->
-            <div class="space-y-4 mb-6">
-              <label
-                class="flex items-center p-4 border rounded-lg cursor-pointer transition hover:bg-gray-50"
-                [class.border-primary-500]="selectedPaymentMethod() === 'PayPal'"
-                [class.ring-1]="selectedPaymentMethod() === 'PayPal'"
-                [class.ring-primary-500]="selectedPaymentMethod() === 'PayPal'"
-              >
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="PayPal"
-                  [ngModel]="selectedPaymentMethod()"
-                  (ngModelChange)="selectedPaymentMethod.set($event)"
-                  class="w-4 h-4 text-primary-600 focus:ring-primary-500"
-                />
-                <span class="ml-3 font-medium">PayPal</span>
-                <span class="ml-auto text-sm text-gray-500">Credit Card, Debit Card</span>
-              </label>
+          <!-- Payment -->
+          <div>
+            <h2 class="text-2xl font-bold mb-6 text-black flex items-center gap-2">
+              <span class="text-secondary">02.</span> Payment
+            </h2>
+            <div class="bg-gray-50 rounded-3xl p-8 border border-gray-100 shadow-sm sticky top-24">
+              <!-- Payment Method Selection -->
+              <div class="space-y-4 mb-8">
+                <label
+                  class="flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-300"
+                  [class.border-secondary]="selectedPaymentMethod() === 'PayPal'"
+                  [class.bg-white]="selectedPaymentMethod() === 'PayPal'"
+                  [class.shadow-md]="selectedPaymentMethod() === 'PayPal'"
+                  [class.border-gray-200]="selectedPaymentMethod() !== 'PayPal'"
+                >
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="PayPal"
+                    [ngModel]="selectedPaymentMethod()"
+                    (ngModelChange)="selectedPaymentMethod.set($event)"
+                    class="w-5 h-5 text-secondary focus:ring-secondary border-gray-300"
+                  />
+                  <div class="ml-3">
+                    <span class="block font-bold text-black">PayPal</span>
+                    <span class="block text-xs text-gray-500">Credit / Debit Card</span>
+                  </div>
+                </label>
 
-              <label
-                class="flex items-center p-4 border rounded-lg cursor-pointer transition hover:bg-gray-50"
-                [class.border-primary-500]="selectedPaymentMethod() === 'Cash'"
-                [class.ring-1]="selectedPaymentMethod() === 'Cash'"
-                [class.ring-primary-500]="selectedPaymentMethod() === 'Cash'"
-              >
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="Cash"
-                  [ngModel]="selectedPaymentMethod()"
-                  (ngModelChange)="selectedPaymentMethod.set($event)"
-                  class="w-4 h-4 text-primary-600 focus:ring-primary-500"
-                />
-                <span class="ml-3 font-medium">Cash on Delivery</span>
-                <span class="ml-auto text-sm text-gray-500">Pay when you receive</span>
-              </label>
-            </div>
+                <label
+                  class="flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-300"
+                  [class.border-secondary]="selectedPaymentMethod() === 'Cash'"
+                  [class.bg-white]="selectedPaymentMethod() === 'Cash'"
+                  [class.shadow-md]="selectedPaymentMethod() === 'Cash'"
+                  [class.border-gray-200]="selectedPaymentMethod() !== 'Cash'"
+                >
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="Cash"
+                    [ngModel]="selectedPaymentMethod()"
+                    (ngModelChange)="selectedPaymentMethod.set($event)"
+                    class="w-5 h-5 text-secondary focus:ring-secondary border-gray-300"
+                  />
+                  <div class="ml-3">
+                    <span class="block font-bold text-black">Cash on Delivery</span>
+                    <span class="block text-xs text-gray-500">Pay when received</span>
+                  </div>
+                </label>
+              </div>
 
-            @if (isProcessing()) {
-            <div class="text-center py-8">
+              @if (isProcessing()) {
+              <div class="text-center py-8">
+                <div
+                  class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-secondary"
+                ></div>
+                <p class="mt-4 text-gray-600 font-medium">Processing payment...</p>
+              </div>
+              } @else {
+              <!-- PayPal Container -->
               <div
-                class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"
+                [hidden]="selectedPaymentMethod() !== 'PayPal'"
+                id="paypal-button-container"
+                class="mb-4"
               ></div>
-              <p class="mt-4 text-gray-600">Processing payment...</p>
-            </div>
-            } @else {
-            <!-- PayPal Container -->
-            <div [hidden]="selectedPaymentMethod() !== 'PayPal'" id="paypal-button-container"></div>
 
-            <!-- Cash Button -->
-            @if (selectedPaymentMethod() === 'Cash') {
-            <button
-              (click)="placeCashOrder()"
-              class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition"
-            >
-              Place Order ({{ cartService.totalPrice() }} EGP)
-            </button>
-            } }
+              <!-- Cash Button -->
+              @if (selectedPaymentMethod() === 'Cash') {
+              <button
+                (click)="placeCashOrder()"
+                class="w-full bg-gradient-to-r from-secondary to-yellow-500 text-black font-bold py-4 px-6 rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all duration-300 shadow-md shadow-yellow-500/20"
+              >
+                Place Order ({{ cartService.totalPrice() }} EGP)
+              </button>
+              } }
+            </div>
           </div>
         </div>
+        }
       </div>
-      }
     </div>
   `,
 })

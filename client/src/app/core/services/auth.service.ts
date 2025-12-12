@@ -70,8 +70,21 @@ export class AuthService {
       });
     } else {
       // If essential data is missing, clear everything to avoid inconsistent state
-      this.logout();
+      // DO NOT call logout() here because it redirects to login page, preventing access to public pages
+      this.clearSessionData();
     }
+  }
+
+  private clearSessionData() {
+    this.currentUser.set(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('firstName');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('roles');
+    localStorage.removeItem('email');
+    localStorage.removeItem('managedBranchId');
+    localStorage.removeItem('barber_shop_cart');
   }
 
   login(credentials: { email: string; password: string }): Observable<AuthResponse> {
@@ -166,15 +179,7 @@ export class AuthService {
   }
 
   logout() {
-    this.currentUser.set(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('firstName');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('roles');
-    localStorage.removeItem('email');
-    localStorage.removeItem('managedBranchId');
-    localStorage.removeItem('barber_shop_cart');
+    this.clearSessionData();
     this.router.navigate(['/auth/login']);
   }
 

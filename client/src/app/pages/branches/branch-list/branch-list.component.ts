@@ -35,51 +35,95 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
       </div>
 
       <!-- Branch List -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         @for (branch of filteredBranches(); track branch.id) {
-        <app-ui-card>
-          <div class="relative h-48">
-            <img
-              [src]="branch.image || defaultBranchImage"
-              [alt]="branch.name"
-              class="w-full h-full object-cover"
-            />
-            <div class="absolute top-4 right-4">
+        <div
+          [routerLink]="['/branches', branch.id]"
+          class="group relative h-80 rounded-3xl overflow-hidden shadow-xl cursor-pointer transform transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
+        >
+          <!-- Background Image -->
+          <img
+            [src]="branch.image || defaultBranchImage"
+            [alt]="branch.name"
+            class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+
+          <!-- Gradient Overlay -->
+          <div
+            class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300"
+          ></div>
+
+          <!-- Top Badges -->
+          <div class="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
+            <!-- Rating Badge -->
+            @if (branch.rating) {
+            <div
+              class="flex items-center gap-1 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10"
+            >
+              <span class="text-yellow-400 text-sm">★</span>
+              <span class="text-white text-sm font-bold">{{ branch.rating }}</span>
+              <span class="text-white/70 text-xs">({{ branch.reviewCount || 0 }})</span>
+            </div>
+            }
+
+            <!-- Status Badge -->
+            <span
+              class="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md shadow-lg"
+              [class.bg-green-500]="branch.isOpen !== false"
+              [class.text-white]="branch.isOpen !== false"
+              [class.bg-red-500]="branch.isOpen === false"
+              [class.text-white]="branch.isOpen === false"
+            >
+              {{ branch.isOpen !== false ? t().open : t().closed }}
+            </span>
+          </div>
+
+          <!-- Bottom Content -->
+          <div
+            class="absolute bottom-0 left-0 right-0 p-6 z-10 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300"
+          >
+            <h3 class="text-2xl font-bold text-white mb-2 leading-tight">
+              {{ branch.name }}
+            </h3>
+
+            <div class="flex items-center gap-2 text-gray-300 mb-4 text-sm">
+              <span>📍</span>
+              <span class="truncate">{{ branch.location }}</span>
+            </div>
+
+            <div
+              class="flex items-center justify-between pt-4 border-t border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-75"
+            >
+              <div class="flex flex-col">
+                <span class="text-xs text-gray-400 uppercase tracking-wider">Hours</span>
+                <span class="text-sm text-white font-medium">{{
+                  branch.hours || '10:00 AM - 10:00 PM'
+                }}</span>
+              </div>
+
               <span
-                class="px-2 py-1 rounded-full text-xs font-medium"
-                [class.bg-green-100]="branch.isOpen !== false"
-                [class.text-green-800]="branch.isOpen !== false"
-                [class.bg-red-100]="branch.isOpen === false"
-                [class.text-red-800]="branch.isOpen === false"
+                class="flex items-center gap-2 text-primary-400 font-semibold text-sm group-hover:translate-x-1 transition-transform"
               >
-                {{ branch.isOpen !== false ? t().open : t().closed }}
-              </span>
-            </div>
-          </div>
-          <div class="p-4">
-            <div class="flex justify-between items-start mb-2">
-              <h3 class="text-xl font-bold">{{ branch.name }}</h3>
-              @if (branch.rating) {
-              <span class="flex items-center text-yellow-500 text-sm font-bold">
-                ★ {{ branch.rating }}
-                <span class="text-gray-400 font-normal ml-1">({{ branch.reviewCount || 0 }})</span>
-              </span>
-              }
-            </div>
-            <p class="text-gray-500 text-sm mb-4 flex items-center gap-1">
-              <span>📍</span> {{ branch.location }}
-            </p>
-            <div class="flex items-center justify-between mt-4">
-              <span class="text-sm text-gray-500">{{ branch.hours || 'Daily 10AM - 2AM' }}</span>
-              <app-ui-button [routerLink]="['/branches', branch.id]" variant="secondary" size="sm">
                 {{ t().viewDetails }}
-              </app-ui-button>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </span>
             </div>
           </div>
-        </app-ui-card>
+        </div>
         } @empty {
-        <div class="col-span-full text-center py-12 text-gray-500">
-          {{ t().noBranchesFound }}
+        <div class="col-span-full flex flex-col items-center justify-center py-16 text-center">
+          <div class="text-6xl mb-4">🔍</div>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+            {{ t().noBranchesFound }}
+          </h3>
+          <p class="text-gray-500 dark:text-gray-400">Try adjusting your search criteria</p>
         </div>
         }
       </div>
@@ -93,7 +137,7 @@ export class BranchListComponent implements OnInit {
 
   // Default branch image
   readonly defaultBranchImage =
-    'https://res.cloudinary.com/duxf4pm9u/image/upload/v1733707559/uploaded_image_1765238759960.jpg';
+    'https://png.pngtree.com/background/20250116/original/pngtree-modern-barbershop-interior-with-empty-black-chairs-wooden-walls-and-mirrors-picture-image_16212968.jpg';
 
   searchControl = new FormControl('');
 

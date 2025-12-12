@@ -10,6 +10,7 @@ export interface Branch {
   name: string;
   location: string;
   managerId?: string;
+  imageUrl?: string; // Add this
 }
 
 // Extended interface for UI usage (optional fields)

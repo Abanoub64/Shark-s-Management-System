@@ -90,7 +90,7 @@ import { FormsModule } from '@angular/forms';
   styles: [],
 })
 export class DeleteConfirmationModalComponent {
-  @Input() isOpen: boolean = false;
+  @Input() isOpen: boolean = true;
   @Input() entityType: string = 'Item'; // e.g., 'Branch', 'Employee'
   @Input() entityName: string = ''; // e.g., 'Downtown Branch', 'John Doe'
 

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { LanguageService } from '../../../core/services/language.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { UiInputComponent } from '../../../components/shared/ui-input.component';
 import { UiButtonComponent } from '../../../components/shared/ui-button.component';
 import { ReactiveFormsModule, FormControl, Validators, FormGroup } from '@angular/forms';
@@ -58,11 +59,7 @@ import { ReactiveFormsModule, FormControl, Validators, FormGroup } from '@angula
               </label>
             </div>
 
-            <div class="text-sm">
-              <a href="#" class="font-medium text-primary hover:text-gray-800">
-                {{ t().forgotPassword }}
-              </a>
-            </div>
+            <!-- Forgot password link removed as requested -->
           </div>
 
           <div>
@@ -78,6 +75,7 @@ import { ReactiveFormsModule, FormControl, Validators, FormGroup } from '@angula
 export class LoginComponent {
   private authService = inject(AuthService);
   private languageService = inject(LanguageService);
+  private toastService = inject(ToastService);
   private router = inject(Router);
   t = this.languageService.t;
 
@@ -97,8 +95,12 @@ export class LoginComponent {
         },
         error: (err) => {
           console.error('Login failed', err);
+          this.toastService.error('Login Failed', 'Invalid email or password. Please try again.');
         },
       });
+    } else {
+      this.toastService.error('Invalid Form', 'Please fill in all required fields correctly.');
+      this.loginForm.markAllAsTouched();
     }
   }
 }
