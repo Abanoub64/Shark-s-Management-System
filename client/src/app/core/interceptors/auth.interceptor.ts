@@ -11,7 +11,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = localStorage.getItem('token');
 
   let authReq = req;
-  if (token) {
+  // Skip adding auth header for external S3 URLs
+  if (token && !req.url.includes('amazonaws.com')) {
     authReq = req.clone({
       setHeaders: {
         Authorization: `Bearer ${token}`,
@@ -25,7 +26,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         error instanceof HttpErrorResponse &&
         error.status === 401 &&
         !req.url.includes('refresh-token') &&
-        !req.url.includes('login')
+        !req.url.includes('login') &&
+        !req.url.includes('amazonaws.com')
       ) {
         if (!isRefreshing) {
           isRefreshing = true;

@@ -94,16 +94,6 @@ export class HairstyleRecommenderComponent {
       arabicRecommendation: 'سهل جداً في العناية.',
     },
     {
-      id: 6,
-      label: 'Egyptian Short Spiky',
-      arabicLabel: 'سبايكي مصري قصير',
-      prompt:
-        'Egyptian short spiky hair, keep original hair color, textured look, realistic barber style',
-      description: 'Short natural spike style.',
-      recommendation: 'Adds style without fake volume.',
-      arabicRecommendation: 'شكل شبابي بدون تغيير الشعر.',
-    },
-    {
       id: 7,
       label: 'Egyptian Medium Fade',
       arabicLabel: 'ميد فايد مصري',
@@ -123,16 +113,7 @@ export class HairstyleRecommenderComponent {
       recommendation: 'For bold sharp looks.',
       arabicRecommendation: 'لشكل جريء وحدّ.',
     },
-    {
-      id: 9,
-      label: 'Egyptian Short Blowout',
-      arabicLabel: 'بلو اوت مصري قصير',
-      prompt:
-        'Egyptian short blowout, keep original hair color, textured volume, realistic barber style',
-      description: 'Short blowout using real hair only.',
-      recommendation: 'Good for thick textured hair.',
-      arabicRecommendation: 'مناسب للشعر الكثيف.',
-    },
+
     {
       id: 10,
       label: 'Egyptian Curly Short Fade',
@@ -152,16 +133,6 @@ export class HairstyleRecommenderComponent {
       description: 'Military-style short cut.',
       recommendation: 'Very clean and formal.',
       arabicRecommendation: 'شكل انضباطي نضيف جداً.',
-    },
-    {
-      id: 12,
-      label: 'Egyptian Short Side Part',
-      arabicLabel: 'سايد بارت مصري قصير',
-      prompt:
-        'Egyptian short side part, keep original hair color, classic look, realistic barber style',
-      description: 'Short natural side part.',
-      recommendation: 'Adds elegance while staying natural.',
-      arabicRecommendation: 'شكل راقي وطبيعي.',
     },
     {
       id: 13,
