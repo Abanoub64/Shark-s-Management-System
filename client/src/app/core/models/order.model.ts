@@ -11,6 +11,7 @@ export interface CreateOrderRequest {
   userId: string;
   phoneNumber: string;
   address: string;
+  customerName?: string; // Add this
   paymentMethod: string;
   items: OrderItemDto[];
 }

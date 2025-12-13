@@ -2,6 +2,7 @@ import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router } from '@angular/router';
 import { BookingService } from '../../../core/services/booking.service';
+import { LanguageService } from '../../../core/services/language.service';
 
 @Component({
   selector: 'app-booking-flow',
@@ -27,7 +28,9 @@ import { BookingService } from '../../../core/services/booking.service';
             >
               {{ i + 1 }}
             </div>
-            <span class="text-xs font-medium text-gray-600 hidden md:block">{{ step.label }}</span>
+            <span class="text-xs font-medium text-gray-600 hidden md:block">{{
+              t()[step.key]
+            }}</span>
           </div>
           }
         </div>
@@ -42,14 +45,17 @@ import { BookingService } from '../../../core/services/booking.service';
 })
 export class BookingFlowComponent {
   bookingService = inject(BookingService);
+  languageService = inject(LanguageService);
   router = inject(Router);
 
+  t = this.languageService.t;
+
   steps = [
-    { path: 'service', label: 'Service' },
-    { path: 'date-time', label: 'Date & Time' },
-    { path: 'barber', label: 'Barber' },
-    { path: 'payment', label: 'Payment' },
-    { path: 'confirmation', label: 'Confirm' },
+    { path: 'service', key: 'stepService' },
+    { path: 'date-time', key: 'stepDateTime' },
+    { path: 'barber', key: 'stepBarber' },
+    { path: 'payment', key: 'stepPayment' },
+    { path: 'confirmation', key: 'stepConfirm' },
   ];
 
   isStepActive(path: string) {

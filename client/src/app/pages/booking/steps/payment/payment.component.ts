@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { BookingService } from '../../../../core/services/booking.service';
 import { UiButtonComponent } from '../../../../components/shared/ui-button.component';
 import { AuthService } from '../../../../core/services/auth.service';
+import { LanguageService } from '../../../../core/services/language.service';
 
 declare var paypal: any;
 
@@ -12,7 +13,7 @@ declare var paypal: any;
   standalone: true,
   imports: [CommonModule, UiButtonComponent],
   template: `
-    <h2 class="text-2xl font-bold mb-6">Payment Method</h2>
+    <h2 class="text-2xl font-bold mb-6">{{ t().paymentMethodTitle }}</h2>
 
     <div class="grid grid-cols-1 gap-4 mb-8">
       <!-- Cash Option -->
@@ -24,8 +25,8 @@ declare var paypal: any;
       >
         <div class="text-2xl">💵</div>
         <div>
-          <h3 class="font-bold">Pay Cash on Arrival</h3>
-          <p class="text-sm text-gray-500">Pay at the counter</p>
+          <h3 class="font-bold">{{ t().payCashTitle }}</h3>
+          <p class="text-sm text-gray-500">{{ t().payCashDesc }}</p>
         </div>
       </div>
 
@@ -39,8 +40,8 @@ declare var paypal: any;
         <div class="flex items-center gap-4 mb-2">
           <div class="text-2xl">🅿️</div>
           <div>
-            <h3 class="font-bold">PayPal</h3>
-            <p class="text-sm text-gray-500">Secure online payment</p>
+            <h3 class="font-bold">{{ t().payPalTitle }}</h3>
+            <p class="text-sm text-gray-500">{{ t().payPalDesc }}</p>
           </div>
         </div>
 
@@ -55,30 +56,31 @@ declare var paypal: any;
     </div>
 
     <div class="bg-gray-50 p-4 rounded-lg mb-8">
-      <h3 class="font-bold mb-2">Booking Summary</h3>
+      <h3 class="font-bold mb-2">{{ t().bookingSummary }}</h3>
       <div class="flex justify-between text-sm mb-1">
-        <span>Service</span>
+        <span>{{ t().serviceLabel }}</span>
         <span>{{ bookingService.selectedService()?.name }}</span>
       </div>
       <div class="flex justify-between text-sm mb-1">
-        <span>Date & Time</span>
+        <span>{{ t().dateTimeLabel }}</span>
         <span
-          >{{ bookingService.selectedDate() | date }} at {{ bookingService.selectedTime() }}</span
+          >{{ bookingService.selectedDate() | date }} {{ t().at }}
+          {{ bookingService.selectedTime() }}</span
         >
       </div>
       <div class="border-t border-gray-200 my-2 pt-2 flex justify-between font-bold">
-        <span>Total</span>
-        <span>\${{ bookingService.totalPrice() }}</span>
+        <span>{{ t().totalLabel }}</span>
+        <span>{{ bookingService.totalPrice() }} {{ t().currency }}</span>
       </div>
     </div>
 
     <div class="mt-8 flex justify-between">
-      <app-ui-button variant="outline" (click)="back()">Back</app-ui-button>
+      <app-ui-button variant="outline" (click)="back()">{{ t().back }}</app-ui-button>
 
       <!-- Only show Pay & Book button for Cash -->
       @if (bookingService.paymentMethod() === 'cash') {
       <app-ui-button (click)="next()" [disabled]="isProcessing">
-        @if (isProcessing) { Processing... } @else { Pay & Book }
+        @if (isProcessing) { {{ t().processing }} } @else { {{ t().bookBtn }} }
       </app-ui-button>
       }
     </div>
@@ -88,6 +90,9 @@ export class PaymentComponent {
   bookingService = inject(BookingService);
   router = inject(Router);
   authService = inject(AuthService);
+  languageService = inject(LanguageService);
+
+  t = this.languageService.t;
 
   @ViewChild('paypalButtonContainer', { static: false }) paypalButtonContainer!: ElementRef;
 
@@ -231,9 +236,16 @@ export class PaymentComponent {
 
     const startAt = `${year}-${month}-${day}T${time}:00`;
 
+    // Fetch customer fullName from localStorage
+    const storedFullName = localStorage.getItem('fullName');
+    const customerName =
+      storedFullName ||
+      `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() ||
+      'Unknown';
+
     const payload = {
       customerId: currentUser.id,
-      customerName: `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim(),
+      customerName: customerName,
       barberId: barber ? barber.barberId : 0,
       serviceId: service.id,
       branchId: branch?.id || 10,

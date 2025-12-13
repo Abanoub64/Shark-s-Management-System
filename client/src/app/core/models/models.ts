@@ -390,12 +390,14 @@ export interface BranchAnalytics {
   totalBookingsLastDays: number;
   totalRevenue: number;
   totalRevenueLastDays: number;
-  avgRating: number;
+  averageRating: number;
   peakHour: number;
   peakHourCount: number;
   bookingsPerDay: { date: string; count: number }[];
   revenuePerDay: { date: string; amount: number }[];
   topServices: { serviceName: string; count: number; revenue: number }[];
+  totalOrdersValue: number;
+  ordersCount: number;
 }
 
 // ========================================

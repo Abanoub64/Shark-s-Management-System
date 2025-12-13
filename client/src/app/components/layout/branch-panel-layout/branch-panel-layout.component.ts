@@ -1,8 +1,10 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { LanguageService } from '../../../core/services/language.service';
 import { ThemeService } from '../../../core/services/theme.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { BranchService } from '../../../core/services/branch.service';
 
 @Component({
   selector: 'app-branch-panel-layout',
@@ -34,7 +36,7 @@ import { ThemeService } from '../../../core/services/theme.service';
             class="text-2xl font-bold flex items-center gap-2"
             [style.color]="'var(--text-primary)'"
           >
-            <span style="color: var(--color-primary-500)">✂</span> Branch Panel
+            <span style="color: var(--color-primary-500)">✂</span> {{ branchName() }}
           </span>
           <button
             class="md:hidden text-gray-500 hover:text-gray-700"
@@ -125,7 +127,7 @@ import { ThemeService } from '../../../core/services/theme.service';
               </svg>
             </button>
             <h1 class="text-lg md:text-xl font-semibold" [style.color]="'var(--text-primary)'">
-              Branch Panel
+              {{ branchName() }}
             </h1>
           </div>
 
@@ -170,7 +172,7 @@ import { ThemeService } from '../../../core/services/theme.service';
             <!-- Exit -->
             <a
               routerLink="/"
-              class="hidden md:block text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              class="text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               [style.color]="'var(--text-secondary)'"
             >
               {{ langService.t().exit }}
@@ -216,10 +218,33 @@ import { ThemeService } from '../../../core/services/theme.service';
     `,
   ],
 })
-export class BranchPanelLayoutComponent {
+export class BranchPanelLayoutComponent implements OnInit {
   langService = inject(LanguageService);
   themeService = inject(ThemeService);
+  private authService = inject(AuthService);
+  private branchService = inject(BranchService);
+
   isMobileSidebarOpen = signal(false);
+  branchName = signal('Branch Panel');
+
+  ngOnInit() {
+    this.loadBranchName();
+  }
+
+  loadBranchName() {
+    const branchId = this.authService.managedBranchId;
+    if (branchId) {
+      this.branchService.getAllBranches().subscribe({
+        next: (branches) => {
+          const branch = branches.find((b) => b.id === branchId);
+          if (branch) {
+            this.branchName.set(branch.name);
+          }
+        },
+        error: (error) => console.error('Error loading branch name:', error),
+      });
+    }
+  }
 
   toggleMobileSidebar() {
     this.isMobileSidebarOpen.update((v) => !v);

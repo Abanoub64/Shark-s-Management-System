@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, effect } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
@@ -38,6 +38,45 @@ export class BookingService {
   totalPrice = computed(() => {
     return this.selectedService()?.price || 0;
   });
+
+  constructor() {
+    this.loadState();
+
+    // Auto-save state changes
+    effect(() => {
+      this.saveState();
+    });
+  }
+
+  private saveState() {
+    const state = {
+      branch: this.selectedBranch(),
+      service: this.selectedService(),
+      date: this.selectedDate(),
+      time: this.selectedTime(),
+      barber: this.selectedBarber(),
+      paymentMethod: this.paymentMethod(),
+    };
+    localStorage.setItem('booking_state', JSON.stringify(state));
+  }
+
+  private loadState() {
+    const saved = localStorage.getItem('booking_state');
+    if (saved) {
+      try {
+        const state = JSON.parse(saved);
+        if (state.branch) this.selectedBranch.set(state.branch);
+        if (state.service) this.selectedService.set(state.service);
+        if (state.date) this.selectedDate.set(new Date(state.date));
+        if (state.time) this.selectedTime.set(state.time);
+        if (state.barber) this.selectedBarber.set(state.barber);
+        if (state.paymentMethod) this.paymentMethod.set(state.paymentMethod);
+      } catch (e) {
+        console.error('Failed to restore booking state', e);
+        localStorage.removeItem('booking_state');
+      }
+    }
+  }
 
   getServices(branchId?: string): Observable<Service[]> {
     // The API seems to be global for services based on the user request,
@@ -97,5 +136,6 @@ export class BookingService {
     this.selectedTime.set(null);
     this.selectedBarber.set(null);
     this.paymentMethod.set(null);
+    localStorage.removeItem('booking_state');
   }
 }

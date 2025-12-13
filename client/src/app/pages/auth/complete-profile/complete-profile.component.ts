@@ -123,17 +123,17 @@ export class CompleteProfileComponent implements OnInit {
       // where we add the missing info.
 
       this.authService
-        .updateProfile({
+        .updateUser(currentUser.id, {
           firstName: firstName!,
           lastName: lastName!,
           phoneNumber: phoneNumber!,
-          // Password might be handled differently (e.g. separate endpoint), ignoring for now or assuming API handles it if sent
+          email: currentUser.email,
         })
         .subscribe({
           next: () => {
             this.router.navigate(['/']);
           },
-          error: (err) => {
+          error: (err: any) => {
             console.error('Profile completion failed', err);
           },
         });

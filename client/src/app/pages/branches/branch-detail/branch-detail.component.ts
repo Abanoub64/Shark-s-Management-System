@@ -4,6 +4,7 @@ import { RouterLink, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { Observable, map } from 'rxjs';
 import { BranchService, BranchExtended } from '../../../core/services/branch.service';
+import { BookingService } from '../../../core/services/booking.service';
 import { UiButtonComponent } from '../../../components/shared/ui-button.component';
 
 @Component({
@@ -31,7 +32,7 @@ import { UiButtonComponent } from '../../../components/shared/ui-button.componen
               <span>📍</span> {{ branch.location }}
             </p>
             <p class="text-gray-700 mb-6">{{ branch.description }}</p>
-            <app-ui-button (click)="bookAppointment(branch.id)" size="lg">
+            <app-ui-button (click)="bookAppointment(branch)" size="lg">
               Book Appointment
             </app-ui-button>
           </div>
@@ -55,6 +56,8 @@ export class BranchDetailComponent {
   authService = inject(AuthService);
   router = inject(Router);
 
+  bookingService = inject(BookingService);
+
   // Using a getter because input signal is not available in constructor for computed immediately in some versions,
   // but in latest Angular it is. However, `branchService.getBranch` is synchronous.
   // Let's use a computed property.
@@ -68,12 +71,13 @@ export class BranchDetailComponent {
       : undefined;
   });
 
-  bookAppointment(branchId: number) {
+  bookAppointment(branch: BranchExtended) {
+    this.bookingService.selectedBranch.set(branch);
     if (this.authService.isAuthenticated) {
-      this.router.navigate(['/booking'], { queryParams: { branchId } });
+      this.router.navigate(['/booking/service']); // Navigate to first step usually, or just /booking if it redirects
     } else {
       this.router.navigate(['/auth/login'], {
-        queryParams: { returnUrl: `/booking?branchId=${branchId}` },
+        queryParams: { returnUrl: '/booking/service' },
       });
     }
   }

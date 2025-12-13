@@ -1,16 +1,17 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { BookingService } from '../../../../core/services/booking.service';
 import { BranchService } from '../../../../core/services/branch.service';
 import { UiButtonComponent } from '../../../../components/shared/ui-button.component';
+import { LanguageService } from '../../../../core/services/language.service';
 
 @Component({
   selector: 'app-select-barber',
   standalone: true,
   imports: [CommonModule, UiButtonComponent],
   template: `
-    <h2 class="text-2xl font-bold mb-6">Select Barber (Optional)</h2>
+    <h2 class="text-2xl font-bold mb-6">{{ t().selectBarberTitle }}</h2>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
       <!-- Any Professional Option -->
@@ -24,8 +25,8 @@ import { UiButtonComponent } from '../../../../components/shared/ui-button.compo
           ?
         </div>
         <div>
-          <h3 class="font-bold">Any Professional</h3>
-          <p class="text-sm text-gray-500">First available barber</p>
+          <h3 class="font-bold">{{ t().anyProfessional }}</h3>
+          <p class="text-sm text-gray-500">{{ t().firstAvailableBarber }}</p>
         </div>
       </div>
 
@@ -55,33 +56,36 @@ import { UiButtonComponent } from '../../../../components/shared/ui-button.compo
     </div>
 
     <div class="mt-8 flex justify-between">
-      <app-ui-button variant="outline" (click)="back()">Back</app-ui-button>
-      <app-ui-button (click)="next()">Next: Payment</app-ui-button>
+      <app-ui-button variant="outline" (click)="back()">{{ t().back }}</app-ui-button>
+      <app-ui-button (click)="next()">{{ t().nextPayment }}</app-ui-button>
     </div>
   `,
 })
-export class SelectBarberComponent {
+export class SelectBarberComponent implements OnInit {
   bookingService = inject(BookingService);
   branchService = inject(BranchService);
+  languageService = inject(LanguageService);
   router = inject(Router);
+
+  t = this.languageService.t;
 
   availableBarbers = signal<any[]>([]);
   isLoading = signal<boolean>(false);
 
-  constructor() {
+  ngOnInit() {
     this.loadAvailableBarbers();
   }
 
   loadAvailableBarbers() {
     const selectedDate = this.bookingService.selectedDate();
     const selectedTime = this.bookingService.selectedTime();
-
-    // Retrieve branchId from signal.
-    // If undefined/null, handle gracefully (e.g. redirect or alert)
     const branch = this.bookingService.selectedBranch();
+
+    console.log('SelectBarberComponent Init:', { selectedDate, selectedTime, branch });
+
     if (!branch) {
-      console.warn('No branch selected! Redirecting or showing error.');
-      // Ideally redirect to branch selection
+      console.warn('No branch selected! Redirecting...');
+      this.router.navigate(['/booking/service']); // Redirect to start if no branch
       return;
     }
     const branchId = branch.id;
@@ -89,17 +93,21 @@ export class SelectBarberComponent {
     if (selectedDate && selectedTime) {
       this.isLoading.set(true);
 
-      // Calculate effective date (handle next day logic for 00:00-02:00)
+      // Clone date to avoid mutating the signal's value reference if it were an object (though signals are immutable-ish, Date objects are mutable)
       const effectiveDate = new Date(selectedDate);
-      const hour = parseInt(selectedTime.split(':')[0]);
+      const hour = parseInt(selectedTime.split(':')[0], 10);
+
+      // Handle next day logic for late night slots (00:00 - 02:00)
       if (hour >= 0 && hour <= 2) {
         effectiveDate.setDate(effectiveDate.getDate() + 1);
       }
 
       const dateStr = this.formatDate(effectiveDate);
+      console.log('Fetching barbers for:', { branchId, dateStr, selectedTime });
 
       this.bookingService.getAvailableBarbers(branchId, dateStr, selectedTime).subscribe({
         next: (barbers) => {
+          console.log('Barbers loaded:', barbers);
           this.availableBarbers.set(barbers);
           this.isLoading.set(false);
         },
@@ -108,6 +116,9 @@ export class SelectBarberComponent {
           this.isLoading.set(false);
         },
       });
+    } else {
+      console.warn('Missing date or time', { selectedDate, selectedTime });
+      // Optionally redirect back if date/time missing
     }
   }
 

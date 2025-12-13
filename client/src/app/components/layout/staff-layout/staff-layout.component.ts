@@ -14,6 +14,7 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
           <div class="flex items-center gap-3">
             <img
               src="https://images.unsplash.com/photo-1534308143481-c55f00be8bd7?q=80&w=1930&auto=format&fit=crop"
+              loading="lazy"
               class="w-10 h-10 rounded-full border-2 border-secondary object-cover"
             />
             <div>

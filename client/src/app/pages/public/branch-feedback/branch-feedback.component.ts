@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { BranchService, Branch } from '../../../core/services/branch.service';
 import { FeedbackService } from '../../../core/services/feedback.service';
+import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.component';
 
 @Component({
   selector: 'app-branch-feedback',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, UiSkeletonComponent],
   template: `
     <div
       class="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center p-4"
@@ -16,10 +17,17 @@ import { FeedbackService } from '../../../core/services/feedback.service';
         <div class="bg-white rounded-2xl shadow-2xl p-8 space-y-6">
           @if (isLoading()) {
           <div class="text-center py-8">
-            <div
-              class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"
-            ></div>
-            <p class="mt-4 text-gray-600">Loading...</p>
+            <div class="mx-auto mb-4 flex justify-center">
+              <app-ui-skeleton
+                width="64px"
+                height="64px"
+                className="rounded-full"
+              ></app-ui-skeleton>
+            </div>
+            <div class="space-y-2 flex flex-col items-center">
+              <app-ui-skeleton width="200px" height="32px"></app-ui-skeleton>
+              <app-ui-skeleton width="150px" height="24px"></app-ui-skeleton>
+            </div>
           </div>
           } @else if (branch()) {
           <div class="text-center">

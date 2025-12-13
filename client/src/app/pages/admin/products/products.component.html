@@ -1,16 +1,24 @@
 <div class="space-y-6">
   <!-- Header -->
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
     <h1 class="text-2xl font-bold" [style.color]="'var(--text-primary)'">
       {{ langService.t().products }}
     </h1>
-    <button
-      (click)="openAddProductModal()"
-      class="px-4 py-2 rounded-lg font-medium transition-colors"
-      style="background: var(--color-primary-500); color: white"
-    >
-      + {{ langService.t().addProduct }}
-    </button>
+    <div class="flex gap-2 w-full sm:w-auto">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        [placeholder]="langService.t().search + '...'"
+        class="input text-sm py-2 px-3 flex-1 sm:w-64"
+      />
+      <button
+        (click)="openAddProductModal()"
+        class="px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap"
+        style="background: var(--color-primary-500); color: white"
+      >
+        + {{ langService.t().addProduct }}
+      </button>
+    </div>
   </div>
 
   <!-- Products Table -->
@@ -61,24 +69,30 @@
         </tr>
       </thead>
       <tbody class="divide-y" [style.border-color]="'var(--border-light)'">
-        @if (isLoading()) {
+        @if (isLoading()) { @for (item of [1, 2, 3, 4, 5]; track item) {
         <tr>
-          <td colspan="6" class="px-6 py-4 text-center" [style.color]="'var(--text-secondary)'">
-            Loading...
+          <td class="px-6 py-4">
+            <app-ui-skeleton width="64px" height="64px" className="rounded"></app-ui-skeleton>
           </td>
+          <td class="px-6 py-4"><app-ui-skeleton width="150px" height="20px"></app-ui-skeleton></td>
+          <td class="px-6 py-4"><app-ui-skeleton width="200px" height="20px"></app-ui-skeleton></td>
+          <td class="px-6 py-4"><app-ui-skeleton width="80px" height="20px"></app-ui-skeleton></td>
+          <td class="px-6 py-4"><app-ui-skeleton width="50px" height="20px"></app-ui-skeleton></td>
+          <td class="px-6 py-4"><app-ui-skeleton width="120px" height="32px"></app-ui-skeleton></td>
         </tr>
-        } @else if (products().length === 0) {
+        } } @else if (products().length === 0) {
         <tr>
           <td colspan="6" class="px-6 py-4 text-center" [style.color]="'var(--text-secondary)'">
             No products available
           </td>
         </tr>
-        } @else { @for (product of products(); track product.id) {
+        } @else { @for (product of filteredProducts(); track product.id) {
         <tr class="hover:bg-opacity-50" [style.background-color]="'var(--bg-secondary)'">
           <td class="px-6 py-4 whitespace-nowrap">
             @if (product.image) {
             <img
               [src]="product.image"
+              loading="lazy"
               [alt]="product.name"
               class="w-16 h-16 object-cover rounded"
             />
@@ -100,7 +114,7 @@
             class="px-6 py-4 whitespace-nowrap font-semibold"
             [style.color]="'var(--text-primary)'"
           >
-            ${{ product.price.toFixed(2) }}
+            LE{{ product.price.toFixed(2) }}
           </td>
           <td class="px-6 py-4 whitespace-nowrap" [style.color]="'var(--text-secondary)'">
             {{ product.stock || 0 }}

@@ -6,11 +6,19 @@ import { AuthService } from '../../../core/services/auth.service';
 import { CartService } from '../../../core/services/cart.service';
 
 import { FooterComponent } from '../footer/footer.component';
+import { GoToTopComponent } from '../../shared/go-to-top/go-to-top.component';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, FooterComponent],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    CommonModule,
+    FooterComponent,
+    GoToTopComponent,
+  ],
   template: `
     <div
       class="min-h-screen flex flex-col font-sans overflow-x-hidden"
@@ -49,7 +57,7 @@ import { FooterComponent } from '../footer/footer.component';
           </div>
 
           <!-- Actions -->
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2 md:gap-4">
             <!-- Cart Icon -->
             <a
               routerLink="/cart"
@@ -102,7 +110,7 @@ import { FooterComponent } from '../footer/footer.component';
               }
             </div>
 
-            <div class="relative group">
+            <div class="relative group hidden md:block">
               <button class="flex items-center gap-2 text-gray-700 hover:text-primary font-medium">
                 <span>{{ authService.firstName }}</span>
                 <svg
@@ -266,6 +274,9 @@ import { FooterComponent } from '../footer/footer.component';
 
       <!-- Footer -->
       <app-footer></app-footer>
+
+      <!-- Go To Top Button -->
+      <app-go-to-top></app-go-to-top>
     </div>
   `,
 })

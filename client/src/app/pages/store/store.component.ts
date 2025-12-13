@@ -4,11 +4,12 @@ import { Product } from '../../core/models/product.model';
 import { ProductCardComponent } from '../../components/store/product-card/product-card.component';
 import { LanguageService } from '../../core/services/language.service';
 import { ProductService } from '../../core/services/product.service';
+import { UiSkeletonComponent } from '../../components/shared/ui-skeleton.component';
 
 @Component({
   selector: 'app-store',
   standalone: true,
-  imports: [CommonModule, ProductCardComponent],
+  imports: [CommonModule, ProductCardComponent, UiSkeletonComponent],
   template: `
     <div class="min-h-screen bg-white pt-24 pb-12">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -24,11 +25,26 @@ import { ProductService } from '../../core/services/product.service';
 
         <!-- Loading State -->
         @if (isLoading()) {
-        <div class="text-center py-20">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          @for (item of [1, 2, 3, 4, 5, 6, 7, 8]; track item) {
           <div
-            class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-secondary mb-4"
-          ></div>
-          <p class="text-gray-500">Loading products...</p>
+            class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm h-[400px]"
+          >
+            <app-ui-skeleton height="250px" width="100%"></app-ui-skeleton>
+            <div class="p-4 space-y-3">
+              <app-ui-skeleton height="24px" width="80%"></app-ui-skeleton>
+              <app-ui-skeleton height="20px" width="60%"></app-ui-skeleton>
+              <div class="flex justify-between items-center pt-2">
+                <app-ui-skeleton height="24px" width="30%"></app-ui-skeleton>
+                <app-ui-skeleton
+                  height="36px"
+                  width="40%"
+                  className="rounded-full"
+                ></app-ui-skeleton>
+              </div>
+            </div>
+          </div>
+          }
         </div>
         }
 

@@ -1,6 +1,7 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
 import { ToastService } from '../../../core/services/toast.service';
 import { LanguageService } from '../../../core/services/language.service';
@@ -17,7 +18,7 @@ export interface UserDto {
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -33,10 +34,20 @@ export interface UserDto {
 
       <!-- Users List -->
       <div class="card">
-        <div class="p-4 md:p-6 border-b" [style.border-color]="'var(--border-light)'">
+        <div
+          class="p-4 md:p-6 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+          [style.border-color]="'var(--border-light)'"
+        >
           <h2 class="text-lg font-semibold" [style.color]="'var(--text-primary)'">
             {{ langService.t().allUsers }}
           </h2>
+          <!-- Search Input -->
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            [placeholder]="langService.t().search + '...'"
+            class="input text-sm py-2 px-3 w-full sm:w-64"
+          />
         </div>
 
         <div class="overflow-x-auto">
@@ -94,7 +105,7 @@ export interface UserDto {
                   {{ langService.t().noUsersFound }}
                 </td>
               </tr>
-              } @else { @for (user of users(); track user.id) {
+              } @else { @for (user of filteredUsers(); track user.id) {
               <tr
                 class="hover:bg-opacity-50 dark:hover:bg-opacity-50 transition-colors"
                 style="hover:background-color: var(--bg-tertiary)"
@@ -138,6 +149,17 @@ export class UsersComponent implements OnInit {
 
   users = signal<UserDto[]>([]);
   isLoading = signal(true);
+  searchTerm = signal('');
+
+  filteredUsers = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    if (!term) return this.users();
+    return this.users().filter(
+      (u) =>
+        (u.firstName + ' ' + u.lastName).toLowerCase().includes(term) ||
+        u.email.toLowerCase().includes(term)
+    );
+  });
 
   ngOnInit() {
     this.loadUsers();

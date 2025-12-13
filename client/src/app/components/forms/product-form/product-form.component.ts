@@ -132,6 +132,7 @@ import { LanguageService } from '../../../core/services/language.service';
             <div class="mt-2">
               <img
                 [src]="imagePreview()!"
+                loading="lazy"
                 [alt]="'Preview'"
                 class="w-32 h-32 object-cover rounded"
               />

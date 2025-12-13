@@ -3,16 +3,17 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { BookingService } from '../../../../core/services/booking.service';
 import { UiButtonComponent } from '../../../../components/shared/ui-button.component';
+import { LanguageService } from '../../../../core/services/language.service';
 
 @Component({
   selector: 'app-select-date-time',
   standalone: true,
   imports: [CommonModule, UiButtonComponent],
   template: `
-    <h2 class="text-2xl font-bold mb-6">Select Date & Time</h2>
+    <h2 class="text-2xl font-bold mb-6">{{ t().selectDateTimeTitle }}</h2>
 
     <div class="mb-6">
-      <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+      <label class="block text-sm font-medium text-gray-700 mb-2">{{ t().dateLabel }}</label>
       <input
         type="date"
         class="w-full p-2 border rounded-md"
@@ -24,7 +25,7 @@ import { UiButtonComponent } from '../../../../components/shared/ui-button.compo
 
     @if (bookingService.selectedDate()) {
     <div class="mb-6">
-      <label class="block text-sm font-medium text-gray-700 mb-2">Select Time</label>
+      <label class="block text-sm font-medium text-gray-700 mb-2">{{ t().selectTimeLabel }}</label>
       <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
         @for (slot of timeSlots; track slot) {
         <button
@@ -36,7 +37,7 @@ import { UiButtonComponent } from '../../../../components/shared/ui-button.compo
         >
           {{ slot }}
           @if (isNextDay(slot)) {
-          <span class="text-xs ml-1 opacity-75 block font-normal">(Next Day)</span>
+          <span class="text-xs ml-1 opacity-75 block font-normal">{{ t().nextDay }}</span>
           }
         </button>
         }
@@ -45,19 +46,22 @@ import { UiButtonComponent } from '../../../../components/shared/ui-button.compo
     }
 
     <div class="mt-8 flex justify-between">
-      <app-ui-button variant="outline" (click)="back()">Back</app-ui-button>
+      <app-ui-button variant="outline" (click)="back()">{{ t().back }}</app-ui-button>
       <app-ui-button
         (click)="next()"
         [disabled]="!bookingService.selectedDate() || !bookingService.selectedTime()"
       >
-        Next: Select Barber
+        {{ t().nextBarber }}
       </app-ui-button>
     </div>
   `,
 })
 export class SelectDateTimeComponent {
   bookingService = inject(BookingService);
+  languageService = inject(LanguageService);
   router = inject(Router);
+
+  t = this.languageService.t;
 
   // Hardcoded slots from 10:00 AM to 02:00 AM (next day)
   timeSlots = [

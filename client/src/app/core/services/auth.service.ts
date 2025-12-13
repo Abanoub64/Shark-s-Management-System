@@ -14,6 +14,9 @@ export interface AuthResponse {
   userId: string;
   email: string;
   fullName: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
   roles: string[];
   managedBranchId: number | null;
 }
@@ -85,6 +88,7 @@ export class AuthService {
     localStorage.removeItem('email');
     localStorage.removeItem('managedBranchId');
     localStorage.removeItem('barber_shop_cart');
+    localStorage.removeItem('fullName'); // Add this
   }
 
   login(credentials: { email: string; password: string }): Observable<AuthResponse> {
@@ -92,13 +96,19 @@ export class AuthService {
       tap((response) => {
         if (response.isAuthenticated) {
           // Extract firstName from fullName (first word only)
-          const firstName = response.fullName?.split(' ')[0] || '';
+          let firstName = response.firstName;
+          if (!firstName && response.fullName) {
+            firstName = response.fullName.split(' ')[0] || '';
+          }
 
           // Store in localStorage
           localStorage.setItem('token', response.token);
           localStorage.setItem('refreshToken', response.refreshToken);
-          localStorage.setItem('firstName', firstName);
+          localStorage.setItem('firstName', firstName || ''); // Use response.firstName
+          localStorage.setItem('lastName', response.lastName || ''); // Use response.lastName
           localStorage.setItem('userId', response.userId);
+          localStorage.setItem('fullName', `${response.firstName} ${response.lastName}`);
+          localStorage.setItem('phoneNumber', response.phoneNumber || ''); // Store phone
           localStorage.setItem('roles', JSON.stringify(response.roles));
           localStorage.setItem('email', response.email);
           if (response.managedBranchId !== null) {
@@ -109,8 +119,9 @@ export class AuthService {
           this.currentUser.set({
             id: response.userId,
             email: response.email,
-            firstName: firstName,
-            lastName: response.fullName?.split(' ').slice(1).join(' ') || '',
+            firstName: firstName || '',
+            lastName: response.lastName || '',
+            phoneNumber: response.phoneNumber || '',
             role: (response.roles[0] as any) || 'Customer',
             roles: response.roles,
             token: response.token,
@@ -193,12 +204,11 @@ export class AuthService {
   }
 
   get roles(): string[] {
-    const rolesJson = localStorage.getItem('roles');
-    return rolesJson ? JSON.parse(rolesJson) : [];
+    return this.currentUser()?.roles || [];
   }
 
   get token(): string | null {
-    return localStorage.getItem('token');
+    return this.currentUser()?.token || localStorage.getItem('token');
   }
 
   get refreshToken(): string | null {
@@ -206,25 +216,24 @@ export class AuthService {
   }
 
   get managedBranchId(): number | null {
-    const branchId = localStorage.getItem('managedBranchId');
-    return branchId ? parseInt(branchId) : null;
+    return this.currentUser()?.managedBranchId || null;
   }
 
   // Role-based helpers
   get isAdmin(): boolean {
-    return this.roles.includes('Admin');
+    return this.roles.some((r) => r.replace(/\s/g, '').toLowerCase() === 'admin');
   }
 
   get isBranchManager(): boolean {
-    return this.roles.includes('BranchManager');
+    return this.roles.some((r) => r.replace(/\s/g, '').toLowerCase() === 'branchmanager');
   }
 
   get isCustomer(): boolean {
-    return this.roles.includes('Customer');
+    return this.roles.some((r) => r.replace(/\s/g, '').toLowerCase() === 'customer');
   }
 
   get isBarber(): boolean {
-    return this.roles.includes('Barber');
+    return this.roles.some((r) => r.replace(/\s/g, '').toLowerCase() === 'barber');
   }
 
   get isAuthenticated(): boolean {
@@ -235,23 +244,46 @@ export class AuthService {
   // Legacy methods for backward compatibility
   // Google login removed
 
-  updateProfile(data: Partial<User>): Observable<User> {
-    return new Observable((observer) => {
-      setTimeout(() => {
-        const currentUser = this.currentUser();
-        if (currentUser) {
-          const updatedUser = { ...currentUser, ...data };
-          this.currentUser.set(updatedUser);
-          observer.next(updatedUser);
-        } else {
-          observer.error('No user logged in');
-        }
-        observer.complete();
-      }, 500);
-    });
+  // Profile Management
+  changePassword(
+    userId: string,
+    data: { currentPassword: string; newPassword: string }
+  ): Observable<any> {
+    return this.http.post(`${this.apiUrl}/change-password/${userId}`, data);
   }
 
-  changePassword(data: { currentPassword: string; newPassword: string }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/change-password`, data);
+  updateUser(
+    userId: string,
+    data: { firstName: string; lastName: string; phoneNumber: string; email: string }
+  ): Observable<any> {
+    return this.http.put(`${this.apiUrl}/user/${userId}`, data).pipe(
+      tap(() => {
+        // Update local state
+        const currentUser = this.currentUser();
+        if (currentUser) {
+          const updatedUser: User = {
+            ...currentUser,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            phoneNumber: data.phoneNumber,
+            email: data.email,
+          };
+          this.currentUser.set(updatedUser);
+
+          // Update localStorage
+          localStorage.setItem('firstName', data.firstName);
+          localStorage.setItem('fullName', `${data.firstName} ${data.lastName}`);
+          localStorage.setItem('email', data.email);
+        }
+      })
+    );
+  }
+
+  deleteUser(userId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/user/${userId}`).pipe(
+      tap(() => {
+        this.logout();
+      })
+    );
   }
 }

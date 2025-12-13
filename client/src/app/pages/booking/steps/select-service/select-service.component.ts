@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { BookingService } from '../../../../core/services/booking.service';
 import { UiButtonComponent } from '../../../../components/shared/ui-button.component';
+import { LanguageService } from '../../../../core/services/language.service';
 
 @Component({
   selector: 'app-select-service',
   standalone: true,
   imports: [CommonModule, UiButtonComponent],
   template: `
-    <h2 class="text-2xl font-bold mb-6">Select a Service</h2>
+    <h2 class="text-2xl font-bold mb-6">{{ t().selectServiceTitle }}</h2>
     <div class="grid grid-cols-1 gap-4">
       @if (services$ | async; as services) { @for (service of services; track service.id) {
       <div
@@ -22,25 +23,27 @@ import { UiButtonComponent } from '../../../../components/shared/ui-button.compo
           <div>
             <h3 class="font-bold">{{ service.name }}</h3>
             <p class="text-sm text-gray-500">{{ service.description }}</p>
-            <p class="text-sm text-gray-500 mt-1">Duration: {{ service.duration }} min</p>
           </div>
-          <div class="text-lg font-bold">\${{ service.price }}</div>
+          <div class="text-lg font-bold">{{ service.price }} {{ t().currency }}</div>
         </div>
       </div>
       } } @else {
-      <div class="text-center py-8 text-gray-500">Loading services...</div>
+      <div class="text-center py-8 text-gray-500">{{ t().loadingServices }}</div>
       }
     </div>
     <div class="mt-8 flex justify-end">
       <app-ui-button (click)="next()" [disabled]="!bookingService.selectedService()">
-        Next: Date & Time
+        {{ t().nextDateTime }}
       </app-ui-button>
     </div>
   `,
 })
 export class SelectServiceComponent {
   bookingService = inject(BookingService);
+  languageService = inject(LanguageService);
   router = inject(Router);
+
+  t = this.languageService.t;
 
   services$ = this.bookingService.getServices();
 

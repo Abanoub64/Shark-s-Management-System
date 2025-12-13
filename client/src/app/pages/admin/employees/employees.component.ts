@@ -14,6 +14,7 @@ import {
   BarberSchedule,
   DayScheduleData,
 } from '../../../core/services/barber.service';
+import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.component';
 
 interface Employee {
   id: number;
@@ -37,6 +38,7 @@ interface Employee {
     FormsModule,
     DeleteConfirmationModalComponent,
     BarberScheduleFormComponent,
+    UiSkeletonComponent,
   ],
   template: `
     <div class="space-y-6">
@@ -167,7 +169,32 @@ interface Employee {
               </tr>
             </thead>
             <tbody class="divide-y" [style.divide-color]="'var(--border-light)'">
-              @for (employee of filteredEmployees(); track employee.id) {
+              @if (isLoading()) { @for (item of [1, 2, 3, 4, 5]; track item) {
+              <tr>
+                <td class="px-4 py-3">
+                  <app-ui-skeleton width="200px" height="40px"></app-ui-skeleton>
+                </td>
+                <td class="px-4 py-3">
+                  <app-ui-skeleton width="120px" height="20px"></app-ui-skeleton>
+                </td>
+                <td class="px-4 py-3">
+                  <app-ui-skeleton width="80px" height="20px"></app-ui-skeleton>
+                </td>
+                <td class="px-4 py-3">
+                  <app-ui-skeleton width="150px" height="20px"></app-ui-skeleton>
+                </td>
+                <td class="px-4 py-3">
+                  <app-ui-skeleton
+                    width="80px"
+                    height="24px"
+                    className="rounded-full"
+                  ></app-ui-skeleton>
+                </td>
+                <td class="px-4 py-3">
+                  <app-ui-skeleton width="100px" height="32px"></app-ui-skeleton>
+                </td>
+              </tr>
+              } } @else { @for (employee of filteredEmployees(); track employee.id) {
               <tr
                 class="hover:bg-opacity-50 dark:hover:bg-opacity-50 transition-colors cursor-pointer"
                 style="hover:background-color: var(--bg-tertiary)"
@@ -177,6 +204,7 @@ interface Employee {
                     @if (employee.photo) {
                     <img
                       [src]="employee.photo"
+                      loading="lazy"
                       class="w-10 h-10 rounded-full object-cover"
                       [alt]="employee.firstName + ' ' + employee.lastName"
                     />
@@ -238,7 +266,7 @@ interface Employee {
                   {{ langService.t().noEmployeesFound }} "{{ nameFilter() }}"
                 </td>
               </tr>
-              }
+              } }
             </tbody>
           </table>
         </div>
@@ -277,20 +305,28 @@ interface Employee {
               </button>
             </div>
             <div class="p-6">
-              <form (ngSubmit)="saveEmployee()" class="space-y-4">
+              <form (ngSubmit)="saveEmployee()" class="space-y-6">
                 <!-- Photo Upload -->
-                <div>
+                <div class="md:col-span-2">
                   <label
                     class="block text-sm font-medium mb-2"
                     [style.color]="'var(--text-primary)'"
                     >{{ langService.t().employeePhoto }}</label
                   >
-                  <div class="flex items-center gap-4">
+                  <div
+                    class="flex items-center gap-4 p-4 rounded-lg border border-dashed"
+                    [style.border-color]="'var(--border-light)'"
+                    [style.background-color]="'var(--bg-tertiary)'"
+                  >
                     @if (formData().photo) {
-                    <img [src]="formData().photo" class="w-20 h-20 rounded-full object-cover" />
+                    <img
+                      [src]="formData().photo"
+                      loading="lazy"
+                      class="w-20 h-20 rounded-full object-cover shadow-md"
+                    />
                     } @else {
                     <div
-                      class="w-20 h-20 rounded-full flex items-center justify-center text-2xl text-white"
+                      class="w-20 h-20 rounded-full flex items-center justify-center text-3xl text-white shadow-md"
                       style="background: var(--color-primary-500)"
                     >
                       👤
@@ -307,87 +343,103 @@ interface Employee {
                       <button
                         type="button"
                         (click)="fileInput.click()"
-                        class="btn-outline text-sm w-full"
+                        class="btn-outline text-sm w-full md:w-auto px-6 py-2"
                       >
                         {{ langService.t().choosePhoto }}
                       </button>
+                      <p class="text-xs mt-2" [style.color]="'var(--text-secondary)'">
+                        Recommended: Square image, max 2MB
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                <!-- First Name -->
-                <div>
-                  <label
-                    class="block text-sm font-medium mb-2"
-                    [style.color]="'var(--text-primary)'"
-                    >First Name *</label
-                  >
-                  <input
-                    type="text"
-                    [(ngModel)]="formData().firstName"
-                    name="firstName"
-                    required
-                    class="input w-full"
-                    placeholder="Enter first name"
-                  />
-                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <!-- First Name -->
+                  <div>
+                    <label
+                      class="block text-sm font-medium mb-2"
+                      [style.color]="'var(--text-primary)'"
+                      >First Name <span class="text-red-500">*</span></label
+                    >
+                    <input
+                      type="text"
+                      [(ngModel)]="formData().firstName"
+                      name="firstName"
+                      required
+                      class="input w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                      [style.border-color]="'var(--border-light)'"
+                      [style.background-color]="'var(--bg-input)'"
+                      placeholder="Enter first name"
+                    />
+                  </div>
 
-                <!-- Last Name -->
-                <div>
-                  <label
-                    class="block text-sm font-medium mb-2"
-                    [style.color]="'var(--text-primary)'"
-                    >Last Name *</label
-                  >
-                  <input
-                    type="text"
-                    [(ngModel)]="formData().lastName"
-                    name="lastName"
-                    required
-                    class="input w-full"
-                    placeholder="Enter last name"
-                  />
-                </div>
+                  <!-- Last Name -->
+                  <div>
+                    <label
+                      class="block text-sm font-medium mb-2"
+                      [style.color]="'var(--text-primary)'"
+                      >Last Name <span class="text-red-500">*</span></label
+                    >
+                    <input
+                      type="text"
+                      [(ngModel)]="formData().lastName"
+                      name="lastName"
+                      required
+                      class="input w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                      [style.border-color]="'var(--border-light)'"
+                      [style.background-color]="'var(--bg-input)'"
+                      placeholder="Enter last name"
+                    />
+                  </div>
 
-                <!-- Phone -->
-                <div>
-                  <label
-                    class="block text-sm font-medium mb-2"
-                    [style.color]="'var(--text-primary)'"
-                    >{{ langService.t().phoneNumber }} *</label
-                  >
-                  <input
-                    type="tel"
-                    [(ngModel)]="formData().phone"
-                    name="phone"
-                    required
-                    class="input w-full"
-                    placeholder="+1 234 567 8900"
-                  />
-                </div>
+                  <!-- Phone -->
+                  <div>
+                    <label
+                      class="block text-sm font-medium mb-2"
+                      [style.color]="'var(--text-primary)'"
+                      >{{ langService.t().phoneNumber }} <span class="text-red-500">*</span></label
+                    >
+                    <input
+                      type="tel"
+                      [(ngModel)]="formData().phone"
+                      name="phone"
+                      required
+                      class="input w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                      [style.border-color]="'var(--border-light)'"
+                      [style.background-color]="'var(--bg-input)'"
+                      placeholder="+1 234 567 8900"
+                    />
+                  </div>
 
-                <!-- Branch -->
-                <div>
-                  <label
-                    class="block text-sm font-medium mb-2"
-                    [style.color]="'var(--text-primary)'"
-                    >{{ langService.t().branch }} *</label
-                  >
-                  <select
-                    [(ngModel)]="formData().branchId"
-                    name="branchId"
-                    required
-                    class="input w-full"
-                  >
-                    <option value="">{{ langService.t().selectBranch }}</option>
-                    @for (branch of availableBranches(); track branch.id) {
-                    <option [ngValue]="branch.id">{{ branch.name }}</option>
-                    }
-                  </select>
+                  <!-- Branch -->
+                  <div>
+                    <label
+                      class="block text-sm font-medium mb-2"
+                      [style.color]="'var(--text-primary)'"
+                      >{{ langService.t().branch }} <span class="text-red-500">*</span></label
+                    >
+                    <select
+                      [(ngModel)]="formData().branchId"
+                      name="branchId"
+                      required
+                      class="input w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                      [style.border-color]="'var(--border-light)'"
+                      [style.background-color]="'var(--bg-input)'"
+                    >
+                      <option value="">{{ langService.t().selectBranch }}</option>
+                      @for (branch of availableBranches(); track branch.id) {
+                      <option [ngValue]="branch.id">{{ branch.name }}</option>
+                      }
+                    </select>
+                  </div>
                 </div>
 
                 <!-- Working Schedule -->
-                <div>
+                <div class="pt-4 border-t" [style.border-color]="'var(--border-light)'">
+                  <h4 class="text-md font-semibold mb-4" [style.color]="'var(--text-primary)'">
+                    Working Schedule
+                  </h4>
                   <app-barber-schedule-form
                     [schedules]="formData().schedule || []"
                     (schedulesChange)="onScheduleChange($event)"
@@ -395,11 +447,14 @@ interface Employee {
                 </div>
 
                 <!-- Actions -->
-                <div class="flex gap-3 pt-4">
-                  <button type="button" (click)="closeModal()" class="btn-outline flex-1">
+                <div class="flex gap-4 pt-4 border-t" [style.border-color]="'var(--border-light)'">
+                  <button type="button" (click)="closeModal()" class="btn-outline flex-1 py-3">
                     {{ langService.t().cancel }}
                   </button>
-                  <button type="submit" class="btn-primary flex-1">
+                  <button
+                    type="submit"
+                    class="btn-primary flex-1 py-3 shadow-lg hover:shadow-xl transition-all"
+                  >
                     {{ isEditMode() ? langService.t().update : langService.t().create }}
                     {{ langService.t().employees }}
                   </button>
@@ -658,7 +713,10 @@ export class EmployeesComponent implements OnInit {
     this.loadData();
   }
 
+  isLoading = signal(true);
+
   loadData() {
+    this.isLoading.set(true);
     // Load branches first, then barbers
     this.branchService.getAllBranches().subscribe({
       next: (branches) => {
@@ -683,16 +741,19 @@ export class EmployeesComponent implements OnInit {
               };
             });
             this.employees.set(employees);
+            this.isLoading.set(false);
           },
           error: (error) => {
             console.error('Error loading barbers:', error);
             this.toastService.error('Error', 'Failed to load barbers');
+            this.isLoading.set(false);
           },
         });
       },
       error: (error) => {
         console.error('Error loading branches:', error);
         this.toastService.error('Error', 'Failed to load branches');
+        this.isLoading.set(false);
       },
     });
   }
@@ -710,12 +771,21 @@ export class EmployeesComponent implements OnInit {
   confirmDelete() {
     const employee = this.employeeToDelete();
     if (employee) {
-      this.employees.update((employees) => employees.filter((e) => e.id !== employee.id));
-      this.toastService.success(
-        'Deleted',
-        `Employee "${employee.firstName} ${employee.lastName}" has been deleted`
-      );
-      this.closeDeleteModal();
+      this.barberService.deleteBarber(employee.id).subscribe({
+        next: () => {
+          this.employees.update((employees) => employees.filter((e) => e.id !== employee.id));
+          this.toastService.success(
+            'Deleted',
+            `Employee "${employee.firstName} ${employee.lastName}" has been deleted`
+          );
+          this.closeDeleteModal();
+        },
+        error: (error) => {
+          console.error('Error deleting employee:', error);
+          this.toastService.error('Error', 'Failed to delete employee');
+          this.closeDeleteModal();
+        },
+      });
     }
   }
 

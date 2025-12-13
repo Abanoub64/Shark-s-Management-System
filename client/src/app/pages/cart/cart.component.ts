@@ -12,7 +12,7 @@ import { AuthService } from '../../core/services/auth.service';
   imports: [CommonModule, RouterLink, FormsModule],
   template: `
     <div class="container mx-auto px-4 py-8 min-h-screen">
-      <h1 class="text-3xl font-bold mb-8">Shopping Cart</h1>
+      <h1 class="text-3xl font-bold mb-8">{{ t().shoppingCart }}</h1>
 
       @if (cartService.items().length === 0) {
       <!-- Empty Cart -->
@@ -30,13 +30,13 @@ import { AuthService } from '../../core/services/auth.service';
             d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
           />
         </svg>
-        <h2 class="text-2xl font-semibold text-gray-600 mb-4">Your cart is empty</h2>
-        <p class="text-gray-500 mb-8">Add some products to get started!</p>
+        <h2 class="text-2xl font-semibold text-gray-600 mb-4">{{ t().cartEmpty }}</h2>
+        <p class="text-gray-500 mb-8">{{ t().addProductsMsg }}</p>
         <a
           routerLink="/store"
           class="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition"
         >
-          Continue Shopping
+          {{ t().continueShopping }}
         </a>
       </div>
       } @else {
@@ -46,7 +46,7 @@ import { AuthService } from '../../core/services/auth.service';
         <div class="lg:col-span-2 space-y-4">
           <div class="flex justify-end mb-2">
             <button (click)="clearCart()" class="text-red-500 text-sm hover:underline">
-              Clear Cart
+              {{ t().clearCart }}
             </button>
           </div>
 
@@ -54,7 +54,11 @@ import { AuthService } from '../../core/services/auth.service';
           <div class="bg-white rounded-lg shadow-md p-4 flex gap-4">
             <!-- Product Image -->
             <img
-              [src]="item.image || '/assets/placeholder.jpg'"
+              [src]="
+                item.image ||
+                'https://st4.depositphotos.com/16122460/21586/i/1600/depositphotos_215866804-stock-photo-flat-lay-composition-hair-salon.jpg'
+              "
+              loading="lazy"
               [alt]="item.productName"
               class="w-24 h-24 object-cover rounded"
             />
@@ -62,7 +66,7 @@ import { AuthService } from '../../core/services/auth.service';
             <!-- Product Details -->
             <div class="flex-1">
               <h3 class="text-lg font-semibold">{{ item.productName }}</h3>
-              <p class="text-gray-600">{{ item.price }} EGP</p>
+              <p class="text-gray-600">{{ item.price }} {{ t().currency }}</p>
 
               <!-- Quantity Controls -->
               <div class="flex items-center gap-3 mt-2">
@@ -86,12 +90,12 @@ import { AuthService } from '../../core/services/auth.service';
 
             <!-- Subtotal and Remove -->
             <div class="text-right">
-              <p class="text-lg font-bold">{{ item.price * item.quantity }} EGP</p>
+              <p class="text-lg font-bold">{{ item.price * item.quantity }} {{ t().currency }}</p>
               <button
                 (click)="removeItem(item.productId)"
                 class="mt-2 text-red-600 hover:text-red-800 text-sm"
               >
-                Remove
+                {{ t().remove }}
               </button>
             </div>
           </div>
@@ -101,12 +105,14 @@ import { AuthService } from '../../core/services/auth.service';
         <!-- Order Summary -->
         <div class="lg:col-span-1">
           <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
-            <h2 class="text-xl font-bold mb-4">Order Summary</h2>
+            <h2 class="text-xl font-bold mb-4">{{ t().orderSummary }}</h2>
 
             <div class="space-y-4 mb-4">
               <!-- Contact Info Inputs -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{
+                  t().phoneNumberLabel
+                }}</label>
                 <input
                   type="tel"
                   [(ngModel)]="phone"
@@ -117,11 +123,13 @@ import { AuthService } from '../../core/services/auth.service';
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Shipping Address</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{
+                  t().shippingAddress
+                }}</label>
                 <textarea
                   [(ngModel)]="address"
                   (ngModelChange)="onInfoChange()"
-                  placeholder="Street, Building, Apartment..."
+                  [placeholder]="t().scAddressPlaceholder"
                   rows="2"
                   class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 ></textarea>
@@ -129,12 +137,14 @@ import { AuthService } from '../../core/services/auth.service';
 
               <div class="border-t pt-4">
                 <div class="flex justify-between mb-2">
-                  <span>Subtotal ({{ cartService.totalItems() }} items)</span>
-                  <span>{{ cartService.totalPrice() }} EGP</span>
+                  <span
+                    >{{ t().subtotal }} ({{ cartService.totalItems() }} {{ t().itemsCount }})</span
+                  >
+                  <span>{{ cartService.totalPrice() }} {{ t().currency }}</span>
                 </div>
                 <div class="flex justify-between text-lg font-bold">
-                  <span>Total</span>
-                  <span>{{ cartService.totalPrice() }} EGP</span>
+                  <span>{{ t().total }}</span>
+                  <span>{{ cartService.totalPrice() }} {{ t().currency }}</span>
                 </div>
               </div>
             </div>
@@ -147,14 +157,14 @@ import { AuthService } from '../../core/services/auth.service';
                 [class.cursor-not-allowed]="!isValid()"
                 class="block w-full bg-green-600 text-white text-center px-6 py-3 rounded-lg hover:bg-green-700 transition font-medium"
               >
-                Proceed to Checkout
+                {{ t().proceedToCheckout }}
               </button>
 
               <a
                 routerLink="/store"
                 class="block w-full border border-gray-300 text-center text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition"
               >
-                Continue Shopping
+                {{ t().continueShopping }}
               </a>
             </div>
           </div>
@@ -169,6 +179,7 @@ export class CartComponent implements OnInit {
   langService = inject(LanguageService);
   private router = inject(Router);
   private authService = inject(AuthService);
+  t = this.langService.t;
 
   phone = '';
   address = '';
@@ -203,13 +214,13 @@ export class CartComponent implements OnInit {
   }
 
   removeItem(productId: number) {
-    if (confirm('Remove this item from cart?')) {
+    if (confirm(this.t().confirmRemoveItem)) {
       this.cartService.removeFromCart(productId);
     }
   }
 
   clearCart() {
-    if (confirm('Are you sure you want to clear your cart?')) {
+    if (confirm(this.t().confirmClearCart)) {
       this.cartService.clearCart();
     }
   }

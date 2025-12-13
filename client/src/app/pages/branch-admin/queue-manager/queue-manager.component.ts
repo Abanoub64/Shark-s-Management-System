@@ -12,6 +12,7 @@ import { BarberService, Barber } from '../../../core/services/barber.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { BookingService } from '../../../core/services/booking.service';
 import { CreateBookingRequest } from '../../../core/models/models';
+import { LanguageService } from '../../../core/services/language.service';
 
 @Component({
   selector: 'app-queue-manager',
@@ -31,9 +32,9 @@ import { CreateBookingRequest } from '../../../core/models/models';
         class="md:w-1/3 flex flex-col bg-gray-50 rounded-xl border border-gray-200 overflow-hidden"
       >
         <div class="p-4 bg-white border-b border-gray-200 flex justify-between items-center">
-          <h2 class="text-lg font-bold text-gray-800">Chairs</h2>
+          <h2 class="text-lg font-bold text-gray-800">{{ langService.t().chairs }}</h2>
           <span class="px-2 py-1 bg-gray-100 text-xs rounded-full"
-            >{{ chairs().length }} Active</span
+            >{{ chairs().length }} {{ langService.t().activeChairs }}</span
           >
         </div>
 
@@ -45,7 +46,9 @@ import { CreateBookingRequest } from '../../../core/models/models';
             <div class="flex justify-between items-start mb-3">
               <div>
                 <h3 class="font-bold text-gray-900">{{ chair.name }}</h3>
-                <p class="text-xs text-gray-500">{{ chair.assignedBarberName || 'No Barber' }}</p>
+                <p class="text-xs text-gray-500">
+                  {{ chair.assignedBarberName || langService.t().noBarber }}
+                </p>
               </div>
               <span
                 class="px-2 py-1 rounded-full text-xs font-medium"
@@ -55,7 +58,7 @@ import { CreateBookingRequest } from '../../../core/models/models';
                     : 'bg-gray-100 text-gray-600'
                 "
               >
-                {{ chair.status }}
+                {{ chair.status === 'Occupied' ? langService.t().occupied : langService.t().free }}
               </span>
             </div>
 
@@ -74,7 +77,7 @@ import { CreateBookingRequest } from '../../../core/models/models';
             <div
               class="mb-4 p-4 text-center text-gray-400 text-sm border-2 border-dashed border-gray-100 rounded-md"
             >
-              No customer currently
+              {{ langService.t().free }}
             </div>
             }
 
@@ -86,7 +89,7 @@ import { CreateBookingRequest } from '../../../core/models/models';
                 size="sm"
                 class="flex-1"
               >
-                Example Complete
+                {{ langService.t().complete }}
               </app-ui-button>
               } @else {
               <app-ui-button
@@ -95,7 +98,7 @@ import { CreateBookingRequest } from '../../../core/models/models';
                 size="sm"
                 class="flex-1 opacity-50 cursor-not-allowed"
               >
-                Free
+                {{ langService.t().free }}
               </app-ui-button>
               }
 
@@ -110,7 +113,7 @@ import { CreateBookingRequest } from '../../../core/models/models';
           </div>
           } @if (chairs().length === 0) {
           <div class="text-center py-10 text-gray-400">
-            <p>No chairs configured</p>
+            <p>{{ langService.t().noDataFound }}</p>
           </div>
           }
         </div>
@@ -121,10 +124,10 @@ import { CreateBookingRequest } from '../../../core/models/models';
         class="md:w-1/3 flex flex-col bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm"
       >
         <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-          <h2 class="text-lg font-bold text-gray-800">Waiting Queue</h2>
+          <h2 class="text-lg font-bold text-gray-800">{{ langService.t().waitingQueue }}</h2>
           <div class="flex gap-2">
             <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full"
-              >{{ queue().length }} Waiting</span
+              >{{ queue().length }} {{ langService.t().waiting }}</span
             >
           </div>
         </div>
@@ -146,7 +149,9 @@ import { CreateBookingRequest } from '../../../core/models/models';
               <div class="text-sm text-gray-600">
                 <p>{{ item.serviceName }}</p>
                 @if (item.preferredBarberName) {
-                <p class="text-xs text-purple-600">Pref: {{ item.preferredBarberName }}</p>
+                <p class="text-xs text-purple-600">
+                  {{ langService.t().pref }}: {{ item.preferredBarberName }}
+                </p>
                 }
               </div>
 
@@ -154,14 +159,14 @@ import { CreateBookingRequest } from '../../../core/models/models';
                 (click)="openAssignModal(item)"
                 class="px-3 py-1 bg-white border border-primary-500 text-primary-600 text-xs font-medium rounded hover:bg-primary-50 transition-colors"
               >
-                Assign →
+                {{ langService.t().assign }} →
               </button>
             </div>
           </div>
           } @if (queue().length === 0) {
           <div class="text-center py-12 text-gray-400">
             <span class="text-4xl block mb-2">☕</span>
-            <p>Queue is empty</p>
+            <p>{{ langService.t().queueEmpty }}</p>
           </div>
           }
         </div>
@@ -172,9 +177,9 @@ import { CreateBookingRequest } from '../../../core/models/models';
         <!-- Live Queue Display -->
         <app-ui-card>
           <div class="p-4">
-            <h3 class="font-bold text-gray-800 mb-3">Live Queue Display</h3>
+            <h3 class="font-bold text-gray-800 mb-3">{{ langService.t().liveQueueDisplay }}</h3>
             <app-ui-button [fullWidth]="true" (click)="openLiveQueue()">
-              📺 Open Live Queue
+              📺 {{ langService.t().openLiveQueue }}
             </app-ui-button>
           </div>
         </app-ui-card>
@@ -183,30 +188,30 @@ import { CreateBookingRequest } from '../../../core/models/models';
         <app-ui-card>
           <div class="p-4">
             <div class="flex justify-between items-center mb-4">
-              <h3 class="font-bold text-gray-800">Actions</h3>
+              <h3 class="font-bold text-gray-800">{{ langService.t().actions }}</h3>
               <button (click)="loadData()" class="text-sm text-primary-600 hover:text-primary-700">
-                ↻ Refresh
+                ↻ {{ langService.t().refresh }}
               </button>
             </div>
 
             <div class="space-y-3">
               <app-ui-button [fullWidth]="true" (click)="showAddChair = !showAddChair">
-                {{ showAddChair ? 'Cancel' : '+ Add New Chair' }}
+                {{ showAddChair ? langService.t().cancelAdd : langService.t().addNewChair }}
               </app-ui-button>
 
               @if (showAddChair) {
               <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 animate-fade-in">
                 <form [formGroup]="chairForm" (ngSubmit)="onAddChair()">
                   <app-ui-input
-                    label="Chair Name"
+                    [label]="langService.t().chairName"
                     formControlName="name"
                     placeholder="e.g. Chair 5"
                     class="mb-2"
                   ></app-ui-input>
                   <div class="relative mb-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1"
-                      >Assigned Barber</label
-                    >
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{
+                      langService.t().assignedBarber
+                    }}</label>
                     <div class="relative">
                       <input
                         type="text"
@@ -217,7 +222,7 @@ import { CreateBookingRequest } from '../../../core/models/models';
                         "
                         (input)="onSearchInput($event)"
                         (focus)="isDropdownOpen.set(true)"
-                        placeholder="Search Barber Name..."
+                        [placeholder]="langService.t().searchBarberName"
                         class="w-full p-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                       />
                       @if (isDropdownOpen()) {
@@ -232,7 +237,9 @@ import { CreateBookingRequest } from '../../../core/models/models';
                           {{ barber.firstName }} {{ barber.lastName }}
                         </div>
                         } @if (filteredBarbers().length === 0) {
-                        <div class="p-2 text-gray-500 text-sm text-center">No barbers found</div>
+                        <div class="p-2 text-gray-500 text-sm text-center">
+                          {{ langService.t().noBarbersFound }}
+                        </div>
                         }
                       </div>
                       }
@@ -243,7 +250,7 @@ import { CreateBookingRequest } from '../../../core/models/models';
                     size="sm"
                     [fullWidth]="true"
                     [disabled]="chairForm.invalid"
-                    >Create</app-ui-button
+                    >{{ langService.t().create }}</app-ui-button
                   >
                 </form>
               </div>
@@ -255,36 +262,38 @@ import { CreateBookingRequest } from '../../../core/models/models';
         <!-- Walk-in Booking -->
         <app-ui-card>
           <div class="p-4">
-            <h3 class="font-bold text-gray-800 mb-4">Walk-in Booking</h3>
+            <h3 class="font-bold text-gray-800 mb-4">{{ langService.t().walkInBooking }}</h3>
             <form [formGroup]="walkInForm" (ngSubmit)="onCreateWalkIn()">
               <div class="grid grid-cols-2 gap-2 mb-3">
                 <app-ui-input
-                  label="First Name"
+                  [label]="langService.t().firstName"
                   formControlName="firstName"
                   placeholder="John"
                 ></app-ui-input>
                 <app-ui-input
-                  label="Last Name"
+                  [label]="langService.t().lastName"
                   formControlName="lastName"
                   placeholder="Doe"
                 ></app-ui-input>
               </div>
               <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Service</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{
+                  langService.t().service
+                }}</label>
                 <select
                   formControlName="serviceId"
                   class="w-full p-2 bg-white border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                 >
-                  <option value="">Select Service</option>
+                  <option value="">{{ langService.t().selectService }}</option>
                   @for (serviceItem of services(); track serviceItem.id) {
                   <option [ngValue]="serviceItem.id">
-                    {{ serviceItem.name }} - {{ serviceItem.price }} EGP
+                    {{ serviceItem.name }} - {{ serviceItem.price }} {{ langService.t().currency }}
                   </option>
                   }
                 </select>
               </div>
               <app-ui-button type="submit" [fullWidth]="true" [disabled]="walkInForm.invalid">
-                Create Walk-in Booking
+                {{ langService.t().createWalkIn }}
               </app-ui-button>
             </form>
           </div>
@@ -293,17 +302,19 @@ import { CreateBookingRequest } from '../../../core/models/models';
         <!-- Manual Enqueue -->
         <app-ui-card>
           <div class="p-4">
-            <h3 class="font-bold text-gray-800 mb-4">Manual Enqueue</h3>
+            <h3 class="font-bold text-gray-800 mb-4">{{ langService.t().manualEnqueue }}</h3>
             <form [formGroup]="enqueueForm" (ngSubmit)="onEnqueue()">
               <app-ui-input
-                label="Booking ID"
+                [label]="langService.t().bookingId"
                 formControlName="bookingId"
                 type="number"
                 placeholder="Booking #"
                 class="mb-3"
               ></app-ui-input>
               <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{
+                  langService.t().priority
+                }}</label>
                 <select
                   formControlName="priority"
                   class="w-full p-2 bg-white border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
@@ -315,28 +326,10 @@ import { CreateBookingRequest } from '../../../core/models/models';
                   <option [ngValue]="10">10 - Urgent</option>
                 </select>
               </div>
-              <app-ui-button type="submit" [fullWidth]="true" [disabled]="enqueueForm.invalid"
-                >Add to Queue</app-ui-button
-              >
+              <app-ui-button type="submit" [fullWidth]="true" [disabled]="enqueueForm.invalid">{{
+                langService.t().addToQueue
+              }}</app-ui-button>
             </form>
-          </div>
-        </app-ui-card>
-
-        <!-- Stats Mockup -->
-        <app-ui-card>
-          <div class="p-4">
-            <h3 class="font-bold text-gray-800 mb-2">Today's Overview</h3>
-            <div class="space-y-2 text-sm">
-              <div class="flex justify-between">
-                <span>Total Served</span><span class="font-bold">12</span>
-              </div>
-              <div class="flex justify-between">
-                <span>Cancellations</span><span class="font-bold text-red-500">2</span>
-              </div>
-              <div class="flex justify-between">
-                <span>Avg Wait</span><span class="font-bold text-green-600">14m</span>
-              </div>
-            </div>
           </div>
         </app-ui-card>
       </div>
@@ -346,8 +339,10 @@ import { CreateBookingRequest } from '../../../core/models/models';
     @if (selectedBooking) {
     <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold mb-4">Assign {{ selectedBooking.customerName }}</h3>
-        <p class="text-gray-600 mb-4">Select a chair to assign this booking to:</p>
+        <h3 class="text-xl font-bold mb-4">
+          {{ langService.t().assignCustomer }} {{ selectedBooking.customerName }}
+        </h3>
+        <p class="text-gray-600 mb-4">{{ langService.t().selectChairToAssign }}</p>
 
         <div class="space-y-2 mb-6 max-h-60 overflow-y-auto">
           @for (chair of chairs(); track chair.id) {
@@ -363,20 +358,24 @@ import { CreateBookingRequest } from '../../../core/models/models';
             <div>
               <span class="font-bold block">{{ chair.name }}</span>
               <span class="text-xs text-gray-500">{{
-                chair.assignedBarberName || 'No Barber'
+                chair.assignedBarberName || langService.t().noBarber
               }}</span>
             </div>
             @if (chair.status === 'Empty') {
-            <span class="text-green-600 text-sm font-medium group-hover:block hidden">Select</span>
+            <span class="text-green-600 text-sm font-medium group-hover:block hidden">{{
+              langService.t().assign
+            }}</span>
             } @else {
-            <span class="text-red-500 text-xs">Occupied</span>
+            <span class="text-red-500 text-xs">{{ langService.t().occupied }}</span>
             }
           </button>
           }
         </div>
 
         <div class="flex justify-end">
-          <app-ui-button variant="secondary" (click)="selectedBooking = null">Cancel</app-ui-button>
+          <app-ui-button variant="secondary" (click)="selectedBooking = null">{{
+            langService.t().close
+          }}</app-ui-button>
         </div>
       </div>
     </div>
@@ -384,6 +383,7 @@ import { CreateBookingRequest } from '../../../core/models/models';
   `,
 })
 export class QueueManagerComponent implements OnInit, OnDestroy {
+  langService = inject(LanguageService); // Injected Language Service
   private queueService = inject(QueueService);
   private authService = inject(AuthService);
   private toastService = inject(ToastService);
@@ -427,8 +427,8 @@ export class QueueManagerComponent implements OnInit, OnDestroy {
 
   // Walk-in form
   walkInForm = this.fb.group({
-    firstName: ['', Validators.required],
-    lastName: ['', Validators.required],
+    firstName: ['', [Validators.required, Validators.minLength(3)]],
+    lastName: ['', [Validators.required, Validators.minLength(3)]],
     serviceId: [null as number | null, Validators.required],
   });
 
@@ -439,13 +439,30 @@ export class QueueManagerComponent implements OnInit, OnDestroy {
     this.loadData();
 
     // Load Barbers for Dropdown
+    // Load Barbers for Dropdown from Bookings (Live Data)
     if (this.branchId) {
-      this.barberService.getBarbers().subscribe({
-        next: (allBarbers) => {
-          // Filter barbers for this branch
-          const branchBarbers = allBarbers.filter((b) => b.branchId === this.branchId);
-          this.barbers.set(branchBarbers);
+      this.bookingService.getAllBookings(this.branchId).subscribe({
+        next: (bookings) => {
+          const uniqueBarbersMap = new Map<number, Barber>();
+          bookings.forEach((b) => {
+            // Ensure we have a valid barberId (ignoring 0 or null if any)
+            if (b.barberId && !uniqueBarbersMap.has(b.barberId)) {
+              const nameParts = b.barberName ? b.barberName.split(' ') : ['Unknown'];
+              const firstName = nameParts[0];
+              const lastName = nameParts.slice(1).join(' ') || '';
+
+              uniqueBarbersMap.set(b.barberId, {
+                id: b.barberId,
+                firstName,
+                lastName,
+                phoneNumber: '', // Not available in BookingDto, but needed for interface
+                branchId: this.branchId,
+              });
+            }
+          });
+          this.barbers.set(Array.from(uniqueBarbersMap.values()));
         },
+        error: (err) => console.error('Error loading barbers from bookings', err),
       });
     }
 

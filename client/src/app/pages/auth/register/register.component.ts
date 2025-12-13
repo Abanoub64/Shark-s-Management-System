@@ -30,7 +30,7 @@ import { ToastService } from '../../../core/services/toast.service';
           <div class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
               <app-ui-input
-                label="First Name"
+                [label]="t().firstNameLabel"
                 type="text"
                 placeholder="John"
                 formControlName="firstName"
@@ -38,7 +38,7 @@ import { ToastService } from '../../../core/services/toast.service';
               ></app-ui-input>
 
               <app-ui-input
-                label="Last Name"
+                [label]="t().lastNameLabel"
                 type="text"
                 placeholder="Doe"
                 formControlName="lastName"
@@ -47,7 +47,7 @@ import { ToastService } from '../../../core/services/toast.service';
             </div>
 
             <app-ui-input
-              label="Phone Number"
+              [label]="t().phoneNumberLabel"
               type="tel"
               placeholder="+1234567890"
               formControlName="phoneNumber"
@@ -75,7 +75,7 @@ import { ToastService } from '../../../core/services/toast.service';
               class="text-sm space-y-1 bg-gray-50 p-3 rounded-md"
               *ngIf="registerForm.get('password')?.value"
             >
-              <p class="font-medium text-gray-700 mb-2">Password must contain:</p>
+              <p class="font-medium text-gray-700 mb-2">{{ t().passwordRequirementsTitle }}</p>
               <div
                 class="flex items-center gap-2"
                 [class.text-green-600]="checkPassword('minLength')"
@@ -83,7 +83,7 @@ import { ToastService } from '../../../core/services/toast.service';
               >
                 <span *ngIf="checkPassword('minLength')">✓</span>
                 <span *ngIf="!checkPassword('minLength')">○</span>
-                At least 6 characters
+                {{ t().reqMinLength }}
               </div>
               <div
                 class="flex items-center gap-2"
@@ -92,7 +92,7 @@ import { ToastService } from '../../../core/services/toast.service';
               >
                 <span *ngIf="checkPassword('uppercase')">✓</span>
                 <span *ngIf="!checkPassword('uppercase')">○</span>
-                Uppercase letter
+                {{ t().reqUppercase }}
               </div>
               <div
                 class="flex items-center gap-2"
@@ -101,7 +101,7 @@ import { ToastService } from '../../../core/services/toast.service';
               >
                 <span *ngIf="checkPassword('lowercase')">✓</span>
                 <span *ngIf="!checkPassword('lowercase')">○</span>
-                Lowercase letter
+                {{ t().reqLowercase }}
               </div>
               <div
                 class="flex items-center gap-2"
@@ -110,7 +110,7 @@ import { ToastService } from '../../../core/services/toast.service';
               >
                 <span *ngIf="checkPassword('number')">✓</span>
                 <span *ngIf="!checkPassword('number')">○</span>
-                Number
+                {{ t().reqNumber }}
               </div>
               <div
                 class="flex items-center gap-2"
@@ -119,7 +119,7 @@ import { ToastService } from '../../../core/services/toast.service';
               >
                 <span *ngIf="checkPassword('special')">✓</span>
                 <span *ngIf="!checkPassword('special')">○</span>
-                Special character
+                {{ t().reqSpecial }}
               </div>
             </div>
 
@@ -129,7 +129,7 @@ import { ToastService } from '../../../core/services/toast.service';
               [placeholder]="t().passwordPlaceholder"
               formControlName="confirmPassword"
               [required]="true"
-              [error]="passwordMismatchError()"
+              [error]="passwordMismatchError() ? t().passwordsDoNotMatch : null"
             ></app-ui-input>
           </div>
 
@@ -210,18 +210,15 @@ export class RegisterComponent {
           },
           error: (err) => {
             console.error('Registration failed', err);
-            this.toastService.error('Registration Failed', 'Please try again.');
+            this.toastService.error(this.t().registrationFailed, this.t().tryAgain);
           },
         });
     } else {
       this.registerForm.markAllAsTouched();
       if (!this.isPasswordValid()) {
-        this.toastService.error(
-          'Weak Password',
-          'Please ensure your password meets all requirements.'
-        );
+        this.toastService.error(this.t().weakPassword, this.t().passwordRequirementsError);
       } else {
-        this.toastService.error('Invalid Form', 'Please fill in all required fields correctly.');
+        this.toastService.error(this.t().invalidForm, this.t().fillRequiredFields);
       }
     }
   }

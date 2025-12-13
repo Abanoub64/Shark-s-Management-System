@@ -8,63 +8,89 @@ import { Barber } from '../../../core/services/barber.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <form (ngSubmit)="onSubmit()">
-      <div class="mb-4">
-        <label class="block text-gray-700 text-sm font-bold mb-2" for="firstName">First Name</label>
-        <input
-          [(ngModel)]="barber.firstName"
-          name="firstName"
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          id="firstName"
-          type="text"
-          placeholder="First Name"
-          required
-        />
+    <form (ngSubmit)="onSubmit()" class="space-y-6 p-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium mb-2" [style.color]="'var(--text-primary)'"
+            >First Name</label
+          >
+          <input
+            [(ngModel)]="barber.firstName"
+            name="firstName"
+            class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+            [style.background-color]="'var(--bg-input)'"
+            [style.border-color]="'var(--border-light)'"
+            [style.color]="'var(--text-primary)'"
+            id="firstName"
+            type="text"
+            placeholder="First Name"
+            required
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2" [style.color]="'var(--text-primary)'"
+            >Last Name</label
+          >
+          <input
+            [(ngModel)]="barber.lastName"
+            name="lastName"
+            class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+            [style.background-color]="'var(--bg-input)'"
+            [style.border-color]="'var(--border-light)'"
+            [style.color]="'var(--text-primary)'"
+            id="lastName"
+            type="text"
+            placeholder="Last Name"
+            required
+          />
+        </div>
+
+        <div class="md:col-span-1">
+          <label class="block text-sm font-medium mb-2" [style.color]="'var(--text-primary)'"
+            >Phone Number</label
+          >
+          <input
+            [(ngModel)]="barber.phoneNumber"
+            name="phoneNumber"
+            class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+            [style.background-color]="'var(--bg-input)'"
+            [style.border-color]="'var(--border-light)'"
+            [style.color]="'var(--text-primary)'"
+            id="phoneNumber"
+            type="tel"
+            placeholder="Phone Number"
+            required
+          />
+        </div>
+
+        <div class="md:col-span-1">
+          <label class="block text-sm font-medium mb-2" [style.color]="'var(--text-primary)'"
+            >Branch ID</label
+          >
+          <input
+            [(ngModel)]="barber.branchId"
+            name="branchId"
+            class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+            [style.background-color]="'var(--bg-input)'"
+            [style.border-color]="'var(--border-light)'"
+            [style.color]="'var(--text-primary)'"
+            id="branchId"
+            type="number"
+            placeholder="Branch ID"
+            required
+          />
+        </div>
       </div>
-      <div class="mb-4">
-        <label class="block text-gray-700 text-sm font-bold mb-2" for="lastName">Last Name</label>
-        <input
-          [(ngModel)]="barber.lastName"
-          name="lastName"
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          id="lastName"
-          type="text"
-          placeholder="Last Name"
-          required
-        />
-      </div>
-      <div class="mb-4">
-        <label class="block text-gray-700 text-sm font-bold mb-2" for="phoneNumber"
-          >Phone Number</label
-        >
-        <input
-          [(ngModel)]="barber.phoneNumber"
-          name="phoneNumber"
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          id="phoneNumber"
-          type="tel"
-          placeholder="Phone Number"
-          required
-        />
-      </div>
-      <div class="mb-4">
-        <label class="block text-gray-700 text-sm font-bold mb-2" for="branchId">Branch ID</label>
-        <input
-          [(ngModel)]="barber.branchId"
-          name="branchId"
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          id="branchId"
-          type="number"
-          placeholder="Branch ID"
-          required
-        />
-      </div>
-      <div class="flex items-center justify-end">
+
+      <div
+        class="flex items-center justify-end pt-4 border-t"
+        [style.border-color]="'var(--border-light)'"
+      >
         <button
-          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          class="bg-primary hover:bg-primary-dark text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all w-full md:w-auto"
           type="submit"
         >
-          Save
+          Save Barber
         </button>
       </div>
     </form>

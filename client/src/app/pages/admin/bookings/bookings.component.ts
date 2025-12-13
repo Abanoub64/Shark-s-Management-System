@@ -1,8 +1,10 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { BookingService } from '../../../core/services/booking.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { BranchService, Branch } from '../../../core/services/branch.service';
 import { BookingDto } from '../../../core/models/models';
 import { DeleteConfirmationModalComponent } from '../../../components/shared/delete-confirmation-modal/delete-confirmation-modal.component';
 import { LanguageService } from '../../../core/services/language.service';
@@ -10,41 +12,44 @@ import { LanguageService } from '../../../core/services/language.service';
 @Component({
   selector: 'app-bookings',
   standalone: true,
-  imports: [CommonModule, DeleteConfirmationModalComponent],
+  imports: [CommonModule, FormsModule, DeleteConfirmationModalComponent],
   template: `
     <div class="space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 class="text-2xl md:text-3xl font-bold" [style.color]="'var(--text-primary)'">
-            Bookings Management
+            {{ langService.t().bookingsManagement }}
           </h1>
           <p class="text-sm md:text-base mt-1" [style.color]="'var(--text-secondary)'">
             {{ langService.t().viewManageBookings }}
           </p>
         </div>
         <div class="flex gap-2">
-          <button class="btn-outline" (click)="filterBookings()">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <!-- Search Input -->
+          <div class="relative">
+            <input
+              type="text"
+              [(ngModel)]="searchId"
+              [placeholder]="langService.t().searchBookingId"
+              class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 w-64"
+              [style.background-color]="'var(--bg-secondary)'"
+              [style.color]="'var(--text-primary)'"
+              [style.border-color]="'var(--border-light)'"
+            />
+            <svg
+              class="w-5 h-5 absolute left-3 top-2.5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
-                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
               />
             </svg>
-            Filter
-          </button>
-          <button class="btn-primary" (click)="createBooking()">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            {{ langService.t().newBooking }}
-          </button>
+          </div>
         </div>
       </div>
 
@@ -52,7 +57,7 @@ import { LanguageService } from '../../../core/services/language.service';
       <div class="card">
         <div class="p-4 md:p-6 border-b" [style.border-color]="'var(--border-light)'">
           <h2 class="text-lg font-semibold" [style.color]="'var(--text-primary)'">
-            Recent Bookings
+            {{ langService.t().recentBookings }}
           </h2>
         </div>
 
@@ -68,50 +73,56 @@ import { LanguageService } from '../../../core/services/language.service';
                   class="px-4 py-3 text-left text-xs font-medium uppercase"
                   [style.color]="'var(--text-tertiary)'"
                 >
-                  ID
+                  {{ langService.t().id }}
                 </th>
                 <th
                   class="px-4 py-3 text-left text-xs font-medium uppercase"
                   [style.color]="'var(--text-tertiary)'"
                 >
-                  Customer
+                  {{ langService.t().branch }}
                 </th>
                 <th
                   class="px-4 py-3 text-left text-xs font-medium uppercase"
                   [style.color]="'var(--text-tertiary)'"
                 >
-                  Service
+                  {{ langService.t().customer }}
                 </th>
                 <th
                   class="px-4 py-3 text-left text-xs font-medium uppercase"
                   [style.color]="'var(--text-tertiary)'"
                 >
-                  Barber
+                  {{ langService.t().service }}
                 </th>
                 <th
                   class="px-4 py-3 text-left text-xs font-medium uppercase"
                   [style.color]="'var(--text-tertiary)'"
                 >
-                  Date & Time
+                  {{ langService.t().barber }}
                 </th>
                 <th
                   class="px-4 py-3 text-left text-xs font-medium uppercase"
                   [style.color]="'var(--text-tertiary)'"
                 >
-                  Status
+                  {{ langService.t().dateTime }}
                 </th>
                 <th
                   class="px-4 py-3 text-left text-xs font-medium uppercase"
                   [style.color]="'var(--text-tertiary)'"
                 >
-                  Actions
+                  {{ langService.t().status }}
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-xs font-medium uppercase"
+                  [style.color]="'var(--text-tertiary)'"
+                >
+                  {{ langService.t().actions }}
                 </th>
               </tr>
             </thead>
             <tbody class="divide-y" [style.divide-color]="'var(--border-light)'">
               @if (isLoading()) {
               <tr>
-                <td colspan="7" class="px-4 py-8 text-center">
+                <td colspan="8" class="px-4 py-8 text-center">
                   <div class="flex justify-center">
                     <div
                       class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"
@@ -122,7 +133,7 @@ import { LanguageService } from '../../../core/services/language.service';
               } @else if (filteredBookings().length === 0) {
               <tr>
                 <td
-                  colspan="7"
+                  colspan="8"
                   class="px-4 py-8 text-center"
                   [style.color]="'var(--text-secondary)'"
                 >
@@ -135,7 +146,10 @@ import { LanguageService } from '../../../core/services/language.service';
                 style="hover:background-color: var(--bg-tertiary)"
               >
                 <td class="px-4 py-3 text-sm font-medium" [style.color]="'var(--text-primary)'">
-                  {{ booking.id }}
+                  #{{ booking.id }}
+                </td>
+                <td class="px-4 py-3 text-sm font-medium" [style.color]="'var(--text-primary)'">
+                  {{ getBranchName(booking.branchId) }}
                 </td>
                 <td class="px-4 py-3 text-sm" [style.color]="'var(--text-secondary)'">
                   {{ booking.customerName || 'N/A' }}
@@ -173,7 +187,7 @@ import { LanguageService } from '../../../core/services/language.service';
                       class="text-red-600 hover:text-red-800 text-sm font-medium"
                       (click)="openDeleteModal(booking)"
                     >
-                      Delete
+                      {{ langService.t().delete }}
                     </button>
                   </div>
                 </td>
@@ -199,16 +213,29 @@ export class BookingsComponent implements OnInit {
   private toastService = signal(new ToastService()).asReadonly();
   private bookingService = signal(inject(BookingService)).asReadonly();
   private authService = signal(inject(AuthService)).asReadonly();
+  private branchService = inject(BranchService);
   langService = inject(LanguageService);
 
   bookings = signal<BookingDto[]>([]);
-  filteredBookings = signal<BookingDto[]>([]);
+  branches = signal<Branch[]>([]);
+  searchId = signal('');
+
+  filteredBookings = computed(() => {
+    const term = this.searchId().toLowerCase();
+    const allBookings = this.bookings();
+
+    if (!term) return allBookings;
+
+    return allBookings.filter((booking) => booking.id.toString().includes(term));
+  });
+
   isLoading = signal(true);
   showDeleteModal = signal(false);
   selectedBooking = signal<BookingDto | null>(null);
 
   ngOnInit() {
     this.loadBookings();
+    this.loadBranches();
   }
 
   loadBookings() {
@@ -220,7 +247,6 @@ export class BookingsComponent implements OnInit {
       .subscribe({
         next: (bookings) => {
           this.bookings.set(bookings);
-          this.filteredBookings.set(bookings);
           this.isLoading.set(false);
         },
         error: (error) => {
@@ -229,6 +255,22 @@ export class BookingsComponent implements OnInit {
           this.isLoading.set(false);
         },
       });
+  }
+
+  loadBranches() {
+    this.branchService.getAllBranches().subscribe({
+      next: (branches) => {
+        this.branches.set(branches);
+      },
+      error: (error) => {
+        console.error('Error loading branches:', error);
+      },
+    });
+  }
+
+  getBranchName(branchId: number): string {
+    const branch = this.branches().find((b) => Number(b.id) === branchId);
+    return branch ? branch.name : `Branch #${branchId}`;
   }
 
   formatDateTime(dateTime: string): string {
@@ -292,9 +334,5 @@ export class BookingsComponent implements OnInit {
 
   viewBooking(id: number) {
     this.toastService().info('View Booking', `Viewing booking ${id}`);
-  }
-
-  filterBookings() {
-    this.toastService().info('Filter', 'Filter options will appear here');
   }
 }

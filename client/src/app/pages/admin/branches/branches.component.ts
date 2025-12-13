@@ -6,11 +6,12 @@ import { DeleteConfirmationModalComponent } from '../../../components/shared/del
 import { BranchService, Branch, BranchExtended } from '../../../core/services/branch.service';
 import { UserService, User } from '../../../core/services/user.service';
 import { LanguageService } from '../../../core/services/language.service';
+import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.component';
 
 @Component({
   selector: 'app-branches',
   standalone: true,
-  imports: [CommonModule, FormsModule, DeleteConfirmationModalComponent],
+  imports: [CommonModule, FormsModule, DeleteConfirmationModalComponent, UiSkeletonComponent],
   templateUrl: './branches.component.html',
 })
 export class BranchesComponent implements OnInit {
@@ -37,6 +38,17 @@ export class BranchesComponent implements OnInit {
   isEditMode = signal(false);
   branchToDelete = signal<BranchExtended | null>(null);
   formData = signal<Partial<BranchExtended>>({});
+
+  searchTerm = signal('');
+
+  // Computed signal for filtered branches
+  filteredBranches = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    if (!term) return this.branches();
+    return this.branches().filter(
+      (b) => b.name.toLowerCase().includes(term) || b.location.toLowerCase().includes(term)
+    );
+  });
 
   getActiveBranches() {
     return this.branches().filter((b) => b.status === 'Active').length;
@@ -167,9 +179,18 @@ export class BranchesComponent implements OnInit {
   confirmDelete() {
     const branch = this.branchToDelete();
     if (branch) {
-      this.branches.update((branches) => branches.filter((b) => b.id !== branch.id));
-      this.toastService.success('Deleted', `Branch "${branch.name}" has been deleted`);
-      this.closeDeleteModal();
+      this.branchService.deleteBranch(branch.id).subscribe({
+        next: () => {
+          this.branches.update((branches) => branches.filter((b) => b.id !== branch.id));
+          this.toastService.success('Deleted', `Branch "${branch.name}" has been deleted`);
+          this.closeDeleteModal();
+        },
+        error: (error) => {
+          console.error('Error deleting branch:', error);
+          this.toastService.error('Error', 'Failed to delete branch');
+          this.closeDeleteModal();
+        },
+      });
     }
   }
 
@@ -192,6 +213,8 @@ export class BranchesComponent implements OnInit {
     this.showManagerDropdown.update((show) => !show);
   }
 
+  isLoading = signal(true); // Default to true on init
+
   ngOnInit() {
     // Load branches from service
     this.branchService.getAllBranches().subscribe({
@@ -200,17 +223,20 @@ export class BranchesComponent implements OnInit {
         // Note: API Branch only has id, name, location
         const extendedBranches: BranchExtended[] = branches.map((branch) => ({
           ...branch, // spreads id, name, location
-          managerName: '', // Extended property - default value
+          ...branch, // spreads id, name, location, managerEmail
+          managerName: branch.managerEmail || '', // Map managerEmail to managerName for display
           photo: undefined, // Extended property - default value
           staff: 0, // Extended property - default value
           status: 'Active', // Extended property - default value
           revenue: 0, // Extended property - default value
         }));
         this.branches.set(extendedBranches);
+        this.isLoading.set(false);
       },
       error: (error) => {
         console.error('Error loading branches:', error);
         this.toastService.error('Error', 'Failed to load branches');
+        this.isLoading.set(false);
       },
     });
 

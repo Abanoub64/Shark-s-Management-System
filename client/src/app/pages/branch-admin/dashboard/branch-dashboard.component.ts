@@ -147,7 +147,11 @@ import { UiButtonComponent } from '../../../components/shared/ui-button.componen
                 @for (staff of staffMembers; track staff.id) {
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-3">
-                    <img [src]="staff.image" class="w-10 h-10 rounded-full object-cover" />
+                    <img
+                      [src]="staff.image"
+                      loading="lazy"
+                      class="w-10 h-10 rounded-full object-cover"
+                    />
                     <div>
                       <h4 class="font-medium text-sm">{{ staff.name }}</h4>
                       <span

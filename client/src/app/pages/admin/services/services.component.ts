@@ -1,9 +1,10 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { DeleteConfirmationModalComponent } from '../../../components/shared/delete-confirmation-modal/delete-confirmation-modal.component';
 import { ShopServiceService, Service } from '../../../core/services/shop-service.service';
+import { LanguageService } from '../../../core/services/language.service';
 
 interface ServiceUI extends Service {
   description?: string;
@@ -19,7 +20,7 @@ interface ServiceUI extends Service {
   imports: [CommonModule, FormsModule, DeleteConfirmationModalComponent],
   template: `
     <div class="space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
           <h1 class="text-2xl md:text-3xl font-bold" [style.color]="'var(--text-primary)'">
             Services Management
@@ -28,17 +29,25 @@ interface ServiceUI extends Service {
             Manage service catalog and pricing
           </p>
         </div>
-        <button class="btn-primary" (click)="openAddModal()">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-          Add Service
-        </button>
+        <div class="flex gap-2 w-full sm:w-auto">
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            [placeholder]="langService.t().search + '...'"
+            class="input text-sm py-2 px-3 flex-1 sm:w-64"
+          />
+          <button class="btn-primary" (click)="openAddModal()">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Add Service
+          </button>
+        </div>
       </div>
 
       <!-- Stats Cards -->
@@ -71,7 +80,7 @@ interface ServiceUI extends Service {
 
       <!-- Services Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        @for (service of services(); track service.id) {
+        @for (service of filteredServices(); track service.id) {
         <div class="card p-4 md:p-6 hover:shadow-lg transition-shadow">
           <div class="flex items-start justify-between mb-3">
             <div class="flex items-center gap-3">
@@ -89,14 +98,6 @@ interface ServiceUI extends Service {
           <p class="text-sm mb-4" [style.color]="'var(--text-secondary)'">
             {{ service.description }}
           </p>
-
-          <div
-            class="flex items-center justify-between text-xs"
-            [style.color]="'var(--text-tertiary)'"
-          >
-            <span>⏱️ {{ service.duration }} min</span>
-            <span>📊 {{ service.bookings }} bookings</span>
-          </div>
 
           <div class="flex gap-2 mt-4 pt-4 border-t" [style.border-color]="'var(--border-light)'">
             <button class="flex-1 btn-outline text-sm py-1" (click)="openEditModal(service)">
@@ -121,7 +122,7 @@ interface ServiceUI extends Service {
       (click)="closeModal()"
     >
       <div
-        class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl"
+        class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg shadow-2xl transform transition-all"
         [style.background-color]="'var(--bg-secondary)'"
         (click)="$event.stopPropagation()"
       >
@@ -134,8 +135,7 @@ interface ServiceUI extends Service {
           </h3>
           <button
             (click)="closeModal()"
-            class="transition-colors hover:opacity-70"
-            [style.color]="'var(--text-tertiary)'"
+            class="text-gray-400 hover:text-gray-600 transition-colors"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -148,101 +148,70 @@ interface ServiceUI extends Service {
           </button>
         </div>
 
-        <form (ngSubmit)="saveService()" class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium mb-2" [style.color]="'var(--text-primary)'"
-              >Service Name *</label
-            >
-            <input
-              type="text"
-              [(ngModel)]="formData().name"
-              name="name"
-              required
-              class="input w-full"
-              placeholder="e.g., Classic Haircut"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium mb-2" [style.color]="'var(--text-primary)'"
-              >Price (EGP) *</label
-            >
-            <input
-              type="number"
-              [(ngModel)]="formData().price"
-              name="price"
-              required
-              min="0"
-              step="0.01"
-              class="input w-full"
-              placeholder="250.00"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium mb-2" [style.color]="'var(--text-primary)'"
-              >Description *</label
-            >
-            <textarea
-              [(ngModel)]="formData().description"
-              name="description"
-              required
-              rows="3"
-              class="input w-full resize-none"
-              placeholder="Describe the service..."
-            ></textarea>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium mb-2" [style.color]="'var(--text-primary)'"
-              >Category</label
-            >
-            <select [(ngModel)]="formData().category" name="category" class="input w-full">
-              <option value="Haircuts">Haircuts</option>
-              <option value="Grooming">Grooming</option>
-              <option value="Shaving">Shaving</option>
-              <option value="Styling">Styling</option>
-              <option value="Spa">Spa</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium mb-2" [style.color]="'var(--text-primary)'"
-              >Duration (minutes)</label
-            >
-            <input
-              type="number"
-              [(ngModel)]="formData().duration"
-              name="duration"
-              min="5"
-              step="5"
-              class="input w-full"
-              placeholder="30"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium mb-2" [style.color]="'var(--text-primary)'"
-              >Icon (Emoji)</label
-            >
-            <div class="grid grid-cols-6 gap-2">
-              @for (icon of availableIcons; track icon) {
-              <button
-                type="button"
-                (click)="selectIcon(icon)"
-                class="text-2xl p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                [class.ring-2]="formData().icon === icon"
-                [class.ring-primary]="formData().icon === icon"
+        <form (ngSubmit)="saveService()" class="p-6 space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium mb-2" [style.color]="'var(--text-primary)'"
+                >Service Name <span class="text-red-500">*</span></label
               >
-                {{ icon }}
-              </button>
-              }
+              <input
+                type="text"
+                [(ngModel)]="formData().name"
+                name="name"
+                required
+                class="input w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                [style.border-color]="'var(--border-light)'"
+                [style.background-color]="'var(--bg-input)'"
+                placeholder="e.g., Classic Haircut"
+              />
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium mb-2" [style.color]="'var(--text-primary)'"
+                >Price (EGP) <span class="text-red-500">*</span></label
+              >
+              <input
+                type="number"
+                [(ngModel)]="formData().price"
+                name="price"
+                required
+                min="0"
+                step="0.01"
+                class="input w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                [style.border-color]="'var(--border-light)'"
+                [style.background-color]="'var(--bg-input)'"
+                placeholder="0.00"
+              />
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium mb-2" [style.color]="'var(--text-primary)'"
+                >Description</label
+              >
+              <textarea
+                [(ngModel)]="formData().description"
+                name="description"
+                rows="4"
+                class="input w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
+                [style.border-color]="'var(--border-light)'"
+                [style.background-color]="'var(--bg-input)'"
+                placeholder="Describe the service..."
+              ></textarea>
             </div>
           </div>
 
-          <div class="flex gap-3 pt-4">
-            <button type="button" (click)="closeModal()" class="btn-outline flex-1">Cancel</button>
-            <button type="submit" class="btn-primary flex-1">
+          <div class="flex gap-4 pt-4 border-t" [style.border-color]="'var(--border-light)'">
+            <button
+              type="button"
+              (click)="closeModal()"
+              class="flex-1 px-4 py-3 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="flex-1 px-4 py-3 rounded-lg bg-primary text-white font-medium hover:bg-primary-dark shadow-lg hover:shadow-xl transition-all"
+            >
               {{ isEditMode() ? 'Update' : 'Create' }} Service
             </button>
           </div>
@@ -265,8 +234,20 @@ interface ServiceUI extends Service {
 export class ServicesComponent implements OnInit {
   private toastService = inject(ToastService);
   private shopService = inject(ShopServiceService);
+  langService = inject(LanguageService);
 
   services = signal<ServiceUI[]>([]);
+  searchTerm = signal('');
+
+  filteredServices = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    if (!term) return this.services();
+    return this.services().filter(
+      (s) =>
+        s.name.toLowerCase().includes(term) ||
+        (s.category && s.category.toLowerCase().includes(term))
+    );
+  });
 
   ngOnInit() {
     this.loadServices();

@@ -16,6 +16,7 @@ import { CartService } from '../../../core/services/cart.service';
       <div class="relative aspect-[4/5] overflow-hidden bg-gray-50">
         <img
           [src]="product.image || defaultImage"
+          loading="lazy"
           [alt]="product.name"
           class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
         />

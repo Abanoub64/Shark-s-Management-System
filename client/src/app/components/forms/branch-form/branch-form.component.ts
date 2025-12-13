@@ -66,7 +66,12 @@ import { Branch, BranchExtended } from '../../../core/services/branch.service';
         />
         @if (imagePreview()) {
         <div class="mt-2">
-          <img [src]="imagePreview()!" [alt]="'Preview'" class="w-32 h-32 object-cover rounded" />
+          <img
+            [src]="imagePreview()!"
+            loading="lazy"
+            [alt]="'Preview'"
+            class="w-32 h-32 object-cover rounded"
+          />
         </div>
         }
       </div>

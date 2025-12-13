@@ -1,7 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { StatCardComponent } from '../../../components/shared/stat-card/stat-card.component';
 import { ChartComponent } from '../../../components/shared/chart/chart.component';
 import { AnalyticsService } from '../../../core/services/analytics.service';
 import { LanguageService } from '../../../core/services/language.service';
@@ -16,7 +15,7 @@ import {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, StatCardComponent, ChartComponent],
+  imports: [CommonModule, FormsModule, ChartComponent],
   template: `
     <div class="space-y-4 md:space-y-6 fade-in">
       <!-- Header -->
@@ -67,7 +66,7 @@ import {
         <!-- Branch Analytics Display -->
         @if (selectedBranch && branchAnalytics) {
         <!-- KPI Cards for Selected Branch -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-6">
           <div
             class="card p-4 text-center"
             style="background: linear-gradient(135deg, rgba(13, 153, 153, 0.1), rgba(13, 153, 153, 0.05));"
@@ -90,10 +89,10 @@ import {
               Total Revenue
             </p>
             <h3 class="text-2xl font-bold" style="color: #10b981;">
-              \${{ branchAnalytics.totalRevenue | number }}
+              {{ branchAnalytics.totalOrdersValue | number }} LE
             </h3>
             <p class="text-xs mt-1" [style.color]="'var(--text-secondary)'">
-              Last {{ analyticsDays }} days: \${{ branchAnalytics.totalRevenueLastDays | number }}
+              {{ branchAnalytics.ordersCount }} orders
             </p>
           </div>
           <div
@@ -104,24 +103,10 @@ import {
               Avg Rating
             </p>
             <h3 class="text-2xl font-bold" style="color: #f59e0b;">
-              ⭐ {{ branchAnalytics.avgRating | number : '1.1-1' }}
+              ⭐ {{ branchAnalytics.averageRating | number : '1.1-1' }}
             </h3>
             <p class="text-xs mt-1" [style.color]="'var(--text-secondary)'">
               Customer satisfaction
-            </p>
-          </div>
-          <div
-            class="card p-4 text-center"
-            style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05));"
-          >
-            <p class="text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">
-              Peak Hour
-            </p>
-            <h3 class="text-2xl font-bold" style="color: #8b5cf6;">
-              {{ formatHour(branchAnalytics.peakHour) }}
-            </h3>
-            <p class="text-xs mt-1" [style.color]="'var(--text-secondary)'">
-              {{ branchAnalytics.peakHourCount }} bookings
             </p>
           </div>
         </div>
@@ -243,7 +228,7 @@ export class AdminDashboardComponent implements OnInit {
       y: {
         beginAtZero: true,
         ticks: {
-          callback: (value: any) => '$' + value.toLocaleString(),
+          callback: (value: any) => value.toLocaleString() + ' LE',
         },
       },
     },
@@ -258,7 +243,7 @@ export class AdminDashboardComponent implements OnInit {
       y: {
         beginAtZero: true,
         ticks: {
-          callback: (value: any) => '$' + value.toLocaleString(),
+          callback: (value: any) => value.toLocaleString() + ' LE',
         },
       },
     },
@@ -274,7 +259,7 @@ export class AdminDashboardComponent implements OnInit {
       x: {
         beginAtZero: true,
         ticks: {
-          callback: (value: any) => '$' + value.toLocaleString(),
+          callback: (value: any) => value.toLocaleString() + ' LE',
         },
       },
     },
@@ -316,7 +301,7 @@ export class AdminDashboardComponent implements OnInit {
       y: {
         beginAtZero: true,
         ticks: {
-          callback: (value: any) => '$' + value.toLocaleString(),
+          callback: (value: any) => value.toLocaleString() + ' LE',
         },
       },
     },
@@ -344,7 +329,7 @@ export class AdminDashboardComponent implements OnInit {
       y: {
         beginAtZero: true,
         ticks: {
-          callback: (value: any) => '$' + value.toLocaleString(),
+          callback: (value: any) => value.toLocaleString() + ' LE',
         },
       },
     },
