@@ -6,11 +6,12 @@ import { BranchService, Branch } from '../../core/services/branch.service';
 import { OrderDto } from '../../core/models/order.model';
 import { BookingDto, BookingStatus } from '../../core/models/models';
 import { LanguageService } from '../../core/services/language.service';
+import { UiSkeletonComponent } from '../../components/shared/ui-skeleton.component';
 
 @Component({
   selector: 'app-my-history',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, UiSkeletonComponent],
   template: `
     <div class="container mx-auto px-4 py-8">
       <h1 class="text-3xl font-bold mb-8">{{ t().myHistory }}</h1>
@@ -41,7 +42,26 @@ import { LanguageService } from '../../core/services/language.service';
       @if (activeTab() === 'bookings') {
       <div>
         @if (isLoadingBookings()) {
-        <p class="text-gray-500">{{ t().loadingBookings }}</p>
+        <div class="space-y-4">
+          @for (item of [1, 2, 3]; track item) {
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+              <div class="w-full">
+                <app-ui-skeleton width="150px" height="24px" className="mb-2"></app-ui-skeleton>
+                <app-ui-skeleton width="200px" height="20px" className="mb-4"></app-ui-skeleton>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 mt-2">
+                  <app-ui-skeleton width="120px" height="20px"></app-ui-skeleton>
+                  <app-ui-skeleton width="140px" height="20px"></app-ui-skeleton>
+                  <app-ui-skeleton width="130px" height="20px"></app-ui-skeleton>
+                  <app-ui-skeleton width="100px" height="20px"></app-ui-skeleton>
+                </div>
+              </div>
+              <app-ui-skeleton width="100px" height="30px" className="rounded-full"></app-ui-skeleton>
+            </div>
+          </div>
+          }
+        </div>
         } @else if (bookings().length === 0) {
         <div class="text-center py-16">
           <p class="text-gray-600">{{ t().noBookingsYet }}</p>
@@ -114,7 +134,30 @@ import { LanguageService } from '../../core/services/language.service';
       @if (activeTab() === 'orders') {
       <div>
         @if (isLoadingOrders()) {
-        <p class="text-gray-500">{{ t().loadingOrders }}</p>
+        <div class="space-y-4">
+          @for (item of [1, 2]; track item) {
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-start mb-4">
+              <div class="space-y-2">
+                <app-ui-skeleton width="180px" height="24px"></app-ui-skeleton>
+                <app-ui-skeleton width="120px" height="16px"></app-ui-skeleton>
+                <div class="mt-2 space-y-1">
+                  <app-ui-skeleton width="200px" height="16px"></app-ui-skeleton>
+                  <app-ui-skeleton width="150px" height="16px"></app-ui-skeleton>
+                </div>
+              </div>
+              <div class="text-right flex flex-col items-end gap-2">
+                <app-ui-skeleton width="80px" height="28px"></app-ui-skeleton>
+                <app-ui-skeleton width="60px" height="24px" className="rounded-full"></app-ui-skeleton>
+              </div>
+            </div>
+            <div class="border-t pt-4 space-y-2">
+              <app-ui-skeleton width="100%" height="20px"></app-ui-skeleton>
+              <app-ui-skeleton width="100%" height="20px"></app-ui-skeleton>
+            </div>
+          </div>
+          }
+        </div>
         } @else if (orders().length === 0) {
         <div class="text-center py-16">
           <p class="text-gray-600">{{ t().noOrdersYet }}</p>

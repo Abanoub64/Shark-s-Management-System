@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
 import { ToastService } from '../../../core/services/toast.service';
 import { LanguageService } from '../../../core/services/language.service';
+import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.component';
 
 export interface UserDto {
   id: string;
@@ -18,7 +19,7 @@ export interface UserDto {
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UiSkeletonComponent],
   template: `
     <div class="space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -86,15 +87,19 @@ export interface UserDto {
             </thead>
             <tbody class="divide-y" [style.divide-color]="'var(--border-light)'">
               @if (isLoading()) {
+              @for (item of [1, 2, 3, 4, 5]; track item) {
               <tr>
-                <td colspan="4" class="px-4 py-8 text-center">
-                  <div class="flex justify-center">
-                    <div
-                      class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"
-                    ></div>
+                <td class="px-4 py-3"><app-ui-skeleton width="150px"></app-ui-skeleton></td>
+                <td class="px-4 py-3"><app-ui-skeleton width="180px"></app-ui-skeleton></td>
+                <td class="px-4 py-3"><app-ui-skeleton width="120px"></app-ui-skeleton></td>
+                <td class="px-4 py-3">
+                  <div class="flex gap-1">
+                    <app-ui-skeleton width="60px" borderRadius="9999px"></app-ui-skeleton>
+                    <app-ui-skeleton width="60px" borderRadius="9999px"></app-ui-skeleton>
                   </div>
                 </td>
               </tr>
+              }
               } @else if (users().length === 0) {
               <tr>
                 <td

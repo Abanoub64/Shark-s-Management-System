@@ -71,7 +71,11 @@ interface Employee {
             {{ langService.t().totalEmployees }}
           </p>
           <h3 class="text-2xl md:text-3xl font-bold mt-1" [style.color]="'var(--text-primary)'">
-            {{ employees().length }}
+            @if (isLoading()) {
+              <app-ui-skeleton width="60px" height="36px"></app-ui-skeleton>
+            } @else {
+              {{ employees().length }}
+            }
           </h3>
         </div>
         <div class="card p-4 md:p-6">
@@ -79,7 +83,11 @@ interface Employee {
             {{ langService.t().activeToday }}
           </p>
           <h3 class="text-2xl md:text-3xl font-bold mt-1 text-green-600">
-            {{ getActiveEmployees() }}
+            @if (isLoading()) {
+              <app-ui-skeleton width="60px" height="36px"></app-ui-skeleton>
+            } @else {
+              {{ getActiveEmployees() }}
+            }
           </h3>
         </div>
         <div class="card p-4 md:p-6">
@@ -87,7 +95,11 @@ interface Employee {
             {{ langService.t().onLeave }}
           </p>
           <h3 class="text-2xl md:text-3xl font-bold mt-1 text-orange-600">
-            {{ getOnLeaveEmployees() }}
+            @if (isLoading()) {
+              <app-ui-skeleton width="60px" height="36px"></app-ui-skeleton>
+            } @else {
+              {{ getOnLeaveEmployees() }}
+            }
           </h3>
         </div>
       </div>
@@ -586,15 +598,15 @@ export class EmployeesComponent implements OnInit {
                 employees.map((e) =>
                   e.id === data.id
                     ? ({
-                        ...e,
-                        firstName: updatedBarber.firstName,
-                        lastName: updatedBarber.lastName,
-                        phone: updatedBarber.phoneNumber,
-                        branchId: updatedBarber.branchId,
-                        branch: branch.name,
-                        schedule: data.schedule,
-                        photo: data.photo, // Preserve photo if changed locally (mock)
-                      } as Employee)
+                      ...e,
+                      firstName: updatedBarber.firstName,
+                      lastName: updatedBarber.lastName,
+                      phone: updatedBarber.phoneNumber,
+                      branchId: updatedBarber.branchId,
+                      branch: branch.name,
+                      schedule: data.schedule,
+                      photo: data.photo, // Preserve photo if changed locally (mock)
+                    } as Employee)
                     : e
                 )
               );
@@ -609,14 +621,14 @@ export class EmployeesComponent implements OnInit {
                 employees.map((e) =>
                   e.id === data.id
                     ? ({
-                        ...e,
-                        firstName: updatedBarber.firstName,
-                        lastName: updatedBarber.lastName,
-                        phone: updatedBarber.phoneNumber,
-                        branchId: updatedBarber.branchId,
-                        branch: branch.name,
-                        photo: data.photo,
-                      } as Employee)
+                      ...e,
+                      firstName: updatedBarber.firstName,
+                      lastName: updatedBarber.lastName,
+                      phone: updatedBarber.phoneNumber,
+                      branchId: updatedBarber.branchId,
+                      branch: branch.name,
+                      photo: data.photo,
+                    } as Employee)
                     : e
                 )
               );

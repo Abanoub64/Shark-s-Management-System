@@ -5,6 +5,7 @@ import { ToastService } from '../../../core/services/toast.service';
 import { DeleteConfirmationModalComponent } from '../../../components/shared/delete-confirmation-modal/delete-confirmation-modal.component';
 import { ShopServiceService, Service } from '../../../core/services/shop-service.service';
 import { LanguageService } from '../../../core/services/language.service';
+import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.component';
 
 interface ServiceUI extends Service {
   description?: string;
@@ -17,7 +18,7 @@ interface ServiceUI extends Service {
 @Component({
   selector: 'app-services',
   standalone: true,
-  imports: [CommonModule, FormsModule, DeleteConfirmationModalComponent],
+  imports: [CommonModule, FormsModule, DeleteConfirmationModalComponent, UiSkeletonComponent],
   template: `
     <div class="space-y-6">
       <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -55,62 +56,99 @@ interface ServiceUI extends Service {
         <div class="card p-4 md:p-6">
           <p class="text-xs md:text-sm" [style.color]="'var(--text-secondary)'">Total Services</p>
           <h3 class="text-2xl md:text-3xl font-bold mt-1" [style.color]="'var(--text-primary)'">
-            {{ services().length }}
+            @if (isLoading()) {
+              <app-ui-skeleton width="60px" height="36px"></app-ui-skeleton>
+            } @else {
+              {{ services().length }}
+            }
           </h3>
         </div>
         <div class="card p-4 md:p-6">
           <p class="text-xs md:text-sm" [style.color]="'var(--text-secondary)'">Most Popular</p>
           <h3 class="text-lg md:text-xl font-bold mt-1" [style.color]="'var(--text-primary)'">
-            {{ getMostPopular() }}
+            @if (isLoading()) {
+              <app-ui-skeleton width="100px" height="28px"></app-ui-skeleton>
+            } @else {
+              {{ getMostPopular() }}
+            }
           </h3>
         </div>
         <div class="card p-4 md:p-6">
           <p class="text-xs md:text-sm" [style.color]="'var(--text-secondary)'">Avg Price</p>
           <h3 class="text-2xl md:text-3xl font-bold mt-1" [style.color]="'var(--text-primary)'">
-            EGP {{ getAvgPrice() }}
+            @if (isLoading()) {
+              <app-ui-skeleton width="80px" height="36px"></app-ui-skeleton>
+            } @else {
+              EGP {{ getAvgPrice() }}
+            }
           </h3>
         </div>
         <div class="card p-4 md:p-6">
           <p class="text-xs md:text-sm" [style.color]="'var(--text-secondary)'">Total Bookings</p>
           <h3 class="text-2xl md:text-3xl font-bold mt-1 text-green-600">
-            {{ getTotalBookings() }}
+            @if (isLoading()) {
+              <app-ui-skeleton width="60px" height="36px"></app-ui-skeleton>
+            } @else {
+              {{ getTotalBookings() }}
+            }
           </h3>
         </div>
       </div>
 
       <!-- Services Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        @for (service of filteredServices(); track service.id) {
-        <div class="card p-4 md:p-6 hover:shadow-lg transition-shadow">
-          <div class="flex items-start justify-between mb-3">
-            <div class="flex items-center gap-3">
-              <div class="text-3xl">{{ service.icon }}</div>
-              <div>
-                <h3 class="font-semibold" [style.color]="'var(--text-primary)'">
-                  {{ service.name }}
-                </h3>
-                <p class="text-xs" [style.color]="'var(--text-tertiary)'">{{ service.category }}</p>
+        @if (isLoading()) {
+          @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+          <div class="card p-4 md:p-6">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-3 w-full">
+                <app-ui-skeleton width="40px" height="40px" className="rounded-full"></app-ui-skeleton>
+                <div class="w-full">
+                  <app-ui-skeleton width="60%" height="20px" className="mb-1"></app-ui-skeleton>
+                  <app-ui-skeleton width="40%" height="16px"></app-ui-skeleton>
+                </div>
               </div>
             </div>
-            <span class="badge badge-primary">EGP {{ service.price }}</span>
+            <app-ui-skeleton width="100%" height="60px" className="mb-4"></app-ui-skeleton>
+            <div class="pt-4 border-t flex gap-2">
+              <app-ui-skeleton width="100%" height="32px"></app-ui-skeleton>
+              <app-ui-skeleton width="100%" height="32px"></app-ui-skeleton>
+            </div>
           </div>
-
-          <p class="text-sm mb-4" [style.color]="'var(--text-secondary)'">
-            {{ service.description }}
-          </p>
-
-          <div class="flex gap-2 mt-4 pt-4 border-t" [style.border-color]="'var(--border-light)'">
-            <button class="flex-1 btn-outline text-sm py-1" (click)="openEditModal(service)">
-              Edit
-            </button>
-            <button
-              class="flex-1 btn-outline text-sm py-1 text-red-600 border-red-600 hover:bg-red-50 dark:hover:bg-red-950"
-              (click)="openDeleteModal(service)"
-            >
-              Delete
-            </button>
+          }
+        } @else {
+          @for (service of filteredServices(); track service.id) {
+          <div class="card p-4 md:p-6 hover:shadow-lg transition-shadow">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="text-3xl">{{ service.icon }}</div>
+                <div>
+                  <h3 class="font-semibold" [style.color]="'var(--text-primary)'">
+                    {{ service.name }}
+                  </h3>
+                  <p class="text-xs" [style.color]="'var(--text-tertiary)'">{{ service.category }}</p>
+                </div>
+              </div>
+              <span class="badge badge-primary">EGP {{ service.price }}</span>
+            </div>
+  
+            <p class="text-sm mb-4" [style.color]="'var(--text-secondary)'">
+              {{ service.description }}
+            </p>
+  
+            <div class="flex gap-2 mt-4 pt-4 border-t" [style.border-color]="'var(--border-light)'">
+              <button class="flex-1 btn-outline text-sm py-1" (click)="openEditModal(service)">
+                Edit
+              </button>
+              <button
+                class="flex-1 btn-outline text-sm py-1 text-red-600 border-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+                (click)="openDeleteModal(service)"
+              >
+                Delete
+              </button>
+            </div>
           </div>
-        </div>
+          }
         }
       </div>
     </div>
@@ -237,6 +275,7 @@ export class ServicesComponent implements OnInit {
   langService = inject(LanguageService);
 
   services = signal<ServiceUI[]>([]);
+  isLoading = signal(true);
   searchTerm = signal('');
 
   filteredServices = computed(() => {
@@ -254,6 +293,7 @@ export class ServicesComponent implements OnInit {
   }
 
   loadServices() {
+    this.isLoading.set(true);
     this.shopService.getServices().subscribe({
       next: (services) => {
         // Merge API data with default UI values
@@ -267,10 +307,12 @@ export class ServicesComponent implements OnInit {
           icon: this.getDefaultIcon(s.name),
         }));
         this.services.set(enhancedServices);
+        this.isLoading.set(false);
       },
       error: (error) => {
         console.error('Error loading services:', error);
         this.toastService.error('Error', 'Failed to load services');
+        this.isLoading.set(false);
       },
     });
   }

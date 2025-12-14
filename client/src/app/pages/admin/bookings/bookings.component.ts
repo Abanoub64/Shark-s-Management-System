@@ -8,11 +8,12 @@ import { BranchService, Branch } from '../../../core/services/branch.service';
 import { BookingDto } from '../../../core/models/models';
 import { DeleteConfirmationModalComponent } from '../../../components/shared/delete-confirmation-modal/delete-confirmation-modal.component';
 import { LanguageService } from '../../../core/services/language.service';
+import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.component';
 
 @Component({
   selector: 'app-bookings',
   standalone: true,
-  imports: [CommonModule, FormsModule, DeleteConfirmationModalComponent],
+  imports: [CommonModule, FormsModule, DeleteConfirmationModalComponent, UiSkeletonComponent],
   template: `
     <div class="space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -121,15 +122,18 @@ import { LanguageService } from '../../../core/services/language.service';
             </thead>
             <tbody class="divide-y" [style.divide-color]="'var(--border-light)'">
               @if (isLoading()) {
+              @for (item of [1, 2, 3, 4, 5]; track item) {
               <tr>
-                <td colspan="8" class="px-4 py-8 text-center">
-                  <div class="flex justify-center">
-                    <div
-                      class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"
-                    ></div>
-                  </div>
-                </td>
+                <td class="px-4 py-3"><app-ui-skeleton width="60px"></app-ui-skeleton></td>
+                <td class="px-4 py-3"><app-ui-skeleton width="100px"></app-ui-skeleton></td>
+                <td class="px-4 py-3"><app-ui-skeleton width="120px"></app-ui-skeleton></td>
+                <td class="px-4 py-3"><app-ui-skeleton width="150px"></app-ui-skeleton></td>
+                <td class="px-4 py-3"><app-ui-skeleton width="120px"></app-ui-skeleton></td>
+                <td class="px-4 py-3"><app-ui-skeleton width="140px"></app-ui-skeleton></td>
+                <td class="px-4 py-3"><app-ui-skeleton width="80px" className="rounded-full"></app-ui-skeleton></td>
+                <td class="px-4 py-3"><div class="flex gap-2"><app-ui-skeleton width="100px"></app-ui-skeleton></div></td>
               </tr>
+              }
               } @else if (filteredBookings().length === 0) {
               <tr>
                 <td

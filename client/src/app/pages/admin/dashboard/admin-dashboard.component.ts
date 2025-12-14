@@ -11,11 +11,12 @@ import {
   TrendData,
   BranchAnalytics,
 } from '../../../core/models/models';
+import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.component';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ChartComponent],
+  imports: [CommonModule, FormsModule, ChartComponent, UiSkeletonComponent],
   template: `
     <div class="space-y-4 md:space-y-6 fade-in">
       <!-- Header -->
@@ -171,9 +172,31 @@ import {
           }
         </div>
         } @else if (selectedBranch && loadingAnalytics) {
-        <div class="flex items-center justify-center py-12">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <span class="ml-3" [style.color]="'var(--text-secondary)'">Loading analytics...</span>
+        <div class="space-y-6 animate-pulse">
+            <!-- Stats Cards Skeletons -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+                <app-ui-skeleton height="120px" className="rounded-xl"></app-ui-skeleton>
+                <app-ui-skeleton height="120px" className="rounded-xl"></app-ui-skeleton>
+                <app-ui-skeleton height="120px" className="rounded-xl"></app-ui-skeleton>
+            </div>
+            
+            <!-- Charts Skeletons -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                 <div class="card p-6 h-[250px] flex flex-col gap-4">
+                    <app-ui-skeleton width="150px" height="24px"></app-ui-skeleton>
+                    <app-ui-skeleton width="100%" height="100%"></app-ui-skeleton>
+                 </div>
+                 <div class="card p-6 h-[250px] flex flex-col gap-4">
+                    <app-ui-skeleton width="150px" height="24px"></app-ui-skeleton>
+                    <app-ui-skeleton width="100%" height="100%"></app-ui-skeleton>
+                 </div>
+            </div>
+
+            <!-- Top Services Skeleton -->
+            <div class="card p-6 h-[300px] flex flex-col gap-4">
+                <app-ui-skeleton width="150px" height="24px"></app-ui-skeleton>
+                <app-ui-skeleton width="100%" height="100%"></app-ui-skeleton>
+            </div>
         </div>
         } @else if (!selectedBranch) {
         <div class="flex flex-col items-center justify-center py-12 text-center">
