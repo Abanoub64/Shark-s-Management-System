@@ -56,8 +56,11 @@ import { AuthService } from '../../core/services/auth.service';
             <img
               [src]="
                 item.image ||
-                'https://st4.depositphotos.com/16122460/21586/i/1600/depositphotos_215866804-stock-photo-flat-lay-composition-hair-salon.jpg'
+                'assets/product-placeholder.svg'
               "
+              loading="lazy"
+              [alt]="item.productName"
+              (error)="$event.target['src'] = 'assets/product-placeholder.svg'"
               loading="lazy"
               [alt]="item.productName"
               class="w-24 h-24 object-cover rounded"

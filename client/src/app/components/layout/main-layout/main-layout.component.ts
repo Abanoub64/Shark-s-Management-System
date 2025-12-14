@@ -21,11 +21,11 @@ import { GoToTopComponent } from '../../shared/go-to-top/go-to-top.component';
   ],
   template: `
     <div
-      class="min-h-screen flex flex-col font-sans overflow-x-hidden"
+      class="min-h-screen flex flex-col font-sans overflow-x-hidden pt-16"
       [dir]="langService.currentLang() === 'ar' ? 'rtl' : 'ltr'"
     >
       <!-- Header -->
-      <header class="bg-white shadow-sm sticky top-0 z-50">
+      <header class="bg-white shadow-sm fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300">
         <nav class="container mx-auto px-4 h-16 flex items-center justify-between">
           <!-- Logo -->
           <a routerLink="/" class="text-2xl font-bold text-primary flex items-center gap-2">
@@ -159,29 +159,55 @@ import { GoToTopComponent } from '../../shared/go-to-top/go-to-top.component';
             </a>
             }
             <!-- Mobile Menu Button -->
-            <button class="md:hidden text-gray-600" (click)="toggleMobileMenu()">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="w-6 h-6"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-                />
-              </svg>
+            <button 
+              class="md:hidden text-gray-600 transition-all duration-300 ease-out" 
+              [class.rotate-90]="isMobileMenuOpen"
+              (click)="toggleMobileMenu()"
+            >
+              @if (!isMobileMenuOpen) {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-6 h-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                  />
+                </svg>
+              } @else {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-6 h-6"
+                >
+                  <path 
+                    stroke-linecap="round" 
+                    stroke-linejoin="round" 
+                    d="M6 18L18 6M6 6l12 12" 
+                  />
+                </svg>
+              }
             </button>
           </div>
         </nav>
 
         <!-- Mobile Navigation Menu -->
-        @if (isMobileMenuOpen) {
         <div
-          class="md:hidden border-t border-gray-100 absolute top-16 left-0 right-0 bg-white shadow-lg z-40"
+          class="md:hidden border-t border-gray-100 absolute top-16 left-0 right-0 bg-white shadow-lg z-40 overflow-hidden transition-all duration-300 ease-out"
+          [class.max-h-0]="!isMobileMenuOpen"
+          [class.opacity-0]="!isMobileMenuOpen"
+          [class.invisible]="!isMobileMenuOpen"
+          [class.max-h-[85vh]]="isMobileMenuOpen"
+          [class.opacity-100]="isMobileMenuOpen"
+          [class.visible]="isMobileMenuOpen"
         >
           <div class="flex flex-col p-4 gap-4">
             <a
@@ -264,7 +290,6 @@ import { GoToTopComponent } from '../../shared/go-to-top/go-to-top.component';
             }
           </div>
         </div>
-        }
       </header>
 
       <!-- Main Content -->

@@ -18,6 +18,7 @@ import { CartService } from '../../../core/services/cart.service';
           [src]="product.image || defaultImage"
           loading="lazy"
           [alt]="product.name"
+          (error)="$event.target['src'] = defaultImage"
           class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
         />
 
@@ -91,8 +92,7 @@ import { CartService } from '../../../core/services/cart.service';
 export class ProductCardComponent {
   @Input() product!: Product;
 
-  readonly defaultImage =
-    'https://st4.depositphotos.com/16122460/21586/i/1600/depositphotos_215866804-stock-photo-flat-lay-composition-hair-salon.jpg';
+  readonly defaultImage = 'assets/product-placeholder.svg';
 
   langService = inject(LanguageService);
   private cartService = inject(CartService);
