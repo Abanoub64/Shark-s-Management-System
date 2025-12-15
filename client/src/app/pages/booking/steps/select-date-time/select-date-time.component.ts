@@ -35,7 +35,7 @@ import { LanguageService } from '../../../../core/services/language.service';
           [class.hover:bg-gray-100]="bookingService.selectedTime() !== slot"
           (click)="selectTime(slot)"
         >
-          {{ slot }}
+          <span dir="ltr">{{ formatTime(slot) }}</span>
           @if (isNextDay(slot)) {
           <span class="text-xs ml-1 opacity-75 block font-normal">{{ t().nextDay }}</span>
           }
@@ -133,6 +133,31 @@ export class SelectDateTimeComponent {
   isNextDay(time: string): boolean {
     const hour = parseInt(time.split(':')[0]);
     return hour >= 0 && hour <= 2;
+  }
+
+  formatTime(time: string): string {
+    const [hourStr, minute] = time.split(':');
+    let hour = parseInt(hourStr);
+    const ampm = hour >= 12 && hour < 24 ? this.t().pm : this.t().am;
+
+    // Convert 24h to 12h format
+    // 00:00 -> 12:00 AM (next day logic handled by isNextDay mostly, but for format itself)
+    // 12:00 -> 12:00 PM
+    // 13:00 -> 01:00 PM
+    if (hour > 12) {
+      hour -= 12;
+    } else if (hour === 0) {
+      hour = 12; // 12 AM
+    } else if (hour === 24) { // Should not happen with current data but for safety
+      hour = 12; // 12 AM
+    }
+
+    // Format minute to always be 2 digits
+    const formattedHour = hour.toString().padStart(2, '0');
+
+    // Return formatted string "HH:mm AM/PM"
+    // Using space between time and AM/PM
+    return `${formattedHour}:${minute} ${ampm}`;
   }
 
   back() {

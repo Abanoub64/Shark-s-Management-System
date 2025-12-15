@@ -38,7 +38,8 @@ export class LanguageService {
       branchOverview: 'Branch Overview',
       queueSystem: 'Queue System',
       exit: 'Exit',
-
+      am: 'AM',
+      pm: 'PM',
       // Common
       exportReport: 'Export Report',
       quickActions: 'Quick Actions',
@@ -552,7 +553,8 @@ export class LanguageService {
       branchOverview: 'نظرة عامة للفرع',
       queueSystem: 'نظام الطابور',
       exit: 'خروج',
-
+      am: 'ص',
+      pm: 'م',
       // Common
       exportReport: 'تصدير التقرير',
       quickActions: 'إجراءات سريعة',
