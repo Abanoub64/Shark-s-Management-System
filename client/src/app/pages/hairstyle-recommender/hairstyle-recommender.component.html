@@ -7,117 +7,70 @@
       <p class="text-gray-500 text-base sm:text-lg">{{ t().hairstyleSubtitle }}</p>
     </div>
 
-    <div
-      class="flex flex-col items-center justify-center gap-12"
-      *ngIf="authService.isAuthenticated; else loginRequired"
-    >
+    <div class="flex flex-col items-center justify-center gap-12"
+      *ngIf="authService.isAuthenticated; else loginRequired">
       <!-- Comparison Row -->
-      <div class="flex flex-col lg:flex-row justify-center items-start gap-6 sm:gap-8 w-full px-1">
+      <div class="flex flex-col lg:flex-row justify-center items-start gap-6 sm:gap-8 lg:gap-2 w-full px-1">
         <!-- Upload Panel (Original) -->
-        <div class="flex flex-col items-center w-full">
+        <div class="flex flex-col items-center w-full lg:w-[420px] lg:flex-none">
           <h3 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4 text-center">
             {{ t().uploadPhoto }}
           </h3>
-          <div
-            class="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-100 w-full max-w-[420px]"
-          >
+          <div class="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-100 w-full max-w-[420px]">
             <div
               class="w-full max-w-[380px] sm:max-w-[400px] mx-auto aspect-[4/5] min-h-[280px] border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center relative transition-all duration-300 overflow-hidden"
-              [class.border-primary]="isDragging"
-              [class.bg-primary]="isDragging"
-              [class.bg-opacity-5]="isDragging"
-              (dragover)="onDragOver($event)"
-              (dragleave)="onDragLeave($event)"
-              (drop)="onDrop($event)"
-            >
+              [class.border-primary]="isDragging" [class.bg-primary]="isDragging" [class.bg-opacity-5]="isDragging"
+              (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
               <!-- Placeholder -->
-              <div
-                *ngIf="!previewUrl()"
-                class="text-center p-8 cursor-pointer clickable-area group"
-              >
+              <div *ngIf="!previewUrl()" class="text-center p-8 cursor-pointer clickable-area group">
                 <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">📸</div>
                 <p class="text-gray-400">{{ t().dragDropWrapper }}</p>
-                <input
-                  type="file"
-                  (change)="onFileSelected($event)"
-                  accept="image/*"
-                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                />
+                <input type="file" (change)="onFileSelected($event)" accept="image/*"
+                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
               </div>
 
               <!-- Preview -->
-              <img
-                *ngIf="previewUrl()"
-                [src]="previewUrl()"
-                loading="lazy"
-                alt="Original"
-                class="w-full h-full object-cover"
-              />
+              <img *ngIf="previewUrl()" [src]="previewUrl()" loading="lazy" alt="Original"
+                class="w-full h-full object-cover" />
 
-              <button
-                *ngIf="previewUrl()"
-                (click)="fileInput.click()"
-                class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 text-white px-4 py-2 rounded-full backdrop-blur-sm hover:bg-opacity-90 transition-colors shadow-lg z-10"
-              >
+              <button *ngIf="previewUrl()" (click)="fileInput.click()"
+                class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 text-white px-4 py-2 rounded-full backdrop-blur-sm hover:bg-opacity-90 transition-colors shadow-lg z-10">
                 {{ t().changePhoto }}
               </button>
-              <input
-                #fileInput
-                type="file"
-                (change)="onFileSelected($event)"
-                accept="image/*"
-                class="hidden"
-              />
+              <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*" class="hidden" />
             </div>
           </div>
         </div>
 
         <!-- Result Panel (Generated) -->
-        <div class="flex flex-col items-center w-full">
+        <div class="flex flex-col items-center w-full lg:w-[420px] lg:flex-none">
           <h3 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4 text-center">
             {{ t().yourNewLook }}
           </h3>
-          <div
-            class="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-100 relative w-full max-w-[420px]"
-          >
+          <div class="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-100 relative w-full max-w-[420px]">
             <div
-              class="w-full max-w-[380px] sm:max-w-[400px] mx-auto aspect-[4/5] min-h-[280px] border border-gray-200 rounded-xl flex items-center justify-center overflow-hidden bg-gray-50 relative"
-            >
+              class="w-full max-w-[380px] sm:max-w-[400px] mx-auto aspect-[4/5] min-h-[280px] border border-gray-200 rounded-xl flex items-center justify-center overflow-hidden bg-gray-50 relative">
               <!-- Loading State -->
-              <div
-                *ngIf="isLoading()"
-                class="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-80 z-20"
-              >
-                <div
-                  class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"
-                ></div>
+              <div *ngIf="isLoading()"
+                class="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-80 z-20">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
                 <p class="text-gray-600 animate-pulse">{{ t().processing }}</p>
               </div>
 
               <!-- Empty State -->
-              <div
-                *ngIf="!generatedImageUrl() && !isLoading()"
-                class="text-center text-gray-400 p-8"
-              >
+              <div *ngIf="!generatedImageUrl() && !isLoading()" class="text-center text-gray-400 p-8">
                 <div class="text-5xl mb-4 opacity-30">✨</div>
                 <p>{{ t().generateNewLook }}</p>
               </div>
 
               <!-- Result Image -->
-              <img
-                *ngIf="generatedImageUrl()"
-                [src]="generatedImageUrl()"
-                loading="lazy"
-                alt="Generated Hairstyle"
-                class="w-full h-full object-cover animate-fade-in"
-              />
+              <img *ngIf="generatedImageUrl()" [src]="generatedImageUrl()" loading="lazy" alt="Generated Hairstyle"
+                class="w-full h-full object-cover animate-fade-in" />
             </div>
           </div>
           <!-- Recommendation Note -->
-          <div
-            *ngIf="generatedImageUrl()"
-            class="mt-4 w-full max-w-[400px] bg-gray-50 border-l-4 border-primary p-4 rounded-r-lg animate-fade-in"
-          >
+          <div *ngIf="generatedImageUrl()"
+            class="mt-4 w-full max-w-[400px] bg-gray-50 border-l-4 border-primary p-4 rounded-r-lg animate-fade-in">
             <h4 class="text-gray-900 font-medium mb-2">{{ t().barberNote }} ✂️</h4>
             <p class="text-gray-600 leading-relaxed text-sm">{{ currentRecommendation }}</p>
           </div>
@@ -125,48 +78,35 @@
       </div>
 
       <!-- Controls Section -->
-      <div
-        class="w-full max-w-4xl bg-white rounded-2xl p-4 sm:p-8 shadow-md border border-gray-100"
-      >
+      <div class="w-full max-w-4xl bg-white rounded-2xl p-4 sm:p-8 shadow-md border border-gray-100">
         <h3 class="text-gray-800 text-lg sm:text-xl font-semibold mb-6 text-center">
           {{ t().selectHairstyle }}
         </h3>
 
-        <div
-          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mb-8"
-        >
-          <button
-            *ngFor="let type of hairTypes"
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
+          <button *ngFor="let type of hairTypes"
             class="p-4 rounded-xl border text-sm transition-all duration-200 text-center flex flex-col items-center justify-center gap-2 hover:shadow-md h-full w-full"
-            [class.bg-primary]="selectedHairType() === type.id"
-            [class.border-primary]="selectedHairType() === type.id"
-            [class.text-white]="selectedHairType() === type.id"
-            [class.bg-gray-50]="selectedHairType() !== type.id"
+            [class.bg-primary]="selectedHairType() === type.id" [class.border-primary]="selectedHairType() === type.id"
+            [class.text-white]="selectedHairType() === type.id" [class.bg-gray-50]="selectedHairType() !== type.id"
             [class.border-gray-200]="selectedHairType() !== type.id"
             [class.text-gray-600]="selectedHairType() !== type.id"
-            [class.hover:bg-gray-100]="selectedHairType() !== type.id"
-            (click)="selectHairType(type.id)"
-          >
+            [class.hover:bg-gray-100]="selectedHairType() !== type.id" (click)="selectHairType(type.id)">
             <span class="font-medium">{{
               langService.currentLang() === 'ar' ? type.arabicLabel : type.label
-            }}</span>
+              }}</span>
           </button>
         </div>
 
         <div class="flex flex-col items-center px-1">
           <!-- Error Message -->
-          <div
-            *ngIf="error()"
-            class="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-center border border-red-100 text-sm w-full max-w-md"
-          >
+          <div *ngIf="error()"
+            class="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-center border border-red-100 text-sm w-full max-w-md">
             {{ error() }}
           </div>
 
           <button
             class="w-full max-w-md py-4 bg-primary text-white rounded-xl font-bold text-lg shadow-lg shadow-primary/30 hover:bg-opacity-90 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
-            [disabled]="!previewUrl() || isLoading()"
-            (click)="generateHairstyle()"
-          >
+            [disabled]="!previewUrl() || isLoading()" (click)="generateHairstyle()">
             {{ isLoading() ? t().processing : t().generateNewLook }}
           </button>
         </div>
@@ -177,15 +117,12 @@
 
 <ng-template #loginRequired>
   <div
-    class="flex flex-col items-center justify-center p-8 sm:p-12 bg-white rounded-2xl shadow-sm border border-gray-100 mt-8 text-center"
-  >
+    class="flex flex-col items-center justify-center p-8 sm:p-12 bg-white rounded-2xl shadow-sm border border-gray-100 mt-8 text-center">
     <div class="text-6xl mb-6">🔒</div>
     <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-2">{{ t().hairstyleRecommender }}</h2>
     <p class="text-gray-500 mb-8 max-w-md">{{ t().loginToUseAI }}</p>
-    <a
-      routerLink="/auth/login"
-      class="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:bg-opacity-90 transition-all shadow-lg hover:shadow-xl"
-    >
+    <a routerLink="/auth/login"
+      class="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:bg-opacity-90 transition-all shadow-lg hover:shadow-xl">
       {{ t().loginNow }}
     </a>
   </div>
