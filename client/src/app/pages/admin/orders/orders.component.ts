@@ -1,5 +1,6 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { OrderService } from '../../../core/services/order.service';
 import { OrderDto } from '../../../core/models/order.model';
@@ -10,7 +11,7 @@ import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.comp
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, DeleteConfirmationModalComponent, UiSkeletonComponent],
+  imports: [CommonModule, FormsModule, DeleteConfirmationModalComponent, UiSkeletonComponent],
   template: `
     <div class="space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -27,9 +28,49 @@ import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.comp
       <!-- Orders List -->
       <div class="card">
         <div class="p-4 md:p-6 border-b" [style.border-color]="'var(--border-light)'">
-          <h2 class="text-lg font-semibold" [style.color]="'var(--text-primary)'">
-            {{ langService.t().allOrders }}
-          </h2>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <h2 class="text-lg font-semibold" [style.color]="'var(--text-primary)'">
+              {{ langService.t().allOrders }}
+            </h2>
+            <div class="flex gap-2">
+              <!-- Search Input -->
+              <div class="relative flex-1 sm:flex-none">
+                <input
+                  type="text"
+                  [(ngModel)]="searchId"
+                  [placeholder]="langService.t().search + '...'"
+                  class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-64 text-sm"
+                  [style.background-color]="'var(--bg-secondary)'"
+                  [style.color]="'var(--text-primary)'"
+                  [style.border-color]="'var(--border-light)'"
+                />
+                <svg
+                  class="w-5 h-5 absolute left-3 top-2.5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+              <button class="btn-outline text-sm whitespace-nowrap" (click)="exportData()">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                Export
+              </button>
+            </div>
+          </div>
         </div>
 
         <div class="overflow-x-auto">
@@ -85,19 +126,21 @@ import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.comp
               </tr>
             </thead>
             <tbody class="divide-y" [style.divide-color]="'var(--border-light)'">
-              @if (isLoading()) {
-              @for (item of [1, 2, 3, 4, 5]; track item) {
+              @if (isLoading()) { @for (item of [1, 2, 3, 4, 5]; track item) {
               <tr>
                 <td class="px-4 py-3"><app-ui-skeleton width="40px"></app-ui-skeleton></td>
                 <td class="px-4 py-3"><app-ui-skeleton width="120px"></app-ui-skeleton></td>
                 <td class="px-4 py-3"><app-ui-skeleton width="80px"></app-ui-skeleton></td>
                 <td class="px-4 py-3"><app-ui-skeleton width="100px"></app-ui-skeleton></td>
                 <td class="px-4 py-3"><app-ui-skeleton width="140px"></app-ui-skeleton></td>
-                <td class="px-4 py-3"><app-ui-skeleton width="80px" className="rounded-full"></app-ui-skeleton></td>
-                <td class="px-4 py-3"><div class="flex gap-2"><app-ui-skeleton width="80px"></app-ui-skeleton></div></td>
+                <td class="px-4 py-3">
+                  <app-ui-skeleton width="80px" className="rounded-full"></app-ui-skeleton>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex gap-2"><app-ui-skeleton width="80px"></app-ui-skeleton></div>
+                </td>
               </tr>
-              }
-              } @else if (orders().length === 0) {
+              } } @else if (filteredOrders().length === 0) {
               <tr>
                 <td
                   colspan="7"
@@ -107,7 +150,7 @@ import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.comp
                   {{ langService.t().noOrdersFound }}
                 </td>
               </tr>
-              } @else { @for (order of orders(); track order.id) {
+              } @else { @for (order of filteredOrders(); track order.id) {
               <tr
                 class="hover:bg-opacity-50 dark:hover:bg-opacity-50 transition-colors cursor-pointer"
                 style="hover:background-color: var(--bg-tertiary)"
@@ -309,10 +352,24 @@ export class OrdersComponent implements OnInit {
   langService = inject(LanguageService);
 
   orders = signal<OrderDto[]>([]);
+  searchId = signal('');
   isLoading = signal(true);
   showDeleteModal = signal(false);
   showDetailsModal = signal(false);
   selectedOrder = signal<OrderDto | null>(null);
+
+  filteredOrders = computed(() => {
+    const term = this.searchId().toLowerCase();
+    const allOrders = this.orders();
+
+    if (!term) return allOrders;
+
+    return allOrders.filter(
+      (order) =>
+        order.id.toString().includes(term) ||
+        (order.customerName || '').toLowerCase().includes(term)
+    );
+  });
 
   ngOnInit() {
     this.loadOrders();
@@ -400,5 +457,46 @@ export class OrdersComponent implements OnInit {
 
   closeDetailsModal() {
     this.showDetailsModal.set(false);
+  }
+
+  exportData() {
+    const rows = this.filteredOrders();
+    if (!rows.length) {
+      this.toastService().error('Export', 'No data to export');
+      return;
+    }
+
+    const headers = ['ID', 'Customer', 'Total', 'Payment Method', 'Date', 'Status'];
+    const csvBody = [
+      headers,
+      ...rows.map((o) => [
+        String(o.id ?? ''),
+        o.customerName ?? '',
+        String(o.total ?? 0),
+        o.paymentMethod ?? '',
+        this.formatDateTime(o.createdAt) ?? '',
+        o.status ?? '',
+      ]),
+    ]
+      .map((row) => row.map((cell) => this.escapeCsv(cell)).join(','))
+      .join('\n');
+
+    const blob = new Blob(['\uFEFF' + csvBody], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'orders.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+
+    this.toastService().success('Export', 'Orders CSV downloaded');
+  }
+
+  private escapeCsv(value: string): string {
+    const str = value ?? '';
+    if (str.includes('"') || str.includes(',') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
   }
 }

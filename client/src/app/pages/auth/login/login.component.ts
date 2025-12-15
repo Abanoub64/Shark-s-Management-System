@@ -21,8 +21,11 @@ import { ReactiveFormsModule, FormControl, Validators, FormGroup } from '@angula
           <h2 class="mt-6 text-3xl font-extrabold text-gray-900">{{ t().signInTitle }}</h2>
           <p class="mt-2 text-sm text-gray-600">
             {{ t().or }}
-            <a routerLink="/auth/register" class="font-medium text-primary hover:text-gray-800">
-              {{ t().createNewAccount }}
+            <a
+              routerLink="/auth/register"
+              class="inline-flex items-center gap-2 text-primary font-semibold hover:text-black transition-colors bg-primary/5 hover:bg-primary/10 px-3 py-1 rounded-full"
+            >
+              <span>{{ t().createNewAccount }}</span>
             </a>
           </p>
         </div>
@@ -63,8 +66,20 @@ import { ReactiveFormsModule, FormControl, Validators, FormGroup } from '@angula
           </div>
 
           <div>
-            <app-ui-button type="submit" [fullWidth]="true" [disabled]="loginForm.invalid">
-              {{ t().signInButton }}
+            <app-ui-button
+              type="submit"
+              [fullWidth]="true"
+              [disabled]="loginForm.invalid || isSubmitting"
+            >
+              <ng-container *ngIf="isSubmitting; else signInText">
+                <span class="flex items-center justify-center gap-2">
+                  <span
+                    class="w-4 h-4 border-2 border-white/60 border-t-white rounded-full animate-spin"
+                  ></span>
+                  {{ t().signInButton }}
+                </span>
+              </ng-container>
+              <ng-template #signInText>{{ t().signInButton }}</ng-template>
             </app-ui-button>
           </div>
         </form>
@@ -79,6 +94,8 @@ export class LoginComponent {
   private router = inject(Router);
   t = this.languageService.t;
 
+  isSubmitting = false;
+
   loginForm = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required, Validators.minLength(6)]),
@@ -86,9 +103,11 @@ export class LoginComponent {
 
   onSubmit() {
     if (this.loginForm.valid) {
+      this.isSubmitting = true;
       const { email, password } = this.loginForm.value;
       this.authService.login({ email: email!, password: password! }).subscribe({
         next: (response) => {
+          this.isSubmitting = false;
           if (response.isAuthenticated) {
             this.router.navigate(['/']);
           }
@@ -96,6 +115,7 @@ export class LoginComponent {
         error: (err) => {
           console.error('Login failed', err);
           this.toastService.error('Login Failed', 'Invalid email or password. Please try again.');
+          this.isSubmitting = false;
         },
       });
     } else {

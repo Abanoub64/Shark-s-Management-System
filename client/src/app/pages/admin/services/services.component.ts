@@ -57,9 +57,9 @@ interface ServiceUI extends Service {
           <p class="text-xs md:text-sm" [style.color]="'var(--text-secondary)'">Total Services</p>
           <h3 class="text-2xl md:text-3xl font-bold mt-1" [style.color]="'var(--text-primary)'">
             @if (isLoading()) {
-              <app-ui-skeleton width="60px" height="36px"></app-ui-skeleton>
+            <app-ui-skeleton width="60px" height="36px"></app-ui-skeleton>
             } @else {
-              {{ services().length }}
+            {{ services().length }}
             }
           </h3>
         </div>
@@ -67,9 +67,9 @@ interface ServiceUI extends Service {
           <p class="text-xs md:text-sm" [style.color]="'var(--text-secondary)'">Most Popular</p>
           <h3 class="text-lg md:text-xl font-bold mt-1" [style.color]="'var(--text-primary)'">
             @if (isLoading()) {
-              <app-ui-skeleton width="100px" height="28px"></app-ui-skeleton>
+            <app-ui-skeleton width="100px" height="28px"></app-ui-skeleton>
             } @else {
-              {{ getMostPopular() }}
+            {{ getMostPopular() }}
             }
           </h3>
         </div>
@@ -77,9 +77,8 @@ interface ServiceUI extends Service {
           <p class="text-xs md:text-sm" [style.color]="'var(--text-secondary)'">Avg Price</p>
           <h3 class="text-2xl md:text-3xl font-bold mt-1" [style.color]="'var(--text-primary)'">
             @if (isLoading()) {
-              <app-ui-skeleton width="80px" height="36px"></app-ui-skeleton>
-            } @else {
-              EGP {{ getAvgPrice() }}
+            <app-ui-skeleton width="80px" height="36px"></app-ui-skeleton>
+            } @else { EGP {{ getAvgPrice() }}
             }
           </h3>
         </div>
@@ -87,9 +86,9 @@ interface ServiceUI extends Service {
           <p class="text-xs md:text-sm" [style.color]="'var(--text-secondary)'">Total Bookings</p>
           <h3 class="text-2xl md:text-3xl font-bold mt-1 text-green-600">
             @if (isLoading()) {
-              <app-ui-skeleton width="60px" height="36px"></app-ui-skeleton>
+            <app-ui-skeleton width="60px" height="36px"></app-ui-skeleton>
             } @else {
-              {{ getTotalBookings() }}
+            {{ getTotalBookings() }}
             }
           </h3>
         </div>
@@ -97,59 +96,59 @@ interface ServiceUI extends Service {
 
       <!-- Services Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        @if (isLoading()) {
-          @for (item of [1, 2, 3, 4, 5, 6]; track item) {
-          <div class="card p-4 md:p-6">
-            <div class="flex items-start justify-between mb-3">
-              <div class="flex items-center gap-3 w-full">
-                <app-ui-skeleton width="40px" height="40px" className="rounded-full"></app-ui-skeleton>
-                <div class="w-full">
-                  <app-ui-skeleton width="60%" height="20px" className="mb-1"></app-ui-skeleton>
-                  <app-ui-skeleton width="40%" height="16px"></app-ui-skeleton>
-                </div>
+        @if (isLoading()) { @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+        <div class="card p-4 md:p-6">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-3 w-full">
+              <app-ui-skeleton
+                width="40px"
+                height="40px"
+                className="rounded-full"
+              ></app-ui-skeleton>
+              <div class="w-full">
+                <app-ui-skeleton width="60%" height="20px" className="mb-1"></app-ui-skeleton>
+                <app-ui-skeleton width="40%" height="16px"></app-ui-skeleton>
               </div>
             </div>
-            <app-ui-skeleton width="100%" height="60px" className="mb-4"></app-ui-skeleton>
-            <div class="pt-4 border-t flex gap-2">
-              <app-ui-skeleton width="100%" height="32px"></app-ui-skeleton>
-              <app-ui-skeleton width="100%" height="32px"></app-ui-skeleton>
-            </div>
           </div>
-          }
-        } @else {
-          @for (service of filteredServices(); track service.id) {
-          <div class="card p-4 md:p-6 hover:shadow-lg transition-shadow">
-            <div class="flex items-start justify-between mb-3">
-              <div class="flex items-center gap-3">
-                <div class="text-3xl">{{ service.icon }}</div>
-                <div>
-                  <h3 class="font-semibold" [style.color]="'var(--text-primary)'">
-                    {{ service.name }}
-                  </h3>
-                  <p class="text-xs" [style.color]="'var(--text-tertiary)'">{{ service.category }}</p>
-                </div>
+          <app-ui-skeleton width="100%" height="60px" className="mb-4"></app-ui-skeleton>
+          <div class="pt-4 border-t flex gap-2">
+            <app-ui-skeleton width="100%" height="32px"></app-ui-skeleton>
+            <app-ui-skeleton width="100%" height="32px"></app-ui-skeleton>
+          </div>
+        </div>
+        } } @else { @for (service of filteredServices(); track service.id) {
+        <div class="card p-4 md:p-6 hover:shadow-lg transition-shadow">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <div class="text-3xl">{{ service.icon }}</div>
+              <div>
+                <h3 class="font-semibold" [style.color]="'var(--text-primary)'">
+                  {{ service.name }}
+                </h3>
+                <p class="text-xs" [style.color]="'var(--text-tertiary)'">{{ service.category }}</p>
               </div>
-              <span class="badge badge-primary">EGP {{ service.price }}</span>
             </div>
-  
-            <p class="text-sm mb-4" [style.color]="'var(--text-secondary)'">
-              {{ service.description }}
-            </p>
-  
-            <div class="flex gap-2 mt-4 pt-4 border-t" [style.border-color]="'var(--border-light)'">
-              <button class="flex-1 btn-outline text-sm py-1" (click)="openEditModal(service)">
-                Edit
-              </button>
-              <button
-                class="flex-1 btn-outline text-sm py-1 text-red-600 border-red-600 hover:bg-red-50 dark:hover:bg-red-950"
-                (click)="openDeleteModal(service)"
-              >
-                Delete
-              </button>
-            </div>
+            <span class="badge badge-primary">EGP {{ service.price }}</span>
           </div>
-          }
-        }
+
+          <p class="text-sm mb-4" [style.color]="'var(--text-secondary)'">
+            {{ service.description }}
+          </p>
+
+          <div class="flex gap-2 mt-4 pt-4 border-t" [style.border-color]="'var(--border-light)'">
+            <button class="flex-1 btn-outline text-sm py-1" (click)="openEditModal(service)">
+              Edit
+            </button>
+            <button
+              class="flex-1 btn-outline text-sm py-1 text-red-600 border-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+              (click)="openDeleteModal(service)"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+        } }
       </div>
     </div>
 

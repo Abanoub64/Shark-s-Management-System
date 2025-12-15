@@ -72,9 +72,9 @@ interface Employee {
           </p>
           <h3 class="text-2xl md:text-3xl font-bold mt-1" [style.color]="'var(--text-primary)'">
             @if (isLoading()) {
-              <app-ui-skeleton width="60px" height="36px"></app-ui-skeleton>
+            <app-ui-skeleton width="60px" height="36px"></app-ui-skeleton>
             } @else {
-              {{ employees().length }}
+            {{ employees().length }}
             }
           </h3>
         </div>
@@ -84,9 +84,9 @@ interface Employee {
           </p>
           <h3 class="text-2xl md:text-3xl font-bold mt-1 text-green-600">
             @if (isLoading()) {
-              <app-ui-skeleton width="60px" height="36px"></app-ui-skeleton>
+            <app-ui-skeleton width="60px" height="36px"></app-ui-skeleton>
             } @else {
-              {{ getActiveEmployees() }}
+            {{ getActiveEmployees() }}
             }
           </h3>
         </div>
@@ -96,9 +96,9 @@ interface Employee {
           </p>
           <h3 class="text-2xl md:text-3xl font-bold mt-1 text-orange-600">
             @if (isLoading()) {
-              <app-ui-skeleton width="60px" height="36px"></app-ui-skeleton>
+            <app-ui-skeleton width="60px" height="36px"></app-ui-skeleton>
             } @else {
-              {{ getOnLeaveEmployees() }}
+            {{ getOnLeaveEmployees() }}
             }
           </h3>
         </div>
@@ -161,10 +161,33 @@ interface Employee {
                   {{ langService.t().role }}
                 </th>
                 <th
-                  class="px-4 py-3 text-left text-xs font-medium uppercase"
+                  class="px-4 py-3 text-left text-xs font-medium uppercase cursor-pointer hover:bg-opacity-50 transition-colors select-none"
                   [style.color]="'var(--text-tertiary)'"
+                  (click)="toggleSort('branch')"
+                  title="Click to sort"
                 >
-                  {{ langService.t().branch }}
+                  <div class="flex items-center gap-2">
+                    <span>{{ langService.t().branch }}</span>
+                    @if (sortColumn() === 'branch') {
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      @if (sortDirection() === 'asc') {
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 15l7-7 7 7"
+                      />
+                      } @else {
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"
+                      />
+                      }
+                    </svg>
+                    }
+                  </div>
                 </th>
                 <th
                   class="px-4 py-3 text-left text-xs font-medium uppercase"
@@ -501,6 +524,8 @@ export class EmployeesComponent implements OnInit {
   availableBranches = signal<Branch[]>([]);
 
   nameFilter = signal('');
+  sortColumn = signal<'branch' | null>(null);
+  sortDirection = signal<'asc' | 'desc'>('asc');
   showModal = signal(false);
   showDeleteModal = signal(false);
   isEditMode = signal(false);
@@ -508,12 +533,41 @@ export class EmployeesComponent implements OnInit {
   formData = signal<Partial<Employee>>({});
 
   filteredEmployees = computed(() => {
+    let result = this.employees();
+
+    // Apply name filter
     const filter = this.nameFilter().toLowerCase().trim();
-    if (!filter) return this.employees();
-    return this.employees().filter((emp) =>
-      `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(filter)
-    );
+    if (filter) {
+      result = result.filter((emp) =>
+        `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(filter)
+      );
+    }
+
+    // Apply sorting
+    const sortCol = this.sortColumn();
+    const sortDir = this.sortDirection();
+    if (sortCol === 'branch') {
+      result = [...result].sort((a, b) => {
+        const aVal = a.branch.toLowerCase();
+        const bVal = b.branch.toLowerCase();
+        const comparison = aVal.localeCompare(bVal);
+        return sortDir === 'asc' ? comparison : -comparison;
+      });
+    }
+
+    return result;
   });
+
+  toggleSort(column: 'branch') {
+    if (this.sortColumn() === column) {
+      // Toggle direction if same column
+      this.sortDirection.set(this.sortDirection() === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Set new column and default to ascending
+      this.sortColumn.set(column);
+      this.sortDirection.set('asc');
+    }
+  }
 
   getActiveEmployees() {
     return this.employees().filter((e) => e.status === 'Active').length;
@@ -598,15 +652,15 @@ export class EmployeesComponent implements OnInit {
                 employees.map((e) =>
                   e.id === data.id
                     ? ({
-                      ...e,
-                      firstName: updatedBarber.firstName,
-                      lastName: updatedBarber.lastName,
-                      phone: updatedBarber.phoneNumber,
-                      branchId: updatedBarber.branchId,
-                      branch: branch.name,
-                      schedule: data.schedule,
-                      photo: data.photo, // Preserve photo if changed locally (mock)
-                    } as Employee)
+                        ...e,
+                        firstName: updatedBarber.firstName,
+                        lastName: updatedBarber.lastName,
+                        phone: updatedBarber.phoneNumber,
+                        branchId: updatedBarber.branchId,
+                        branch: branch.name,
+                        schedule: data.schedule,
+                        photo: data.photo, // Preserve photo if changed locally (mock)
+                      } as Employee)
                     : e
                 )
               );
@@ -621,14 +675,14 @@ export class EmployeesComponent implements OnInit {
                 employees.map((e) =>
                   e.id === data.id
                     ? ({
-                      ...e,
-                      firstName: updatedBarber.firstName,
-                      lastName: updatedBarber.lastName,
-                      phone: updatedBarber.phoneNumber,
-                      branchId: updatedBarber.branchId,
-                      branch: branch.name,
-                      photo: data.photo,
-                    } as Employee)
+                        ...e,
+                        firstName: updatedBarber.firstName,
+                        lastName: updatedBarber.lastName,
+                        phone: updatedBarber.phoneNumber,
+                        branchId: updatedBarber.branchId,
+                        branch: branch.name,
+                        photo: data.photo,
+                      } as Employee)
                     : e
                 )
               );
@@ -802,6 +856,44 @@ export class EmployeesComponent implements OnInit {
   }
 
   exportData() {
-    this.toastService.success('Export', 'Employees data exported successfully');
+    const rows = this.filteredEmployees();
+    if (!rows.length) {
+      this.toastService.error('Export', 'No data to export');
+      return;
+    }
+
+    const headers = ['First Name', 'Last Name', 'Phone', 'Role', 'Branch', 'Status', 'Rating'];
+    const csvBody = [
+      headers,
+      ...rows.map((e) => [
+        e.firstName ?? '',
+        e.lastName ?? '',
+        e.phone ?? '',
+        e.role ?? '',
+        e.branch ?? '',
+        e.status ?? '',
+        String(e.rating ?? 0),
+      ]),
+    ]
+      .map((row) => row.map((cell) => this.escapeCsv(cell)).join(','))
+      .join('\n');
+
+    const blob = new Blob(['\uFEFF' + csvBody], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'employees.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+
+    this.toastService.success('Export', 'Employees CSV downloaded');
+  }
+
+  private escapeCsv(value: string): string {
+    const str = value ?? '';
+    if (str.includes('"') || str.includes(',') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
   }
 }

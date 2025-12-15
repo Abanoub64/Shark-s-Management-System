@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Product } from '../../../core/models/product.model';
 import { LanguageService } from '../../../core/services/language.service';
 import { CartService } from '../../../core/services/cart.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-product-card',
@@ -96,6 +97,7 @@ export class ProductCardComponent {
 
   langService = inject(LanguageService);
   private cartService = inject(CartService);
+  private toastService = inject(ToastService);
   t = this.langService.t;
 
   addToCart() {
@@ -110,6 +112,9 @@ export class ProductCardComponent {
         },
         1
       );
+
+      // Success toast feedback
+      this.toastService.success(this.t().success, `${this.product.name} ${this.t().addedToCart}`);
     }
   }
 }

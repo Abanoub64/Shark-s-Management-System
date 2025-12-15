@@ -83,4 +83,43 @@ export class ProductsComponent implements OnInit {
       },
     });
   }
+
+  exportData() {
+    const rows = this.filteredProducts();
+    if (!rows.length) {
+      alert('No data to export');
+      return;
+    }
+
+    const headers = ['Product Name', 'Description', 'Price', 'Stock'];
+    const csvBody = [
+      headers,
+      ...rows.map((p) => [
+        p.name ?? '',
+        p.description ?? '',
+        String(p.price?.toFixed(2) ?? '0.00'),
+        String(p.stock ?? 0),
+      ]),
+    ]
+      .map((row) => row.map((cell) => this.escapeCsv(cell)).join(','))
+      .join('\n');
+
+    const blob = new Blob(['\uFEFF' + csvBody], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'products.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+
+    alert('Products CSV downloaded');
+  }
+
+  private escapeCsv(value: string): string {
+    const str = value ?? '';
+    if (str.includes('"') || str.includes(',') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  }
 }

@@ -35,32 +35,88 @@ import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.comp
       <!-- Branch Analytics Section -->
       <div class="card p-4 md:p-6">
         <h2 class="text-lg md:text-xl font-semibold mb-4" [style.color]="'var(--text-primary)'">
-          📊 Branch Analytics
+          📊 {{ langService.t().branchAnalytics }}
         </h2>
 
-        <!-- Branch Selector -->
-        <div class="mb-6">
-          <label class="block text-sm font-medium mb-2" [style.color]="'var(--text-secondary)'">
-            Select Branch to View Analytics
-          </label>
-          <div class="flex flex-wrap gap-2">
-            @for (branch of branches; track branch.id) {
-            <button
-              (click)="selectBranch(branch)"
-              class="px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium"
-              [class]="
-                selectedBranch?.id === branch.id
-                  ? 'bg-primary text-white shadow-md scale-105'
-                  : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
-              "
-              [style.color]="selectedBranch?.id === branch.id ? 'white' : 'var(--text-primary)'"
-            >
-              🏪 {{ branch.name }}
-            </button>
+        <!-- Branch Selector and Days Filter -->
+        <div class="mb-6 space-y-4">
+          <!-- Branch Selector -->
+          <div>
+            <label class="block text-sm font-medium mb-2" [style.color]="'var(--text-secondary)'">
+              {{ langService.t().selectBranchToView }}
+            </label>
+            <div class="flex flex-wrap gap-2">
+              @for (branch of branches; track branch.id) {
+              <button
+                (click)="selectBranch(branch)"
+                class="px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium"
+                [class]="
+                  selectedBranch?.id === branch.id
+                    ? 'bg-primary text-white shadow-md scale-105'
+                    : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                "
+                [style.color]="selectedBranch?.id === branch.id ? 'white' : 'var(--text-primary)'"
+              >
+                🏪 {{ branch.name }}
+              </button>
+              }
+            </div>
+            @if (branches.length === 0) {
+            <p class="text-sm" [style.color]="'var(--text-secondary)'">
+              {{ langService.t().loadingBranches }}
+            </p>
             }
           </div>
-          @if (branches.length === 0) {
-          <p class="text-sm" [style.color]="'var(--text-secondary)'">Loading branches...</p>
+
+          <!-- Days Selector -->
+          @if (selectedBranch) {
+          <div>
+            <label class="block text-sm font-medium mb-2" [style.color]="'var(--text-secondary)'">
+              📅 {{ langService.t().analyticsPeriod }}
+            </label>
+            <div class="flex flex-wrap gap-2 items-center">
+              <button
+                (click)="changeDays(7)"
+                class="px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium"
+                [class]="
+                  analyticsDays === 7
+                    ? 'bg-primary text-white shadow-md'
+                    : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                "
+                [style.color]="analyticsDays === 7 ? 'white' : 'var(--text-primary)'"
+              >
+                {{ langService.t().sevenDays }}
+              </button>
+              <button
+                (click)="changeDays(30)"
+                class="px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium"
+                [class]="
+                  analyticsDays === 30
+                    ? 'bg-primary text-white shadow-md'
+                    : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                "
+                [style.color]="analyticsDays === 30 ? 'white' : 'var(--text-primary)'"
+              >
+                {{ langService.t().thirtyDays }}
+              </button>
+              <div class="flex items-center gap-2">
+                <span class="text-sm" [style.color]="'var(--text-secondary)'"
+                  >{{ langService.t().custom }}:</span
+                >
+                <input
+                  type="number"
+                  [(ngModel)]="customDays"
+                  (change)="changeDays(customDays)"
+                  min="1"
+                  max="365"
+                  [placeholder]="langService.t().days"
+                  class="w-16 px-2 py-2 rounded-lg border text-sm"
+                  [style.borderColor]="'var(--border-color)'"
+                  [style.color]="'var(--text-primary)'"
+                />
+              </div>
+            </div>
+          </div>
           }
         </div>
 
@@ -73,13 +129,14 @@ import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.comp
             style="background: linear-gradient(135deg, rgba(13, 153, 153, 0.1), rgba(13, 153, 153, 0.05));"
           >
             <p class="text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">
-              Total Bookings
+              {{ langService.t().totalBookings }}
             </p>
             <h3 class="text-2xl font-bold" [style.color]="'var(--primary-color)'">
               {{ branchAnalytics.totalBookings }}
             </h3>
             <p class="text-xs mt-1" [style.color]="'var(--text-secondary)'">
-              Last {{ analyticsDays }} days: {{ branchAnalytics.totalBookingsLastDays }}
+              {{ langService.t().last }} {{ analyticsDays }} {{ langService.t().days }}:
+              {{ branchAnalytics.totalBookingsLastDays }}
             </p>
           </div>
           <div
@@ -87,13 +144,13 @@ import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.comp
             style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));"
           >
             <p class="text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">
-              Total Revenue
+              {{ langService.t().totalRevenue }}
             </p>
             <h3 class="text-2xl font-bold" style="color: #10b981;">
               {{ branchAnalytics.totalOrdersValue | number }} LE
             </h3>
             <p class="text-xs mt-1" [style.color]="'var(--text-secondary)'">
-              {{ branchAnalytics.ordersCount }} orders
+              {{ branchAnalytics.ordersCount }} {{ langService.t().orders }}
             </p>
           </div>
           <div
@@ -101,23 +158,23 @@ import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.comp
             style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));"
           >
             <p class="text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">
-              Avg Rating
+              {{ langService.t().avgRating }}
             </p>
             <h3 class="text-2xl font-bold" style="color: #f59e0b;">
               ⭐ {{ branchAnalytics.averageRating | number : '1.1-1' }}
             </h3>
             <p class="text-xs mt-1" [style.color]="'var(--text-secondary)'">
-              Customer satisfaction
+              {{ langService.t().customerSatisfaction }}
             </p>
           </div>
         </div>
 
         <!-- Charts Row -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6">
+        <div class="grid grid-cols-1 gap-4 md:gap-6 mb-6">
           <!-- Bookings Per Day Chart -->
           <div class="card p-4">
             <h4 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">
-              📅 Bookings Per Day
+              📅 {{ langService.t().bookingsPerDay }}
             </h4>
             @if (bookingsPerDayData && branchAnalytics.bookingsPerDay.length > 0) {
             <app-chart
@@ -128,82 +185,185 @@ import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.comp
             />
             } @else {
             <div class="flex items-center justify-center h-48 text-gray-400">
-              <p>No booking data available</p>
-            </div>
-            }
-          </div>
-
-          <!-- Revenue Per Day Chart -->
-          <div class="card p-4">
-            <h4 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">
-              💰 Revenue Per Day
-            </h4>
-            @if (revenuePerDayData && branchAnalytics.revenuePerDay.length > 0) {
-            <app-chart
-              type="line"
-              [data]="revenuePerDayData"
-              [options]="revenueChartOptions"
-              [height]="'200px'"
-            />
-            } @else {
-            <div class="flex items-center justify-center h-48 text-gray-400">
-              <p>No revenue data available</p>
+              <p>{{ langService.t().noBookingData }}</p>
             </div>
             }
           </div>
         </div>
 
-        <!-- Top Services Chart -->
+        <!-- Bookings Status + Queue/Chairs KPIs + Orders KPI -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
+          <div class="card p-4">
+            <h4 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">
+              ✅ {{ langService.t().bookingsByStatus }}
+            </h4>
+            @if (bookingsStatusData) {
+            <app-chart
+              type="doughnut"
+              [data]="bookingsStatusData"
+              [options]="pieChartOptions"
+              [height]="'220px'"
+            />
+            } @else {
+            <div class="flex items-center justify-center h-48 text-gray-400">
+              <p>{{ langService.t().noStatusData }}</p>
+            </div>
+            }
+          </div>
+          <div class="card p-4 text-center">
+            <p class="text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">
+              {{ langService.t().pendingQueue }}
+            </p>
+            <h3 class="text-2xl font-bold" [style.color]="'var(--text-primary)'">
+              {{ branchAnalytics.pendingQueueCount }}
+            </h3>
+            <p class="text-xs mt-1" [style.color]="'var(--text-secondary)'">
+              {{ langService.t().waitingCustomers }}
+            </p>
+          </div>
+          <div class="card p-4 text-center">
+            <p class="text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">
+              {{ langService.t().occupiedChairs }}
+            </p>
+            <h3 class="text-2xl font-bold" [style.color]="'var(--text-primary)'">
+              {{ branchAnalytics.occupiedChairs }}
+            </h3>
+            <p class="text-xs mt-1" [style.color]="'var(--text-secondary)'">
+              {{ langService.t().currentlyBusy }}
+            </p>
+          </div>
+          <div class="card p-4 text-center">
+            <p class="text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">
+              {{ langService.t().orders }}
+            </p>
+            <h3 class="text-2xl font-bold" style="color:#0d9999">
+              {{ branchAnalytics.ordersCount }}
+            </h3>
+            <p class="text-xs mt-1" [style.color]="'var(--text-secondary)'">
+              {{ langService.t().inLast }} {{ analyticsDays }} {{ langService.t().days }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Rating Gauge -->
         <div class="card p-4">
           <h4 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">
-            🏆 Top Services
+            ⭐ {{ langService.t().averageRatingTitle }}
           </h4>
-          @if (topServicesData && branchAnalytics.topServices.length > 0) {
+          @if (ratingGaugeData) {
           <app-chart
-            type="bar"
-            [data]="topServicesData"
-            [options]="servicesChartOptions"
-            [height]="'250px'"
+            type="doughnut"
+            [data]="ratingGaugeData"
+            [options]="doughnutChartOptions"
+            [height]="'180px'"
           />
+          <p class="text-xs mt-3 text-center" [style.color]="'var(--text-secondary)'">
+            {{ langService.t().basedOn }} {{ branchAnalytics.ratingsCount }}
+            {{ langService.t().ratings }}
+          </p>
           } @else {
-          <div class="flex items-center justify-center h-48 text-gray-400">
-            <p>No services data available</p>
+          <div class="flex items-center justify-center h-32 text-gray-400">
+            <p>{{ langService.t().noRatingsData }}</p>
           </div>
           }
         </div>
         } @else if (selectedBranch && loadingAnalytics) {
-        <div class="space-y-6 animate-pulse">
-            <!-- Stats Cards Skeletons -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-                <app-ui-skeleton height="120px" className="rounded-xl"></app-ui-skeleton>
-                <app-ui-skeleton height="120px" className="rounded-xl"></app-ui-skeleton>
-                <app-ui-skeleton height="120px" className="rounded-xl"></app-ui-skeleton>
+        <div class="space-y-6">
+          <!-- KPI Cards Skeletons -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+            <div class="card p-4">
+              <app-ui-skeleton width="120px" height="16px" className="mb-2"></app-ui-skeleton>
+              <app-ui-skeleton width="80px" height="32px" className="mb-2"></app-ui-skeleton>
+              <app-ui-skeleton width="150px" height="14px"></app-ui-skeleton>
             </div>
-            
-            <!-- Charts Skeletons -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-                 <div class="card p-6 h-[250px] flex flex-col gap-4">
-                    <app-ui-skeleton width="150px" height="24px"></app-ui-skeleton>
-                    <app-ui-skeleton width="100%" height="100%"></app-ui-skeleton>
-                 </div>
-                 <div class="card p-6 h-[250px] flex flex-col gap-4">
-                    <app-ui-skeleton width="150px" height="24px"></app-ui-skeleton>
-                    <app-ui-skeleton width="100%" height="100%"></app-ui-skeleton>
-                 </div>
+            <div class="card p-4">
+              <app-ui-skeleton width="120px" height="16px" className="mb-2"></app-ui-skeleton>
+              <app-ui-skeleton width="100px" height="32px" className="mb-2"></app-ui-skeleton>
+              <app-ui-skeleton width="80px" height="14px"></app-ui-skeleton>
             </div>
+            <div class="card p-4">
+              <app-ui-skeleton width="100px" height="16px" className="mb-2"></app-ui-skeleton>
+              <app-ui-skeleton width="90px" height="32px" className="mb-2"></app-ui-skeleton>
+              <app-ui-skeleton width="140px" height="14px"></app-ui-skeleton>
+            </div>
+          </div>
 
-            <!-- Top Services Skeleton -->
-            <div class="card p-6 h-[300px] flex flex-col gap-4">
-                <app-ui-skeleton width="150px" height="24px"></app-ui-skeleton>
-                <app-ui-skeleton width="100%" height="100%"></app-ui-skeleton>
+          <!-- Bookings Per Day Chart Skeleton -->
+          <div class="card p-4">
+            <app-ui-skeleton width="150px" height="20px" className="mb-3"></app-ui-skeleton>
+            <app-ui-skeleton width="100%" height="200px" className="rounded-lg"></app-ui-skeleton>
+          </div>
+
+          <!-- Status Chart + 3 KPI Cards Grid Skeleton -->
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6">
+            <!-- Status Chart Skeleton -->
+            <div class="card p-4">
+              <app-ui-skeleton width="140px" height="20px" className="mb-3"></app-ui-skeleton>
+              <app-ui-skeleton width="100%" height="220px" className="rounded-lg"></app-ui-skeleton>
             </div>
+            <!-- Pending Queue KPI -->
+            <div class="card p-4">
+              <app-ui-skeleton
+                width="100px"
+                height="16px"
+                className="mb-2 mx-auto"
+              ></app-ui-skeleton>
+              <app-ui-skeleton
+                width="60px"
+                height="32px"
+                className="mb-2 mx-auto"
+              ></app-ui-skeleton>
+              <app-ui-skeleton width="120px" height="14px" className="mx-auto"></app-ui-skeleton>
+            </div>
+            <!-- Occupied Chairs KPI -->
+            <div class="card p-4">
+              <app-ui-skeleton
+                width="100px"
+                height="16px"
+                className="mb-2 mx-auto"
+              ></app-ui-skeleton>
+              <app-ui-skeleton
+                width="60px"
+                height="32px"
+                className="mb-2 mx-auto"
+              ></app-ui-skeleton>
+              <app-ui-skeleton width="100px" height="14px" className="mx-auto"></app-ui-skeleton>
+            </div>
+            <!-- Orders KPI -->
+            <div class="card p-4">
+              <app-ui-skeleton
+                width="80px"
+                height="16px"
+                className="mb-2 mx-auto"
+              ></app-ui-skeleton>
+              <app-ui-skeleton
+                width="60px"
+                height="32px"
+                className="mb-2 mx-auto"
+              ></app-ui-skeleton>
+              <app-ui-skeleton width="120px" height="14px" className="mx-auto"></app-ui-skeleton>
+            </div>
+          </div>
+
+          <!-- Rating Gauge Skeleton -->
+          <div class="card p-4">
+            <app-ui-skeleton width="160px" height="20px" className="mb-3"></app-ui-skeleton>
+            <app-ui-skeleton
+              width="100%"
+              height="180px"
+              className="rounded-lg mb-3"
+            ></app-ui-skeleton>
+            <app-ui-skeleton width="150px" height="14px" className="mx-auto"></app-ui-skeleton>
+          </div>
         </div>
         } @else if (!selectedBranch) {
         <div class="flex flex-col items-center justify-center py-12 text-center">
           <div class="text-5xl mb-4">👆</div>
-          <p class="text-lg font-medium" [style.color]="'var(--text-primary)'">Select a Branch</p>
+          <p class="text-lg font-medium" [style.color]="'var(--text-primary)'">
+            {{ langService.t().selectABranch }}
+          </p>
           <p class="text-sm" [style.color]="'var(--text-secondary)'">
-            Click on a branch above to view its analytics
+            {{ langService.t().clickBranchAbove }}
           </p>
         </div>
         }
@@ -227,11 +387,14 @@ export class AdminDashboardComponent implements OnInit {
   branchAnalytics: BranchAnalytics | null = null;
   loadingAnalytics = false;
   analyticsDays = 30;
+  customDays = 30;
 
   // Branch Analytics Chart Data
   bookingsPerDayData: any = null;
   revenuePerDayData: any = null;
   topServicesData: any = null;
+  bookingsStatusData: any = null;
+  ratingGaugeData: any = null;
 
   // Chart data
   revenueTrendData: any = null;
@@ -388,7 +551,19 @@ export class AdminDashboardComponent implements OnInit {
 
   selectBranch(branch: Branch): void {
     this.selectedBranch = branch;
+    this.analyticsDays = 30; // Reset to default
+    this.customDays = 30;
     this.loadBranchAnalytics(branch.id);
+  }
+
+  changeDays(days: number): void {
+    if (days > 0 && days <= 365) {
+      this.analyticsDays = days;
+      this.customDays = days;
+      if (this.selectedBranch) {
+        this.loadBranchAnalytics(this.selectedBranch.id);
+      }
+    }
   }
 
   private loadBranchAnalytics(branchId: number): void {
@@ -426,14 +601,33 @@ export class AdminDashboardComponent implements OnInit {
       };
     }
 
-    // Revenue Per Day Chart
+    // Revenue Per Day Chart (zero-fill missing days over last analyticsDays)
     if (analytics.revenuePerDay && analytics.revenuePerDay.length > 0) {
+      const byDate: Record<string, number> = {};
+      for (const d of analytics.revenuePerDay) {
+        // Normalize to YYYY-MM-DD for stable keying
+        const dateKey = new Date(d.date).toISOString().slice(0, 10);
+        byDate[dateKey] = d.amount ?? 0;
+      }
+
+      const dates: string[] = [];
+      const values: number[] = [];
+      const today = new Date();
+      // Generate last N days range (inclusive of today)
+      for (let i = this.analyticsDays - 1; i >= 0; i--) {
+        const dt = new Date(today);
+        dt.setDate(today.getDate() - i);
+        const key = dt.toISOString().slice(0, 10);
+        dates.push(this.formatDate(key));
+        values.push(byDate[key] ?? 0);
+      }
+
       this.revenuePerDayData = {
-        labels: analytics.revenuePerDay.map((d) => this.formatDate(d.date)),
+        labels: dates,
         datasets: [
           {
             label: 'Revenue',
-            data: analytics.revenuePerDay.map((d) => d.amount),
+            data: values,
             borderColor: '#10b981',
             backgroundColor: 'rgba(16, 185, 129, 0.1)',
             fill: true,
@@ -455,6 +649,40 @@ export class AdminDashboardComponent implements OnInit {
           },
         ],
       };
+    }
+
+    // Bookings by Status Chart (doughnut)
+    if (analytics.bookingsByStatus) {
+      const labels = Object.keys(analytics.bookingsByStatus);
+      const data = Object.values(analytics.bookingsByStatus);
+      this.bookingsStatusData = {
+        labels,
+        datasets: [
+          {
+            data,
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#0ea5e9'],
+          },
+        ],
+      };
+    } else {
+      this.bookingsStatusData = null;
+    }
+
+    // Rating gauge (averageRating out of 5)
+    if (typeof analytics.averageRating === 'number') {
+      const val = Math.max(0, Math.min(5, analytics.averageRating));
+      this.ratingGaugeData = {
+        labels: ['Rating', 'Remaining'],
+        datasets: [
+          {
+            data: [val, 5 - val],
+            backgroundColor: ['#f59e0b', '#e5e7eb'],
+            borderWidth: 0,
+          },
+        ],
+      };
+    } else {
+      this.ratingGaugeData = null;
     }
   }
 

@@ -21,8 +21,11 @@ import { ToastService } from '../../../core/services/toast.service';
           <h2 class="mt-6 text-3xl font-extrabold text-gray-900">{{ t().registerTitle }}</h2>
           <p class="mt-2 text-sm text-gray-600">
             {{ t().or }}
-            <a routerLink="/auth/login" class="font-medium text-primary hover:text-gray-800">
-              {{ t().signInToExisting }}
+            <a
+              routerLink="/auth/login"
+              class="inline-flex items-center gap-2 text-primary font-semibold hover:text-black transition-colors bg-primary/5 hover:bg-primary/10 px-3 py-1 rounded-full"
+            >
+              <span>{{ t().signInToExisting }}</span>
             </a>
           </p>
         </div>
@@ -134,8 +137,20 @@ import { ToastService } from '../../../core/services/toast.service';
           </div>
 
           <div>
-            <app-ui-button type="submit" [fullWidth]="true" [disabled]="registerForm.invalid">
-              {{ t().createAccountButton }}
+            <app-ui-button
+              type="submit"
+              [fullWidth]="true"
+              [disabled]="registerForm.invalid || isSubmitting"
+            >
+              <ng-container *ngIf="isSubmitting; else createText">
+                <span class="flex items-center justify-center gap-2">
+                  <span
+                    class="w-4 h-4 border-2 border-white/60 border-t-white rounded-full animate-spin"
+                  ></span>
+                  {{ t().createAccountButton }}
+                </span>
+              </ng-container>
+              <ng-template #createText>{{ t().createAccountButton }}</ng-template>
             </app-ui-button>
           </div>
         </form>
@@ -149,6 +164,8 @@ export class RegisterComponent {
   languageService = inject(LanguageService);
   toastService = inject(ToastService);
   t = this.languageService.t;
+
+  isSubmitting = false;
 
   registerForm = new FormGroup({
     firstName: new FormControl('', [Validators.required, Validators.minLength(2)]),
@@ -193,6 +210,7 @@ export class RegisterComponent {
 
   onSubmit() {
     if (this.registerForm.valid && !this.passwordMismatchError() && this.isPasswordValid()) {
+      this.isSubmitting = true;
       const { firstName, lastName, phoneNumber, email, password } = this.registerForm.value;
       this.authService
         .register({
@@ -204,6 +222,7 @@ export class RegisterComponent {
         })
         .subscribe({
           next: (response) => {
+            this.isSubmitting = false;
             if (response.isAuthenticated) {
               this.router.navigate(['/']);
             }
@@ -211,6 +230,7 @@ export class RegisterComponent {
           error: (err) => {
             console.error('Registration failed', err);
             this.toastService.error(this.t().registrationFailed, this.t().tryAgain);
+            this.isSubmitting = false;
           },
         });
     } else {

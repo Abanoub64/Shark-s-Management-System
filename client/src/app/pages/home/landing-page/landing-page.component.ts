@@ -92,7 +92,7 @@ import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.comp
       <div class="container mx-auto px-4 relative z-10">
         <div class="text-center mb-16">
           <h2 class="text-4xl font-bold mb-4 text-white font-serif">
-            <span class="text-secondary">{{ t().whyChoose }}</span> Sharks
+            <span class="text-secondary">{{ t().whyChoose }}</span>
           </h2>
           <p class="text-gray-400 max-w-2xl mx-auto text-lg font-light">
             {{ t().whyChooseSubtitle }}

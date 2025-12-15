@@ -47,25 +47,34 @@ import { FormsModule } from '@angular/forms';
 
         <!-- Content -->
         <div class="mb-6">
-          <p class="text-gray-700 mb-4">
-            To confirm deletion, please type
-            <strong class="font-mono text-red-600">delete {{ entityName }}</strong> below:
-          </p>
+          @if (requiresConfirmationText) {
+          <div>
+            <p class="text-gray-700 mb-4">
+              To confirm deletion, please type
+              <strong class="font-mono text-red-600">delete {{ entityName }}</strong> below:
+            </p>
 
-          <input
-            type="text"
-            [(ngModel)]="confirmationText"
-            (keyup.enter)="onConfirm()"
-            placeholder="Type here..."
-            class="input"
-            [class.border-red-500]="showError"
-            autofocus
-          />
+            <input
+              type="text"
+              [(ngModel)]="confirmationText"
+              (keyup.enter)="onConfirm()"
+              placeholder="Type here..."
+              class="input"
+              [class.border-red-500]="showError"
+              autofocus
+            />
 
-          @if (showError) {
-          <p class="text-sm text-red-600 mt-2">
-            ❌ Text doesn't match. Please type exactly:
-            <span class="font-mono">delete {{ entityName }}</span>
+            @if (showError) {
+            <p class="text-sm text-red-600 mt-2">
+              ❌ Text doesn't match. Please type exactly:
+              <span class="font-mono">delete {{ entityName }}</span>
+            </p>
+            }
+          </div>
+          } @else {
+          <p class="text-gray-700">
+            Are you sure you want to delete <strong>{{ entityName }}</strong
+            >? This action cannot be undone.
           </p>
           }
         </div>
@@ -76,9 +85,9 @@ import { FormsModule } from '@angular/forms';
           <button
             (click)="onConfirm()"
             class="btn-danger flex-1"
-            [disabled]="!isConfirmationValid()"
-            [class.opacity-50]="!isConfirmationValid()"
-            [class.cursor-not-allowed]="!isConfirmationValid()"
+            [disabled]="requiresConfirmationText && !isConfirmationValid()"
+            [class.opacity-50]="requiresConfirmationText && !isConfirmationValid()"
+            [class.cursor-not-allowed]="requiresConfirmationText && !isConfirmationValid()"
           >
             Delete {{ entityType }}
           </button>
@@ -93,6 +102,7 @@ export class DeleteConfirmationModalComponent {
   @Input() isOpen: boolean = true;
   @Input() entityType: string = 'Item'; // e.g., 'Branch', 'Employee'
   @Input() entityName: string = ''; // e.g., 'Downtown Branch', 'John Doe'
+  @Input() requiresConfirmationText: boolean = true; // Set to false to skip text confirmation
 
   @Output() confirmed = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
@@ -101,6 +111,10 @@ export class DeleteConfirmationModalComponent {
   showError: boolean = false;
 
   isConfirmationValid(): boolean {
+    // If text confirmation is not required, always return true
+    if (!this.requiresConfirmationText) {
+      return true;
+    }
     const expectedText = `delete ${this.entityName}`;
     return this.confirmationText.toLowerCase() === expectedText.toLowerCase();
   }

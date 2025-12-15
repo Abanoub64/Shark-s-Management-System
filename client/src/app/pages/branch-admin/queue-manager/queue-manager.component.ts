@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angu
 import { UiCardComponent } from '../../../components/shared/ui-card.component';
 import { UiButtonComponent } from '../../../components/shared/ui-button.component';
 import { UiInputComponent } from '../../../components/shared/ui-input.component';
+import { DeleteConfirmationModalComponent } from '../../../components/shared/delete-confirmation-modal/delete-confirmation-modal.component';
 import { QueueService } from '../../../core/services/queue.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Chair, QueueItem } from '../../../core/models/queue.models';
@@ -24,6 +25,7 @@ import { LanguageService } from '../../../core/services/language.service';
     UiCardComponent,
     UiButtonComponent,
     UiInputComponent,
+    DeleteConfirmationModalComponent,
   ],
   template: `
     <div class="h-[calc(100vh-8rem)] flex flex-col md:flex-row gap-6 overflow-hidden">
@@ -380,6 +382,17 @@ import { LanguageService } from '../../../core/services/language.service';
       </div>
     </div>
     }
+
+    <!-- Delete Confirmation Modal -->
+    @if (showDeleteModal()) {
+    <app-delete-confirmation-modal
+      [entityType]="'chair'"
+      [entityName]="chairToDelete()?.name || ''"
+      [requiresConfirmationText]="false"
+      (confirmed)="confirmDeleteChair()"
+      (cancelled)="closeDeleteModal()"
+    />
+    }
   `,
 })
 export class QueueManagerComponent implements OnInit, OnDestroy {
@@ -391,6 +404,10 @@ export class QueueManagerComponent implements OnInit, OnDestroy {
 
   chairs = signal<Chair[]>([]);
   queue = signal<QueueItem[]>([]);
+
+  // Modal state for chair deletion
+  showDeleteModal = signal(false);
+  chairToDelete = signal<Chair | null>(null);
 
   // State
   selectedBooking: QueueItem | null = null;
@@ -569,19 +586,37 @@ export class QueueManagerComponent implements OnInit, OnDestroy {
   }
 
   removeChair(chairId: number) {
-    if (confirm('Are you sure you want to remove this chair?')) {
-      this.queueService.deleteChair(chairId).subscribe({
-        next: (deleted) => {
-          if (deleted) {
-            this.toastService.success('Deleted', 'Chair removed');
-            this.loadData();
-          } else {
-            this.toastService.error('Error', 'Chair is occupied or in use');
-          }
-        },
-        error: (err) => this.toastService.error('Error', 'Failed to remove chair'),
-      });
+    const chair = this.chairs().find((c) => c.id === chairId);
+    if (chair) {
+      this.chairToDelete.set(chair);
+      this.showDeleteModal.set(true);
     }
+  }
+
+  confirmDeleteChair() {
+    const chair = this.chairToDelete();
+    if (!chair) return;
+
+    this.queueService.deleteChair(chair.id).subscribe({
+      next: (deleted) => {
+        if (deleted) {
+          this.toastService.success('Deleted', 'Chair removed');
+          this.loadData();
+        } else {
+          this.toastService.error('Error', 'Chair is occupied or in use');
+        }
+        this.closeDeleteModal();
+      },
+      error: (err) => {
+        this.toastService.error('Error', 'Failed to remove chair');
+        this.closeDeleteModal();
+      },
+    });
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal.set(false);
+    this.chairToDelete.set(null);
   }
 
   onAddChair() {

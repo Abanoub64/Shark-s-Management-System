@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 export interface Product {
@@ -19,20 +19,24 @@ export interface Product {
 export class ProductService {
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
+  private productsCache$?: Observable<Product[]>;
 
   getProducts(): Observable<Product[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/Product`).pipe(
-      map((products) =>
-        products.map((p) => ({
-          ...p,
-          image: p.imageUrl || p.image || p.Image || p.ImageUrl,
-          stock: p.stock || p.Stock || 50,
-          price: p.price || p.Price || 0,
-          name: p.name || p.Name,
-          description: p.description || p.Description,
-        }))
-      )
-    );
+    if (!this.productsCache$) {
+      this.productsCache$ = this.http.get<any[]>(`${this.apiUrl}/Product`).pipe(
+        map((products) =>
+          products.map((p) => ({
+            ...p,
+            image: p.imageUrl || p.image || p.Image || p.ImageUrl,
+            stock: p.stock || p.Stock || 50,
+            price: p.price || p.Price || 0,
+            name: p.name || p.Name,
+            description: p.description || p.Description,
+          }))
+        )
+      );
+    }
+    return this.productsCache$;
   }
 
   getProduct(id: number): Observable<Product> {
@@ -49,7 +53,8 @@ export class ProductService {
       map((p) => ({
         ...p,
         image: p.imageUrl || p.image,
-      }))
+      })),
+      tap(() => this.clearCache())
     );
   }
 
@@ -58,11 +63,18 @@ export class ProductService {
       map((p) => ({
         ...p,
         image: p.imageUrl || p.image,
-      }))
+      })),
+      tap(() => this.clearCache())
     );
   }
 
   deleteProduct(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/Product/${id}`);
+    return this.http
+      .delete<void>(`${this.apiUrl}/Product/${id}`)
+      .pipe(tap(() => this.clearCache()));
+  }
+
+  clearCache(): void {
+    this.productsCache$ = undefined;
   }
 }

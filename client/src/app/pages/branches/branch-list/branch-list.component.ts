@@ -142,13 +142,21 @@ export class BranchListComponent implements OnInit {
   });
 
   isLoading = signal(true);
+  private loadingTimeout?: number;
 
   ngOnInit() {
+    // Only show loading skeleton if response takes more than 200ms
+    this.loadingTimeout = window.setTimeout(() => {
+      this.isLoading.set(true);
+    }, 200);
+
     this.branchService.getAllBranches().subscribe({
       next: () => {
+        clearTimeout(this.loadingTimeout);
         this.isLoading.set(false);
       },
       error: (err) => {
+        clearTimeout(this.loadingTimeout);
         console.error('Failed to load branches:', err);
         this.isLoading.set(false);
       },
@@ -156,6 +164,11 @@ export class BranchListComponent implements OnInit {
   }
 
   constructor() {
+    // Check if branches are already loaded from cache
+    if (this.branchService.branches().length > 0) {
+      this.isLoading.set(false);
+    }
+
     this.searchControl.valueChanges.subscribe(() => {
       // Trigger change detection if needed, but computed handles it
     });

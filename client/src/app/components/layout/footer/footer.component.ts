@@ -29,11 +29,7 @@ import { LanguageService } from '../../../core/services/language.service';
                   t().findBranch
                 }}</a>
               </li>
-              <li>
-                <a routerLink="/booking" class="hover:text-secondary transition-colors">{{
-                  t().bookAppointment
-                }}</a>
-              </li>
+
               <li>
                 <a routerLink="/store" class="hover:text-secondary transition-colors">{{
                   t().store

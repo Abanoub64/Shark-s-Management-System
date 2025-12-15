@@ -74,19 +74,26 @@ export class StoreComponent implements OnInit {
 
   products = signal<Product[]>([]);
   isLoading = signal(false);
+  private loadingTimeout?: number;
 
   ngOnInit() {
     this.loadProducts();
   }
 
   loadProducts() {
-    this.isLoading.set(true);
+    // Only show loading skeleton if response takes more than 200ms
+    this.loadingTimeout = window.setTimeout(() => {
+      this.isLoading.set(true);
+    }, 200);
+
     this.productService.getProducts().subscribe({
       next: (products) => {
+        clearTimeout(this.loadingTimeout);
         this.products.set(products);
         this.isLoading.set(false);
       },
       error: (error) => {
+        clearTimeout(this.loadingTimeout);
         console.error('Error loading products:', error);
         this.isLoading.set(false);
       },

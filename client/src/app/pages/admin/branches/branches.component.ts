@@ -195,7 +195,37 @@ export class BranchesComponent implements OnInit {
   }
 
   exportData() {
-    this.toastService.success('Export', 'Branches data exported successfully');
+    const rows = this.filteredBranches();
+    if (!rows.length) {
+      this.toastService.error('Export', 'No data to export');
+      return;
+    }
+
+    const headers = ['Branch Name', 'Location', 'Manager', 'Status'];
+    const csvBody = [
+      headers,
+      ...rows.map((b) => [b.name ?? '', b.location ?? '', b.managerName ?? '', b.status ?? '']),
+    ]
+      .map((row) => row.map((cell) => this.escapeCsv(cell)).join(','))
+      .join('\n');
+
+    const blob = new Blob(['\uFEFF' + csvBody], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'branches.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+
+    this.toastService.success('Export', 'Branches CSV downloaded');
+  }
+
+  private escapeCsv(value: string): string {
+    const str = value ?? '';
+    if (str.includes('"') || str.includes(',') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
   }
 
   selectManager(user: User) {

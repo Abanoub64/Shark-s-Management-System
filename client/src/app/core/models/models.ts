@@ -398,6 +398,10 @@ export interface BranchAnalytics {
   topServices: { serviceName: string; count: number; revenue: number }[];
   totalOrdersValue: number;
   ordersCount: number;
+  bookingsByStatus?: Record<string, number>;
+  pendingQueueCount?: number;
+  occupiedChairs?: number;
+  ratingsCount?: number;
 }
 
 // ========================================

@@ -23,6 +23,7 @@ import { UiSkeletonComponent } from '../../components/shared/ui-skeleton.compone
           [class.border-primary-600]="activeTab() === 'bookings'"
           [class.text-primary-600]="activeTab() === 'bookings'"
           [class.text-gray-500]="activeTab() !== 'bookings'"
+          [class.border-transparent]="activeTab() !== 'bookings'"
           class="pb-2 px-4 font-medium border-b-2 transition hover:text-gray-700"
         >
           {{ t().myBookings }}
@@ -31,8 +32,9 @@ import { UiSkeletonComponent } from '../../components/shared/ui-skeleton.compone
           (click)="activeTab.set('orders')"
           [class.border-primary-600]="activeTab() === 'orders'"
           [class.text-primary-600]="activeTab() === 'orders'"
+          [class.border-transparent]="activeTab() !== 'orders'"
           [class.text-gray-500]="activeTab() !== 'orders'"
-          class="pb-2 px-4 font-medium border-b-2 border-transparent transition hover:text-gray-700"
+          class="pb-2 px-4 font-medium border-b-2 transition hover:text-gray-700"
         >
           {{ t().myOrders }}
         </button>
@@ -57,7 +59,11 @@ import { UiSkeletonComponent } from '../../components/shared/ui-skeleton.compone
                   <app-ui-skeleton width="100px" height="20px"></app-ui-skeleton>
                 </div>
               </div>
-              <app-ui-skeleton width="100px" height="30px" className="rounded-full"></app-ui-skeleton>
+              <app-ui-skeleton
+                width="100px"
+                height="30px"
+                className="rounded-full"
+              ></app-ui-skeleton>
             </div>
           </div>
           }
@@ -148,7 +154,11 @@ import { UiSkeletonComponent } from '../../components/shared/ui-skeleton.compone
               </div>
               <div class="text-right flex flex-col items-end gap-2">
                 <app-ui-skeleton width="80px" height="28px"></app-ui-skeleton>
-                <app-ui-skeleton width="60px" height="24px" className="rounded-full"></app-ui-skeleton>
+                <app-ui-skeleton
+                  width="60px"
+                  height="24px"
+                  className="rounded-full"
+                ></app-ui-skeleton>
               </div>
             </div>
             <div class="border-t pt-4 space-y-2">

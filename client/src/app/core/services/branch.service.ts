@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 // Backend API response structure
@@ -40,22 +40,31 @@ export class BranchService {
 
   // Signal to hold branches state
   branches = signal<BranchExtended[]>([]);
+  private branchesCache$?: Observable<Branch[]>;
 
   constructor(private http: HttpClient) {}
 
   getAllBranches(): Observable<Branch[]> {
-    return this.http.get<any[]>(this.apiUrl).pipe(
-      map((branches) =>
-        branches.map((b) => ({
-          ...b,
-          image: b.imageUrl || b.image, // Map imageUrl from API to image for frontend
-        }))
-      ),
-      tap((branches) => {
-        // Update signal with fetched data
-        this.branches.set(branches);
-      })
-    );
+    // Return cached data if available and signal has data
+    if (this.branches().length > 0) {
+      return of(this.branches());
+    }
+
+    if (!this.branchesCache$) {
+      this.branchesCache$ = this.http.get<any[]>(this.apiUrl).pipe(
+        map((branches) =>
+          branches.map((b) => ({
+            ...b,
+            image: b.imageUrl || b.image, // Map imageUrl from API to image for frontend
+          }))
+        ),
+        tap((branches) => {
+          // Update signal with fetched data
+          this.branches.set(branches);
+        })
+      );
+    }
+    return this.branchesCache$;
   }
 
   getBranch(id: number | string): Observable<Branch> {
@@ -63,14 +72,21 @@ export class BranchService {
   }
 
   createBranch(formData: FormData): Observable<Branch> {
-    return this.http.post<Branch>(this.apiUrl, formData);
+    return this.http.post<Branch>(this.apiUrl, formData).pipe(tap(() => this.clearCache()));
   }
 
   updateBranch(id: number, formData: FormData): Observable<Branch> {
-    return this.http.put<Branch>(`${this.apiUrl}/${id}`, formData);
+    return this.http
+      .put<Branch>(`${this.apiUrl}/${id}`, formData)
+      .pipe(tap(() => this.clearCache()));
   }
 
   deleteBranch(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(tap(() => this.clearCache()));
+  }
+
+  clearCache(): void {
+    this.branchesCache$ = undefined;
+    this.branches.set([]);
   }
 }
