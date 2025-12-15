@@ -2,6 +2,10 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/api/lightx/(.*)",
+      "destination": "https://api.lightxeditor.com/external/api/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
