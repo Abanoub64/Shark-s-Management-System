@@ -66,13 +66,13 @@ import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.comp
               </p>
             </div>
             <div>
-              <p class="text-4xl font-bold text-secondary font-serif">15k+</p>
+              <p class="text-4xl font-bold text-secondary font-serif">1k+</p>
               <p class="text-sm text-gray-400 uppercase tracking-widest mt-1">
                 {{ t().happyClients }}
               </p>
             </div>
             <div>
-              <p class="text-4xl font-bold text-secondary font-serif">10+</p>
+              <p class="text-4xl font-bold text-secondary font-serif">8+</p>
               <p class="text-sm text-gray-400 uppercase tracking-widest mt-1">
                 {{ t().yearsExperience }}
               </p>
@@ -143,6 +143,57 @@ import { UiSkeletonComponent } from '../../../components/shared/ui-skeleton.comp
             <p class="text-gray-400 leading-relaxed">
               {{ t().easyBookingDesc }}
             </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AI Haircut Teaser Section -->
+    <section class="py-24 relative overflow-hidden">
+      <!-- Background Image -->
+      <div class="absolute inset-0">
+        <img
+          src="https://images.unsplash.com/photo-1622286342621-4bd786c2447c?q=80&w=2070&auto=format&fit=crop"
+          alt="AI Haircut Background"
+          loading="lazy"
+          class="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+        />
+        <div class="absolute inset-0 bg-black/80"></div>
+      </div>
+
+      <div class="container mx-auto px-4 relative z-10">
+        <div class="flex flex-col md:flex-row items-center gap-12">
+          <!-- Text Content -->
+          <div class="w-full md:w-1/2 text-center md:text-start">
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-6 font-serif">
+              {{ t().aiHaircutRecommender }}
+            </h2>
+            <p class="text-gray-300 text-lg mb-8 leading-relaxed">
+              {{ t().aiHaircutSubtitle }}
+            </p>
+            <a
+              routerLink="/hairstyle-recommender"
+              class="inline-flex items-center justify-center bg-white text-black px-8 py-4 rounded-full font-bold text-lg hover:bg-secondary transition-colors duration-300 transform hover:scale-105 shadow-lg group"
+            >
+              {{ t().tryItNow }}
+              
+            </a>
+          </div>
+
+          <!-- Visual/Image -->
+          <div class="w-full md:w-1/2 flex justify-center">
+            <div class="relative w-80 h-80 rounded-full border-4 border-secondary/20 flex items-center justify-center animate-pulse-slow">
+              <div class="absolute inset-0 bg-secondary/10 rounded-full blur-xl"></div>
+              <span class="relative z-10 text-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="24" width="128" height="128" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="6" cy="6" r="3"></circle>
+                  <circle cx="6" cy="18" r="3"></circle>
+                  <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+                  <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+                  <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+                </svg>
+              </span>
+            </div>
           </div>
         </div>
       </div>
