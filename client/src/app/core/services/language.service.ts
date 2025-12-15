@@ -61,6 +61,8 @@ export class LanguageService {
       update: 'Update',
       create: 'Create',
       search: 'Search',
+      searchPlaceholder: 'Search by name or location...',
+      searchProductsPlaceholder: 'Search products...',
       filterByName: 'Filter by name...',
       choosePhoto: 'Choose Photo',
       fullName: 'Full Name',
@@ -298,7 +300,7 @@ export class LanguageService {
       connect: 'Connect',
       rightsReserved: 'All rights reserved.',
       findBranch: 'Find a Branch',
-      searchPlaceholder: 'Search by name or location...',
+
       viewDetails: 'View Details',
       noBranchesFound: 'No branches found matching your search.',
 
@@ -576,6 +578,8 @@ export class LanguageService {
       update: 'تحديث',
       create: 'إنشاء',
       search: 'بحث',
+      searchPlaceholder: 'بحث بالاسم أو الموقع...',
+      searchProductsPlaceholder: 'بحث عن منتجات...',
       filterByName: 'بحث بالاسم...',
       choosePhoto: 'اختر صورة',
       fullName: 'الاسم الكامل',
@@ -809,7 +813,7 @@ export class LanguageService {
       connect: 'تواصل معنا',
       rightsReserved: 'جميع الحقوق محفوظة.',
       findBranch: 'ابحث عن فرع',
-      searchPlaceholder: 'ابحث بالاسم أو الموقع...',
+
       viewDetails: 'عرض التفاصيل',
       noBranchesFound: 'لا توجد فروع تطابق بحثك.',
 
