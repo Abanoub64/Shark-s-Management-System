@@ -4,105 +4,106 @@ import { Observable, interval, throwError } from 'rxjs';
 import { switchMap, map, take, retryWhen, delay, catchError, filter } from 'rxjs/operators';
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root',
 })
 export class LightXService {
-    private readonly API_KEY = '94f999f817e5481aaaacde2eb24b44f4_538e453a449849c4a429a91ab9f73a05_andoraitools';
-    private readonly BASE_URL = '/api/lightx'; // Relative path for proxy
+  private readonly API_KEY =
+    'ee06c9f51eb549db90d51454f3117e6f_f529ab270dba4c75ad28e23ddbba1eaf_andoraitools';
+  private readonly BASE_URL = '/api/lightx'; // Relative path for proxy
 
-    constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-    generateHairstyle(image: File, prompt: string): Observable<string> {
-        return this.getUploadUrl(image).pipe(
-            switchMap(uploadData => {
-                return this.uploadImage(uploadData.body.uploadImage, image).pipe(
-                    map(() => uploadData.body.imageUrl)
-                );
-            }),
-            switchMap(imageUrl => this.initiateGeneration(imageUrl, prompt)),
-            switchMap(orderId => this.pollStatus(orderId))
+  generateHairstyle(image: File, prompt: string): Observable<string> {
+    return this.getUploadUrl(image).pipe(
+      switchMap((uploadData) => {
+        return this.uploadImage(uploadData.body.uploadImage, image).pipe(
+          map(() => uploadData.body.imageUrl)
         );
-    }
+      }),
+      switchMap((imageUrl) => this.initiateGeneration(imageUrl, prompt)),
+      switchMap((orderId) => this.pollStatus(orderId))
+    );
+  }
 
-    private getUploadUrl(image: File): Observable<any> {
-        const url = `${this.BASE_URL}/v2/uploadImageUrl`;
-        const body = {
-            uploadType: 'imageUrl', // Fixed value as per doc
-            size: image.size,
-            contentType: image.type
-        };
-        const headers = new HttpHeaders({
-            'Content-Type': 'application/json',
-            'x-api-key': this.API_KEY
-        });
+  private getUploadUrl(image: File): Observable<any> {
+    const url = `${this.BASE_URL}/v2/uploadImageUrl`;
+    const body = {
+      uploadType: 'imageUrl', // Fixed value as per doc
+      size: image.size,
+      contentType: image.type,
+    };
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'x-api-key': this.API_KEY,
+    });
 
-        return this.http.post<any>(url, body, { headers }).pipe(
-            map(response => {
-                if (response.statusCode !== 2000) {
-                    throw new Error(`LightX Upload URL Error: ${response.message}`);
-                }
-                return response;
-            })
-        );
-    }
+    return this.http.post<any>(url, body, { headers }).pipe(
+      map((response) => {
+        if (response.statusCode !== 2000) {
+          throw new Error(`LightX Upload URL Error: ${response.message}`);
+        }
+        return response;
+      })
+    );
+  }
 
-    private uploadImage(uploadUrl: string, image: File): Observable<any> {
-        const headers = new HttpHeaders({
-            'Content-Type': image.type
-        });
-        return this.http.put(uploadUrl, image, { headers });
-    }
+  private uploadImage(uploadUrl: string, image: File): Observable<any> {
+    const headers = new HttpHeaders({
+      'Content-Type': image.type,
+    });
+    return this.http.put(uploadUrl, image, { headers });
+  }
 
-    private initiateGeneration(imageUrl: string, prompt: string): Observable<string> {
-        const url = `${this.BASE_URL}/v2/hairstyle`;
-        const body = {
-            imageUrl: imageUrl,
-            textPrompt: prompt
-        };
-        const headers = new HttpHeaders({
-            'Content-Type': 'application/json',
-            'x-api-key': this.API_KEY
-        });
+  private initiateGeneration(imageUrl: string, prompt: string): Observable<string> {
+    const url = `${this.BASE_URL}/v2/hairstyle`;
+    const body = {
+      imageUrl: imageUrl,
+      textPrompt: prompt,
+    };
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'x-api-key': this.API_KEY,
+    });
 
-        return this.http.post<any>(url, body, { headers }).pipe(
-            map(response => {
-                if (response.statusCode !== 2000) {
-                    throw new Error(`LightX Generation Error: ${response.message}`);
-                }
-                return response.body.orderId;
-            })
-        );
-    }
+    return this.http.post<any>(url, body, { headers }).pipe(
+      map((response) => {
+        if (response.statusCode !== 2000) {
+          throw new Error(`LightX Generation Error: ${response.message}`);
+        }
+        return response.body.orderId;
+      })
+    );
+  }
 
-    private pollStatus(orderId: string): Observable<string> {
-        const url = `${this.BASE_URL}/v2/order-status`;
-        const body = { orderId: orderId };
-        const headers = new HttpHeaders({
-            'Content-Type': 'application/json',
-            'x-api-key': this.API_KEY
-        });
+  private pollStatus(orderId: string): Observable<string> {
+    const url = `${this.BASE_URL}/v2/order-status`;
+    const body = { orderId: orderId };
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'x-api-key': this.API_KEY,
+    });
 
-        return interval(3000).pipe(
-            switchMap(() => this.http.post<any>(url, body, { headers })),
-            map(response => {
-                if (response.statusCode !== 2000) {
-                    throw new Error(`LightX Status Error: ${response.message}`);
-                }
-                return response.body;
-            }),
-            filter(data => data && (data.status === 'active' || data.status === 'failed')),
-            take(1),
-            map(data => {
-                if (data.status === 'failed') {
-                    throw new Error('Hairstyle generation failed');
-                }
-                return data.output;
-            }),
-            retryWhen(errors => errors.pipe(delay(3000), take(10))), // Retry logic handled by interval/filter, this is for request errors
-            catchError(error => {
-                console.error('Polling failed', error);
-                return throwError(() => new Error('Failed to get generation result'));
-            })
-        );
-    }
+    return interval(3000).pipe(
+      switchMap(() => this.http.post<any>(url, body, { headers })),
+      map((response) => {
+        if (response.statusCode !== 2000) {
+          throw new Error(`LightX Status Error: ${response.message}`);
+        }
+        return response.body;
+      }),
+      filter((data) => data && (data.status === 'active' || data.status === 'failed')),
+      take(1),
+      map((data) => {
+        if (data.status === 'failed') {
+          throw new Error('Hairstyle generation failed');
+        }
+        return data.output;
+      }),
+      retryWhen((errors) => errors.pipe(delay(3000), take(10))), // Retry logic handled by interval/filter, this is for request errors
+      catchError((error) => {
+        console.error('Polling failed', error);
+        return throwError(() => new Error('Failed to get generation result'));
+      })
+    );
+  }
 }
